@@ -40,8 +40,6 @@ class NetworkReader:
         """
         Reads the data from the following paper
         https://zenodo.org/record/3938818#.Yf64mPso9FE
-        Pieces of code has been taken from the according github repository
-        https://github.com/lcucav/networkdisruption
         """
         data = pd.read_csv(
             self.directory + "Montagna_Meetings_Edgelist.csv", sep="\\s+"
@@ -56,8 +54,6 @@ class NetworkReader:
         """
         Reads the data from the following paper
         https://zenodo.org/record/3938818#.Yf64mPso9FE
-        Pieces of code has been taken from the according github repository
-        https://github.com/lcucav/networkdisruption
         """
         data = pd.read_csv(
             self.directory + "Montagna_Phone_Calls_Edgelist.csv", sep=","
