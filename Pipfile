@@ -8,6 +8,7 @@ networkx = "*"
 networkit = "*"
 pandas = "*"
 matplotlib = "*"
+pre-commit = "*"
 
 [dev-packages]
 
