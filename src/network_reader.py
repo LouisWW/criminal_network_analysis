@@ -71,4 +71,4 @@ if __name__ == '__main__':
     print(network_reader.directory)
     network_obj = network_reader.read_cunha()
     nx.draw(network_obj)
-    plt.show()
+    plt.show()j
