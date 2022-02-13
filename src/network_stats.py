@@ -1,5 +1,5 @@
 """
-This script's intention is to get the properities of an
+This script's intention is to get the properties of an
 given network
 
 __author__ = Louis Weyland
@@ -21,7 +21,7 @@ logging.basicConfig(
 logger = logging.getLogger("logger")
 
 
-class NetowrkStats:
+class NetworkStats:
     """Takes an network as input and returns its properties"""
 
     def __init__(self, network: nx.Graph) -> None:
@@ -31,6 +31,7 @@ class NetowrkStats:
     def get_overview(self) -> None:
         """Get an overview of the network"""
         nk.overview(self.network)
+        nk.community.detectCommunities(self.network)
 
     @property
     def get_connected_components(self) -> int:
@@ -68,19 +69,55 @@ class NetowrkStats:
                 is_powerlaw = True
         return is_powerlaw, fit.alpha
 
+    def get_community(self):
+        """Gets the number of communities"""
+        communities = nk.community.detectCommunities(self.network)
+        raise NotImplementedError("Additional work is needed!!")
+        return communities
+
+    def get_diameter(self) -> int:
+        """
+        Gets the diameter, longest possible path of a
+        network
+        """
+        if self.get_connected_components == 1:
+            diam = nk.distance.Diameter(self.network, algo=1)
+            diam.run()
+            return diam.getDiameter()[0]
+        else:
+            logger.warning("Graph must be connected!! Otherwise distance == inf")
+            return -1
+
+    def get_radius(self) -> int:
+        """Get the radius of a graph"""
+        raise NotImplementedError
+
+    def get_scale_freeness(self):
+        """Scale freeness as defined in M. Graph Theory"""
+        raise NotImplementedError
+
+    def get_density(self):
+        """Get the relative density of a graph as
+        defined in Scott J."""
+        raise NotImplementedError
+
 
 if __name__ == "__main__":
 
     from network_generator import NetworkGenerator
 
     network_generator = NetworkGenerator()
-    network = network_generator.generate_barabasi_albert(n_nodes=10000)
+    network = network_generator.generate_barabasi_albert(n_nodes=1000)
 
-    network_stats = NetowrkStats(network)
+    network_stats = NetworkStats(network)
+
+    """
     data = network_stats.get_degree_distribution
     _, alpha = network_stats.check_if_powerlaw(data)
-
     from utils.plotter import Plotter
 
     plotter = Plotter()
     plotter.plot_log_log(data, "Degree", "P(X)")
+    """
+    # network_stats.get_community()
+    x = network_stats.get_diameter()
