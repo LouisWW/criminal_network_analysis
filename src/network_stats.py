@@ -85,15 +85,14 @@ class NetworkStats:
             diam.run()
             diameter = diam.getDiameter()[0]
             logger.info(f"Diameter = {diameter}")
-            return diameter
         else:
             logger.warning("Graph must be connected! Otherwise distance == inf")
             return -1
 
-    def get_radius(self):
+    def get_radius(self) :
         """Get the radius of a graph"""
         raise NotImplementedError
-
+ 
     def get_scale_freeness(self):
         """Scale freeness as defined in M. Graph Theory"""
         raise NotImplementedError
