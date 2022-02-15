@@ -15,7 +15,7 @@ import powerlaw
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(levelname)s: %(message)s ---- (%(asctime)s.%(msecs)03d) %(filename)s",
+    format="[%(levelname)s] %(message)s ---- (%(asctime)s.%(msecs)03d) %(filename)s",
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("logger")
