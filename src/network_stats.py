@@ -15,7 +15,7 @@ import powerlaw
 
 logging.basicConfig(
     level=logging.INFO,
-    format="\n%(levelname)s: %(message)s ---- (%(asctime)s.%(msecs)03d) %(filename)s",
+    format="%(levelname)s: %(message)s ---- (%(asctime)s.%(msecs)03d) %(filename)s",
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("logger")
@@ -33,14 +33,14 @@ class NetworkStats:
         nk.overview(self.network)
         nk.community.detectCommunities(self.network)
 
-    @property
     def get_connected_components(self) -> int:
         """Return the number of connected components"""
         cc = nk.components.ConnectedComponents(self.network)
         cc.run()
-        return cc.numberOfComponents()
+        n_component = cc.numberOfComponents()
+        logger.info(f"Number of components = {n_component}")
+        return n_component
 
-    @property
     def get_degree_distribution(self) -> List[float]:
         """Gets the normalized degree distribution of a network"""
         return (
@@ -69,10 +69,10 @@ class NetworkStats:
                 is_powerlaw = True
         return is_powerlaw, fit.alpha
 
-    def get_community(self):
+    def get_community(self) -> int:
         """Gets the number of communities"""
         communities = nk.community.detectCommunities(self.network)
-        raise NotImplementedError("Additional work is needed!!")
+        logger.warning("Additional work needed here!")
         return communities
 
     def get_diameter(self) -> int:
@@ -80,15 +80,17 @@ class NetworkStats:
         Gets the diameter, longest possible path of a
         network
         """
-        if self.get_connected_components == 1:
+        if self.get_connected_components() == 1:
             diam = nk.distance.Diameter(self.network, algo=1)
             diam.run()
-            return diam.getDiameter()[0]
+            diameter = diam.getDiameter()[0]
+            logger.info(f"Diameter = {diameter}")
+            return diameter
         else:
-            logger.warning("Graph must be connected!! Otherwise distance == inf")
+            logger.warning("Graph must be connected! Otherwise distance == inf")
             return -1
 
-    def get_radius(self) -> int:
+    def get_radius(self):
         """Get the radius of a graph"""
         raise NotImplementedError
 
