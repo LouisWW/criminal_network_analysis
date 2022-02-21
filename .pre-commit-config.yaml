@@ -45,13 +45,23 @@ repos:
         args: [--no-strict-optional, --ignore-missing-imports]
 
 
--   repo: https://github.com/mwouts/jupytext
-    rev: v1.11.0  # CURRENT_TAG/COMMIT_HASH
+-   repo: https://github.com/pycqa/pydocstyle
+    rev: 6.1.1  # pick a git hash / tag to point to
     hooks:
-    -   id: jupytext
-        args: [--sync, --pipe, black, flake8,reorder-python-imports, mypy]
-        additional_dependencies:
-            - black==21.9b0 # Matches hook
-            - flake8==3.9.2
-            - reorder-python-imports==v2.6.0
-            - mypy==v0.910
+    -   id: pydocstyle
+        name: pydocstyle
+        entry: pydocstyle
+        language: python
+        types: [python]
+
+
+-   repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.2.3
+    hooks:
+    -   id: nbqa-black
+    -   id: nbqa-flake8
+    -   id: nbqa-pyupgrade
+        args: [--py36-plus]
+    -   id: nbqa-isort
+    -   id: nbqa-mypy
+    -   id: nbqa-pydocstyle
