@@ -7,6 +7,8 @@ dependencies:
   - python=3.8.10
   - graph-tool
   - pip
+  - ipython
+  - ipykernel
 
   - pip:
     - networkx
