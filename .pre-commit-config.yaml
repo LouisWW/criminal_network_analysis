@@ -24,6 +24,7 @@ repos:
         language_version: python3
         args: [--max-line-length=100]
 
+
 -   repo: https://github.com/asottile/reorder_python_imports
     rev: v2.6.0
     hooks:
@@ -42,3 +43,15 @@ repos:
     -   id: mypy
         files: ^src/
         args: [--no-strict-optional, --ignore-missing-imports]
+
+
+-   repo: https://github.com/mwouts/jupytext
+    rev: v1.11.0  # CURRENT_TAG/COMMIT_HASH
+    hooks:
+    -   id: jupytext
+        args: [--sync, --pipe, black, flake8,reorder-python-imports, mypy]
+        additional_dependencies:
+            - black==21.9b0 # Matches hook
+            - flake8==3.9.2
+            - reorder-python-imports==v2.6.0
+            - mypy==v0.910
