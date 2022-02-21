@@ -60,8 +60,15 @@ repos:
     hooks:
     -   id: nbqa-black
     -   id: nbqa-flake8
+        args: [--max-line-length=100]
     -   id: nbqa-pyupgrade
         args: [--py36-plus]
     -   id: nbqa-isort
-    -   id: nbqa-mypy
     -   id: nbqa-pydocstyle
+        entry: nbqa pydocstyle
+        language: python
+        require_serial: true
+        types: [jupyter]
+        additional_dependencies: [pydocstyle]
+    -   id: nbqa-mypy
+        args: [--no-strict-optional, --ignore-missing-imports]
