@@ -13,6 +13,10 @@ cmake = "*"
 cython = "*"
 powerlaw = "*"
 tabulate = "*"
+pytest = "*"
+pytest-xdist = "*"
+pytest-subtests = "*"
+pytest-cov = "*"
 
 [dev-packages]
 ipykernel = "*"

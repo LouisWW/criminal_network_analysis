@@ -1,0 +1,25 @@
+# Use this conda environment when working (instead of pipenv)
+name: criminal_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8.10
+  - graph-tool
+  - pip
+
+  - pip:
+    - networkx
+    - networkit
+    - pandas
+    - matplotlib
+    - pre-commit
+    - cmake
+    - cython
+    - powerlaw
+    - tabulate
+    - pytest
+    - pytest-xdist
+    - pytest-subtests
+    - pytest-cov
+    - ipykernel
