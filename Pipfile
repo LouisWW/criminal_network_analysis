@@ -17,6 +17,8 @@ pytest = "*"
 pytest-xdist = "*"
 pytest-subtests = "*"
 pytest-cov = "*"
+vext = "*"
+"vext.gi" = "*"
 
 [dev-packages]
 ipykernel = "*"
