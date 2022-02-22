@@ -1,7 +1,11 @@
 """
-This script's intention is to get the convert a
-networkit grahp object to a networkx graph object
-and vice versa
+This script's intention is to get the convert graphs between packages.
+
+It converts grahp objects from networkx to networkit
+vice versa and networkx to graph-tool.
+So as for now to convert networkit graphs to graph-tool,
+the graphs need to be firstly converted to networkx.
+
 __author__ = Louis Weyland
 __date__   = 14/02/2022
 """
@@ -12,14 +16,14 @@ import networkx as nx
 
 def get_prop_type(value, key=None):
     """
-    Performs typing and value conversion for the graph_tool PropertyMap class.
+    Perform typing and value conversion for the graph_tool PropertyMap class.
+
     If a key is provided, it also ensures the key is in a format that can be
     used with the PropertyMap. Returns a tuple, (type name, value, key)
     """
-
     if isinstance(key, str):
         # Encode the key as ASCII
-        key = key.encode("ascii", errors="replace")
+        key = str(key)
 
     # Deal with the value
     if isinstance(value, bool):
@@ -34,7 +38,7 @@ def get_prop_type(value, key=None):
 
     elif isinstance(value, str):
         tname = "string"
-        value = value.encode("ascii", errors="replace")
+        value = str(value)
 
     elif isinstance(value, dict):
         tname = "object"
@@ -47,25 +51,27 @@ def get_prop_type(value, key=None):
 
 
 class NetworkConverter:
-    """Converts graph object from one package to another"""
+    """Converting graph object from one package to another."""
 
     def __ini__(self):
+        """No specific info for now."""
         pass
 
     @staticmethod
     def nx_to_nk(network: nx.graph) -> nk.graph:
-        """converts from networkx to networkit"""
+        """Convert graph from networkx to networkit."""
         return nk.nxadapter.nx2nk(network)
 
     @staticmethod
     def nk_to_nx(network: nk.graph) -> nx.graph:
-        """converts from networkx to networkit"""
+        """Convert grpah from networkx to networkit."""
         return nk.nxadapter.nk2nx(network)
 
     @staticmethod
     def nx2gt(network):
         """
-        Converts a networkx graph to a graph-tool graph.
+        Convert a networkx graph to a graph-tool graph.
+
         Copied from
         https://bbengfort.github.io/2016/06/graph-tool-from-networkx/
         """
@@ -85,7 +91,7 @@ class NetworkConverter:
         # Go through all nodes and edges and add seen properties
         # Add the node properties first
         nprops = set()  # cache keys to only add properties once
-        for node, data in network.nodes_iter(data=True):
+        for node, data in network.nodes(data=True):
 
             # Go through all the properties if not seen and add them.
             for key, val in data.items():
@@ -108,7 +114,7 @@ class NetworkConverter:
 
         # Add the edge properties second
         eprops = set()  # cache keys to only add properties once
-        for src, dst, data in network.edges_iter(data=True):
+        for src, dst, data in network.edges(data=True):
 
             # Go through all the edge properties if not seen and add them.
             for key, val in data.items():
@@ -127,7 +133,7 @@ class NetworkConverter:
         # Phase 2: Actually add all the nodes and vertices with their properties
         # Add the nodes
         vertices = {}  # vertex mapping for tracking edges later
-        for node, data in network.nodes_iter(data=True):
+        for node, data in network.nodes(data=True):
 
             # Create the vertex and annotate for our edges later
             v = gtG.add_vertex()
@@ -139,7 +145,7 @@ class NetworkConverter:
                 gtG.vp[key][v] = value  # vp is short for vertex_properties
 
         # Add the edges
-        for src, dst, data in network.edges_iter(data=True):
+        for src, dst, data in network.edges(data=True):
 
             # Look up the vertex structs from our vertices mapping and add edge.
             e = gtG.add_edge(vertices[src], vertices[dst])

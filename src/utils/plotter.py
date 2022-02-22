@@ -1,22 +1,27 @@
 """
-This script's intention is to get the generate plots to
-visualize the data generated in this project
+This script's intention is generate plots.
+
+More specifically, generated data is visualized.
 
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
 from typing import List
 
+import graph_tool.all as gt
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import powerlaw
+from config.config import ConfigParser
 from cycler import cycler
 
 
-class Plotter:
-    """This class takes care of all the plotting generated in this project"""
+class Plotter(ConfigParser):
+    """This class takes care of all the plotting generated in this project."""
 
     def __init__(self) -> None:
+        """Inherit from Configparser and set default plotting param."""
+        super().__init__()
 
         # Making sure all the plots have the same parameters
         plt.rcParams["figure.figsize"] = (10, 7)
@@ -27,11 +32,38 @@ class Plotter:
         mpl.rcParams["figure.dpi"] = 100
         mpl.rcParams["savefig.dpi"] = 300
 
+    def draw_network(self, network: gt.Graph) -> None:
+        """Visualizes the Network."""
+        # draw circular
+        assert isinstance(network, gt.Graph), "network type is not from graph-tool"
+        if self.args.draw_network == "c":
+            g = gt.GraphView(network)
+            state = gt.minimize_nested_blockmodel_dl(g)
+            t = gt.get_hierarchy_tree(state)[0]
+            tpos = pos = gt.radial_tree_layout(t, t.vertex(t.num_vertices() - 1))
+            cts = gt.get_hierarchy_control_points(g, t, tpos)
+            pos = g.own_property(tpos)
+            b = state.levels[0].b
+            shape = b.copy()
+            shape.a %= 14
+            gt.graph_draw(
+                g,
+                pos=pos,
+                vertex_fill_color=b,
+                vertex_shape=shape,
+                edge_control_points=cts,
+                edge_color=[0, 0, 0, 0.3],
+                vertex_anchor=0,
+            )
+
+        elif self.args.draw_network == "n":
+            gt.graph_draw(network)
+
     def plot_log_log(self, data: List[float], x_label: str, y_label: str) -> plt.Axes:
         """
-        Sort the data in ascending way and plots the
-        data in a log-log scale to better visualize the powerlaw
-        effect
+        Plot the data in a log-log scale to visualize the powerlaw.
+
+        Important: Sort the data in ascending way
         """
         data = sorted(data, reverse=True)
         fit = powerlaw.Fit(data)
