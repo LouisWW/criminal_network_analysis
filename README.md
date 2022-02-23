@@ -64,3 +64,17 @@ A pre-commit hook is used in this repo to uniform the linting. Thus after the fi
     # Make sure to be in the pipenv env or conda env
 
     $ pre-commit install
+
+When using pre-commit for the first time, it will download all the packages (flake8,blake, pydocstring). So don't be afraid!!
+To make it work correctly you need to do following commands
+
+    git add CHANGED_FILES
+    git commit -m"Your message"
+
+Pre-commit is running. If you don't have [Branch_name commit_number] in the git commit output, the pre-commit hook did some changes to it or didn't accept your changes.
+What you need to do it either change your stuff, if an error is shown and/or do again until commit is accepted.
+
+    git add CHANGED_FILES
+    git commit -m"Your message"
+
+---
