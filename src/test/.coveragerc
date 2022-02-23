@@ -1,0 +1,9 @@
+This files make sure pytest doesn't include the coverage
+# of the test folder and __init__ files
+[run]
+omit = test/*
+[coverage:report]
+skip_empty = true
+
+[html]
+directory = test/cov_report/
