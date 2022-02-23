@@ -30,4 +30,18 @@ def create_networkx():
     network.add_edge(3, 4)
     network.add_edge(4, 5)
 
+    # set nodes attributes fitness
+    network.nodes[1]["fitness"] = 10
+    network.nodes[2]["fitness"] = 8
+    network.nodes[3]["fitness"] = 6
+    network.nodes[4]["fitness"] = 3
+    network.nodes[5]["fitness"] = 11
+
+    # set nodes attributes age
+    network.nodes[1]["age"] = 30
+    network.nodes[2]["age"] = 35
+    network.nodes[3]["age"] = 20
+    network.nodes[4]["age"] = 60
+    network.nodes[5]["age"] = 4
+
     return network
