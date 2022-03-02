@@ -1,20 +1,50 @@
-"""
-This script's intention is to get the properties of all
-the individual nodes
+"""This script's intention is to get the properties of all the individual nodes.
 
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
+from typing import Sequence
+from typing import Tuple
+
+import networkit as nk
+import numpy as np
 
 
 class NodeStats:
-    """
-    Defines the different properties such as
-    centrality,distance,betweeness,eccentricity...
+    """Define the properties of a node.
+
+    The properties are katz,betweeness,eccentricity
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, network: nk.Graph) -> None:
+        """Initialize the network as an attribute."""
+        self.network = network
+
+    def get_katz(self) -> Sequence[Tuple[int, float]]:
+        """Get the katz score for each node."""
+        # Initialize algorithm
+        katz = nk.centrality.KatzCentrality(self.network, 1e-3)
+        katz.run()
+        return katz.ranking()
+
+    def get_eccentricity(self) -> Sequence[Tuple[int, int]]:
+        """Return the eccentricity of the nodes."""
+        eccentricity = np.zeros(self.network.numberOfNodes())
+        # to append to the right idx in the list
+        iterator = iter(range(0, self.network.numberOfNodes()))
+
+        for node in self.network.iterNodes():
+            eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
+                self.network, node
+            )
+
+        return eccentricity
+
+    def get_betweenness(self) -> Sequence[Tuple[int, int]]:
+        """Return betweeness centrality."""
+        btwn = nk.centrality.Betweenness(self.network)
+        btwn.run()
+        return btwn.ranking()
 
 
 if __name__ == "__main__":
