@@ -46,6 +46,26 @@ class NodeStats:
         btwn.run()
         return btwn.ranking()
 
+    def get_closeness(self) -> Sequence[Tuple[int, float]]:
+        """Return the closeness of a node."""
+        raise NotImplementedError
+
+    def get_degree(self) -> Sequence[Tuple[int, int]]:
+        """Count the number of neighbor a node has."""
+        raise NotImplementedError
+
+    def get_local_clustering(self) -> Sequence[Tuple[int, float]]:
+        """Get the local clustering of a node."""
+        raise NotImplementedError
+
+    def get_eigenvector_centrality(self) -> Sequence[Tuple[int, float]]:
+        """Get the eigenvector centrality of a node."""
+        raise NotImplementedError
+
+    def get_average_path(self):
+        """Get average path over a node."""
+        raise NotImplementedError
+
 
 if __name__ == "__main__":
 
