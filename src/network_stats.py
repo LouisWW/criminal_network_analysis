@@ -113,6 +113,7 @@ class NetworkStats:
         m = self.network.numberOfEdges()
         n = self.network.numberOfNodes()
         d = (2 * m) / n * (n - 1)
+        logger.info(f"Density = {d}")
         return d
 
     def get_relative_density(self) -> float:
@@ -121,6 +122,7 @@ class NetworkStats:
         n = self.network.numberOfNodes()
         mean_degree = (2 * m) / n
         d = (n * mean_degree) / (n * (n - 1))
+        logger.info(f"Relative Density = {d}")
         return d
 
 
