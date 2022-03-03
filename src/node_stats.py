@@ -8,6 +8,7 @@ from typing import Tuple
 
 import networkit as nk
 import numpy as np
+from utils.graph_converter import NetworkConverter
 
 
 class NodeStats:
@@ -18,7 +19,7 @@ class NodeStats:
 
     def __init__(self, network: nk.Graph) -> None:
         """Initialize the network as an attribute."""
-        self.network = network
+        self.network = NetworkConverter(network).nx_to_nk()
 
     def get_katz(self) -> Sequence[Tuple[int, float]]:
         """Get the katz score for each node."""
