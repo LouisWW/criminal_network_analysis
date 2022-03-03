@@ -11,6 +11,7 @@ import networkit as nk
 import networkx as nx
 import numpy as np
 import powerlaw
+from utils.graph_converter import NetworkConverter
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +26,7 @@ class NetworkStats:
 
     def __init__(self, network: nx.Graph) -> None:
         """Initialize the network as an attribute."""
-        self.network = network
+        self.network = NetworkConverter(network).nx_to_nk()
 
     def get_overview(self) -> None:
         """Get an overview of the network."""
