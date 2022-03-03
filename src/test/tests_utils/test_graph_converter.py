@@ -1,5 +1,7 @@
 """Test if the conversions between graph types are right."""
 import graph_tool as gt
+import networkit as nk
+import networkx as nx
 import pytest
 from utils.graph_converter import NetworkConverter
 
@@ -8,14 +10,13 @@ class TestNetworkConverter:
     """Class for unit tests for  NetworkConverter."""
 
     @pytest.mark.essential
-    def test_nx2gt(self, create_networkx):
-        """
-        Test if conversion nx to gt works well.
+    def test_nx_to_gt(self, create_networkx):
+        """Test if conversion nx to gt works well.
 
         Test if all the attributes and connection
         as imported correctly to graph tool
         """
-        converted_network = NetworkConverter().nx2gt(create_networkx)
+        converted_network = NetworkConverter().nx_to_gt(create_networkx)
         assert isinstance(
             converted_network, gt.Graph
         ), "Graph object is not created properly"
@@ -78,3 +79,17 @@ class TestNetworkConverter:
                 "1",
                 "4",
             ], "Id is not converted correctly"
+
+    @pytest.mark.essential
+    def test_nx_to_nk(self, create_networkx):
+        """Test if conversion nx to nk works well."""
+        converted_network = NetworkConverter().nx_to_nk(create_networkx)
+
+        nx_adj_matrix = nx.adjacency_matrix(create_networkx)
+        nk_adj_matrix = nk.algebraic.adjacencyMatrix(
+            converted_network, matrixType="sparse"
+        )
+
+        assert (
+            nk_adj_matrix != nx_adj_matrix
+        ).nnz == 0, "Nx to Nk conversion didn't work properly"
