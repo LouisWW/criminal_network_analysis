@@ -10,7 +10,7 @@ class TestNetworkConverter:
     """Class for unit tests for  NetworkConverter."""
 
     @pytest.mark.essential
-    def test_nx_to_gt(self, create_networkx):
+    def test_nx_to_gt(self, create_networkx: nk.Graph):
         """Test if conversion nx to gt works well.
 
         Test if all the attributes and connection
@@ -81,7 +81,7 @@ class TestNetworkConverter:
             ], "Id is not converted correctly"
 
     @pytest.mark.essential
-    def test_nx_to_nk(self, create_networkx):
+    def test_nx_to_nk(self, create_networkx: nk.Graph):
         """Test if conversion nx to nk works well."""
         converted_network = NetworkConverter().nx_to_nk(create_networkx)
 
