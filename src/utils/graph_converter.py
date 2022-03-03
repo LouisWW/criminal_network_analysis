@@ -68,12 +68,15 @@ class NetworkConverter:
         return nk.nxadapter.nk2nx(network)
 
     @staticmethod
-    def nx2gt(network):
+    def nx_to_gt(network):
         """
         Convert a networkx graph to a graph-tool graph.
 
         Copied from
         https://bbengfort.github.io/2016/06/graph-tool-from-networkx/
+
+        Important notice, nodes start at 1 in graph-tool in comparison
+        to networkit/x where node enumeration starts with 0.
         """
         # Phase 0: Create a directed or undirected graph-tool Graph
         gtG = gt.Graph(directed=network.is_directed())
