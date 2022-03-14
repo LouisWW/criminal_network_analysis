@@ -1,6 +1,6 @@
-"""
-This script's contains the different logger modules
-which allows for a better printing overview
+"""This script's contains the different logger modules.
+
+The logger allows for a better printing overview
 
 __author__ = Louis Weyland
 __date__   = 13/02/2022
@@ -9,9 +9,10 @@ import logging
 
 
 class Logger:
+    """Logger class to print various statements."""
+
     def __init__(self, level="WARNING"):
-        # To debug the class, init the object with debug_level='DEBUG'
-        # save the logging to a file
+        """Set the logger."""
         self.logger = logging.getLogger("logger")
         self.logger.setLevel("DEBUG")
         ch = logging.StreamHandler()
