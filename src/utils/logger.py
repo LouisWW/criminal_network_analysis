@@ -11,7 +11,7 @@ import logging
 class Logger:
     """Logger class to print various statements."""
 
-    def __init__(self, level):
+    def __init__(self, level="WARNING"):
         """Set the logger."""
         self.logger = logging.getLogger("logger")
         self.logger.setLevel("DEBUG")
@@ -21,3 +21,7 @@ class Logger:
         )
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
+
+    def testing(self, integ: int):
+        """Test some stuff."""
+        return integ + 2
