@@ -11,7 +11,7 @@ import logging
 class Logger:
     """Logger class to print various statements."""
 
-    def __init__(self, level="WARNING"):
+    def __init__(self, level):
         """Set the logger."""
         self.logger = logging.getLogger("logger")
         self.logger.setLevel("DEBUG")
