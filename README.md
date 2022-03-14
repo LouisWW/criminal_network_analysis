@@ -1,4 +1,4 @@
-# criminal_network_analysis
+# Criminal_network_analysis
 Analysing the resilience of criminal networks in an iterative fashion.
 
 
@@ -11,7 +11,8 @@ Analysing the resilience of criminal networks in an iterative fashion.
 ### Environment
 In this repo two environments are used, Pipenv and conda. Pipenv is a light tool, which makes sure that the versions and dependencies are correct. However, to install tools that build on other languages such as C/C++, for mac, conda is preferred. Conda has its own complier which makes it really easy to install packages
 
-#### Pipenv (not ideal for Mac OSX)
+### Ubuntu 20.04
+#### Pipenv (preferred for Ubuntu)
 To setup pipenv environment, python 3.8 needs to be installed first. Then the following lines will install the environment
 
     $ python3.8 -m pip install pip --upgrade
@@ -42,7 +43,8 @@ Additionally to the pipenv environment, a python package called **graph-tool** i
     $ make install
 
 
-#### Conda (preferred for Mac OSX)
+### Mac OSX
+##### Conda (preferred for Mac OSX)
 To install the conda environment, make sure to install conda fisrt via https://www.anaconda.com/products/individual. Then to create the environment, use the following commands,
 
     conda env create -f conda_environment.yml
@@ -54,6 +56,19 @@ To activate the environment
 To update the environment
 
     conda env update --file conda_environment.yml
+
+#### Trouble shooting with clang version
+
+If you try to run some code outside of conda and you experience some troubles with gcc or clang complier, do the following
+
+    xcode-select --install
+    sudo xcode-select --switch /Library/Developer/CommandLineTools
+    clang --version
+
+    # add in ~/.bashrc_profile
+    export CC=/Library/Developer/CommandLineTools/usr/bin/clang
+    export CXX=/Library/Developer/CommandLineTools/usr/bin/clang++
+    export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
 
 
 ---
