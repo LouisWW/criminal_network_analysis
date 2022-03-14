@@ -42,7 +42,7 @@ repos:
     hooks:
     -   id: mypy
         files: ^src/
-        args: [--no-strict-optional, --ignore-missing-imports, --check-untyped-defs, --disallow_incomplete_defs]
+        args: [--no-strict-optional, --ignore-missing-imports, --disallow-untyped-defs, --disallow-incomplete-defs]
 
 
 -   repo: https://github.com/pycqa/pydocstyle
