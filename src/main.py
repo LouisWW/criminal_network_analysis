@@ -22,5 +22,5 @@ if args.draw_network:
     network_reader = NetworkReader()
     network_obj = network_reader.read_montagna_phone_calls()
     # convert graph_obj
-    network_obj = NetworkConverter().nx2gt(network_obj)
+    network_obj = NetworkConverter().nx_to_gt(network_obj)
     Plotter().draw_network(network_obj)

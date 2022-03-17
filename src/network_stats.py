@@ -26,7 +26,7 @@ class NetworkStats:
 
     def __init__(self, network: nx.Graph) -> None:
         """Initialize the network as an attribute."""
-        self.network = NetworkConverter(network).nx_to_nk()
+        self.network = NetworkConverter().nx_to_nk(network)
 
     def get_overview(self) -> None:
         """Get an overview of the network."""
@@ -101,11 +101,11 @@ class NetworkStats:
         logger.info(f"Radius = {radius}")
         return radius
 
-    def get_eccentricity(self, node) -> int:
+    def get_eccentricity(self, node: int) -> int:
         """Return the eccentricity of a node."""
         return nk.distance.Eccentricity.getValue(self.network, node)[1]
 
-    def get_scale_freeness(self):
+    def get_scale_freeness(self) -> None:
         """Scale freeness as defined in M. Graph Theory."""
         raise NotImplementedError
 
@@ -130,6 +130,9 @@ class NetworkStats:
 if __name__ == "__main__":
 
     from network_generator import NetworkGenerator
+    import os
+
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
     network_generator = NetworkGenerator()
     network = network_generator.generate_barabasi_albert(n_nodes=1000)

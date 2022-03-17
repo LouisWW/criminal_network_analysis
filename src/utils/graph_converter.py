@@ -9,12 +9,18 @@ the graphs need to be firstly converted to networkx.
 __author__ = Louis Weyland
 __date__   = 14/02/2022
 """
+from typing import Optional
+from typing import Tuple
+from typing import Union
+
 import graph_tool as gt
 import networkit as nk
 import networkx as nx
 
 
-def get_prop_type(value, key=None):
+def get_prop_type(
+    value: Union[int, str, float, bool, dict], key: Optional[str] = None
+) -> Tuple[str, Union[float, str, dict], str]:
     """
     Perform typing and value conversion for the graph_tool PropertyMap class.
 
@@ -53,7 +59,7 @@ def get_prop_type(value, key=None):
 class NetworkConverter:
     """Converting graph object from one package to another."""
 
-    def __ini__(self):
+    def __init__(self) -> None:
         """No specific info for now."""
         pass
 
@@ -68,7 +74,7 @@ class NetworkConverter:
         return nk.nxadapter.nk2nx(network)
 
     @staticmethod
-    def nx_to_gt(network):
+    def nx_to_gt(network: nx.graph) -> gt.Graph:
         """
         Convert a networkx graph to a graph-tool graph.
 
