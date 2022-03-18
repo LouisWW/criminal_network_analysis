@@ -8,10 +8,8 @@ from typing import List
 from typing import Tuple
 
 import networkit as nk
-import networkx as nx
 import numpy as np
 import powerlaw
-from utils.graph_converter import NetworkConverter
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,9 +22,10 @@ logger = logging.getLogger("logger")
 class NetworkStats:
     """Take an network as input and returns its properties."""
 
-    def __init__(self, network: nx.Graph) -> None:
+    def __init__(self, network: nk.Graph) -> None:
         """Initialize the network as an attribute."""
-        self.network = NetworkConverter().nx_to_nk(network)
+        assert isinstance(network, nk.Graph), "Given network type is not Networkit"
+        self.network = network
 
     def get_overview(self) -> None:
         """Get an overview of the network."""
