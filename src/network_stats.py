@@ -6,7 +6,6 @@ __date__   = 5/02/2022
 import logging
 from typing import List
 from typing import Tuple
-from typing import Union
 
 import networkit as nk
 import numpy as np
