@@ -19,6 +19,7 @@ pytest-subtests = "*"
 pytest-cov = "*"
 vext = "*"
 "vext.gi" = "*"
+pyintergraph = "*"
 
 [dev-packages]
 ipykernel = "*"

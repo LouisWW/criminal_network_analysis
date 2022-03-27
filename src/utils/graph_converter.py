@@ -9,13 +9,16 @@ the graphs need to be firstly converted to networkx.
 __author__ = Louis Weyland
 __date__   = 14/02/2022
 """
+from asyncio.log import logger
 from typing import Optional
 from typing import Tuple
 from typing import Union
 
-import graph_tool as gt
+import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
+import numpy as np
+import pyintergraph
 
 
 def get_prop_type(
@@ -64,13 +67,13 @@ class NetworkConverter:
         pass
 
     @staticmethod
-    def nx_to_nk(network: nx.graph) -> nk.graph:
+    def nx_to_nk(network: nx.graph) -> nk.Graph:
         """Convert graph from networkx to networkit."""
         return nk.nxadapter.nx2nk(network)
 
     @staticmethod
-    def nk_to_nx(network: nk.graph) -> nx.graph:
-        """Convert grpah from networkx to networkit."""
+    def nk_to_nx(network: nk.graph) -> nx.Graph:
+        """Convert graph from networkx to networkit."""
         return nk.nxadapter.nk2nx(network)
 
     @staticmethod
@@ -165,3 +168,28 @@ class NetworkConverter:
 
         # Done, finally!
         return gtG
+
+    @staticmethod
+    def gt_to_nx(network: gt.Graph, labelname: str = "id") -> nx.Graph:
+        """Convert graph from graph_tool to networkx."""
+        logger.warning("labelname should be set to 'id'!")
+        return pyintergraph.gt2nx(network, labelname)
+
+    @staticmethod
+    def gt_to_nk(network: gt.Graph) -> nk.Graph:
+        """Convert graph from graph_tool to networkit."""
+        logger.debug("This function is not efficient!")
+        adj_matrix = gt.adjacency(network)
+
+        # Gt counts from 0 and not from 1 as nx,nk!!
+        adj_matrix.data += 1
+        return nk.nxadapter.nx2nk(nx.from_scipy_sparse_matrix(adj_matrix))
+
+    @staticmethod
+    def nk_to_gt(network: nk.Graph, directed: bool = False) -> gt.Graph:
+        """Convert graph from networkit to graph_tool."""
+        nk_adj_matrix = nk.algebraic.adjacencyMatrix(network, matrixType="sparse")
+        g = gt.Graph(directed=directed)
+        g.add_edge_list(np.transpose(nk_adj_matrix.nonzero()))
+
+        return g
