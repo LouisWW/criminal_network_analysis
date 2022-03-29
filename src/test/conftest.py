@@ -15,7 +15,7 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def create_networkx():
+def create_networkx() -> nx.Graph:
     """
     Create a well-known network with attributes.
 
@@ -23,25 +23,25 @@ def create_networkx():
     functions need to be!
     """
     network = nx.Graph()
+    network.add_edge(0, 1)
+    network.add_edge(0, 2)
+    network.add_edge(0, 4)
     network.add_edge(1, 2)
-    network.add_edge(1, 3)
-    network.add_edge(1, 5)
     network.add_edge(2, 3)
     network.add_edge(3, 4)
-    network.add_edge(4, 5)
 
     # set nodes attributes fitness
-    network.nodes[1]["fitness"] = 10
-    network.nodes[2]["fitness"] = 8
-    network.nodes[3]["fitness"] = 6
-    network.nodes[4]["fitness"] = 3
-    network.nodes[5]["fitness"] = 11
+    network.nodes[0]["fitness"] = 10
+    network.nodes[1]["fitness"] = 8
+    network.nodes[2]["fitness"] = 6
+    network.nodes[3]["fitness"] = 3
+    network.nodes[4]["fitness"] = 11
 
     # set nodes attributes age
-    network.nodes[1]["age"] = 30
-    network.nodes[2]["age"] = 35
-    network.nodes[3]["age"] = 20
-    network.nodes[4]["age"] = 60
-    network.nodes[5]["age"] = 4
+    network.nodes[0]["age"] = 30
+    network.nodes[1]["age"] = 35
+    network.nodes[2]["age"] = 20
+    network.nodes[3]["age"] = 60
+    network.nodes[4]["age"] = 4
 
     return network

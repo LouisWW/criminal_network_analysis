@@ -20,6 +20,7 @@ pytest-cov = "*"
 vext = "*"
 "vext.gi" = "*"
 mypy = "*"
+pyintergraph = "*"
 
 [dev-packages]
 ipykernel = "*"
