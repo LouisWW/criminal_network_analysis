@@ -178,18 +178,22 @@ class NetworkConverter:
     @staticmethod
     def gt_to_nk(network: gt.Graph) -> nk.Graph:
         """Convert graph from graph_tool to networkit."""
-        logger.debug("This function is not efficient!")
         adj_matrix = gt.adjacency(network)
+        col, row = adj_matrix.nonzero()
 
-        # Gt counts from 0 and not from 1 as nx,nk!!
-        adj_matrix.data += 1
-        return nk.nxadapter.nx2nk(nx.from_scipy_sparse_matrix(adj_matrix))
+        # create nk.Graph with number of vertices
+        graph = nk.Graph(len(network.get_vertices()))
+
+        for r, c in zip(row, col):
+            graph.addEdge(r, c)
+
+        return graph
 
     @staticmethod
     def nk_to_gt(network: nk.Graph, directed: bool = False) -> gt.Graph:
         """Convert graph from networkit to graph_tool."""
         nk_adj_matrix = nk.algebraic.adjacencyMatrix(network, matrixType="sparse")
-        g = gt.Graph(directed=directed)
-        g.add_edge_list(np.transpose(nk_adj_matrix.nonzero()))
+        graph = gt.Graph(directed=directed)
+        graph.add_edge_list(np.transpose(nk_adj_matrix.nonzero()))
 
-        return g
+        return graph
