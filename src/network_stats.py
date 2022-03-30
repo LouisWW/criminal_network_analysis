@@ -129,7 +129,7 @@ class NetworkStats:
 
     def get_degree_dispersion(self) -> float:
         """Get the dipsersion coefficient <k^2>/<k>.
-        If coefficient is highter > 2, an giant component exists.
+        If the Molloy-Reed criterion is highter > 2, an giant component exists.
         """
         k = self.get_degree_distribution(normalized=False)
         k_2 = list(map(lambda x: pow(x, 2), k))
