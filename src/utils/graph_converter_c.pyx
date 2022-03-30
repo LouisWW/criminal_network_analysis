@@ -9,13 +9,16 @@ the graphs need to be firstly converted to networkx.
 __author__ = Louis Weyland
 __date__   = 14/02/2022
 """
+from asyncio.log import logger
 from typing import Optional
 from typing import Tuple
 from typing import Union
 
-import graph_tool as gt
+import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
+import numpy as np
+import pyintergraph
 
 
 def get_prop_type(
@@ -56,7 +59,7 @@ def get_prop_type(
     return tname, value, key
 
 
-class NetworkConverter:
+cdef class NetworkConverter:
     """Converting graph object from one package to another."""
 
     def __init__(self) -> None:
@@ -64,13 +67,13 @@ class NetworkConverter:
         pass
 
     @staticmethod
-    def nx_to_nk(network: nx.graph) -> nk.graph:
+    def nx_to_nk(network: nx.graph) -> nk.Graph:
         """Convert graph from networkx to networkit."""
         return nk.nxadapter.nx2nk(network)
 
     @staticmethod
-    def nk_to_nx(network: nk.graph) -> nx.graph:
-        """Convert grpah from networkx to networkit."""
+    def nk_to_nx(network: nk.graph) -> nx.Graph:
+        """Convert graph from networkx to networkit."""
         return nk.nxadapter.nk2nx(network)
 
     @staticmethod
@@ -165,3 +168,32 @@ class NetworkConverter:
 
         # Done, finally!
         return gtG
+
+    @staticmethod
+    def gt_to_nx(network: gt.Graph, labelname: str = "id") -> nx.Graph:
+        """Convert graph from graph_tool to networkx."""
+        logger.warning("labelname should be set to 'id'!")
+        return pyintergraph.gt2nx(network, labelname)
+
+    @staticmethod
+    def gt_to_nk(network):
+        """Convert graph from graph_tool to networkit."""
+        adj_matrix = gt.adjacency(network)
+        col, row = adj_matrix.nonzero()
+
+        # create nk.Graph with number of vertices
+        graph = nk.Graph(len(network.get_vertices()))
+
+        for r, c in zip(row, col):
+            graph.addEdge(r, c)
+
+        return graph
+
+    @staticmethod
+    def nk_to_gt(network: nk.Graph, directed: bool = False) -> gt.Graph:
+        """Convert graph from networkit to graph_tool."""
+        nk_adj_matrix = nk.algebraic.adjacencyMatrix(network, matrixType="sparse")
+        graph = gt.Graph(directed=directed)
+        graph.add_edge_list(np.transpose(nk_adj_matrix.nonzero()))
+
+        return graph
