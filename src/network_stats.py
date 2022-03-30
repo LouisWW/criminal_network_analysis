@@ -3,6 +3,7 @@
 __author__ = Louis Weyland
 __date__   = 5/02/2022
 """
+import itertools
 import logging
 from typing import List
 from typing import Tuple
@@ -10,6 +11,7 @@ from typing import Tuple
 import networkit as nk
 import numpy as np
 import powerlaw
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -129,6 +131,7 @@ class NetworkStats:
 
     def get_degree_dispersion(self) -> float:
         """Get the dipsersion coefficient <k^2>/<k>.
+
         If the Molloy-Reed criterion is highter > 2, an giant component exists.
         """
         k = self.get_degree_distribution(normalized=False)
@@ -142,6 +145,25 @@ class NetworkStats:
                 "Dispersion criterion is {}<=2 -> A giant component isn't exist!"
             )
         return dispersion
+
+    def get_efficiency(self) -> float:
+        """Get the efficiency of a Network.
+
+        Corresponds to communication efficiency
+        """
+        # Using the All-Pairs Shortest-Paths algorithm
+        apsp = nk.distance.APSP(self.network)
+        apsp.run()
+        # Vector of list for each node to each node
+        vector_of_dist = apsp.getDistances()
+        # Merge all the lists in one list
+        list_dist = list(itertools.chain.from_iterable(vector_of_dist))
+        inv_list_dist = list(map(lambda x: 1 / x, list_dist))
+
+        n = self.network.numberOfNodes()
+        efficiency = (1 / (n * (n - 1))) * np.mean(inv_list_dist)
+        print(efficiency)
+        return efficiency
 
 
 if __name__ == "__main__":
@@ -169,4 +191,4 @@ if __name__ == "__main__":
     # r = network_stats.get_radius()
     d = network_stats.get_relative_density()
 
-    network_stats.get_degree_dispersion()
+    network_stats.get_efficiency()
