@@ -3,7 +3,6 @@
 __author__ = Louis Weyland
 __date__   = 5/02/2022
 """
-import itertools
 import logging
 from typing import List
 from typing import Tuple
@@ -156,13 +155,16 @@ class NetworkStats:
         apsp.run()
         # Vector of list for each node to each node
         vector_of_dist = apsp.getDistances()
-        # Merge all the lists in one list
-        list_dist = list(itertools.chain.from_iterable(vector_of_dist))
-        inv_list_dist = list(map(lambda x: 1 / x, list_dist))
+        # Merge all the lists in one array
+        arr_dist = np.hstack(vector_of_dist)
+
+        # get ride of 0 elements since they represent distance to themself
+        # and get the inv
+        arr_dist = arr_dist[arr_dist != 0]
+        arr_inv_dist = np.reciprocal(arr_dist)
 
         n = self.network.numberOfNodes()
-        efficiency = (1 / (n * (n - 1))) * np.mean(inv_list_dist)
-        print(efficiency)
+        efficiency = (1 / (n * (n - 1))) * np.mean(arr_inv_dist)
         return efficiency
 
 
