@@ -40,10 +40,12 @@ class NetworkStats:
         logger.info(f"Number of components = {n_component}")
         return n_component
 
-    def get_degree_distribution(self) -> List[float]:
+    def get_degree_distribution(self, normalized: bool = True) -> List[float]:
         """Get the normalized degree distribution of a network."""
         return (
-            nk.centrality.DegreeCentrality(self.network, normalized=True).run().scores()
+            nk.centrality.DegreeCentrality(self.network, normalized=normalized)
+            .run()
+            .scores()
         )
 
     def check_if_powerlaw(self, data: List[float]) -> Tuple[bool, float]:
@@ -125,6 +127,22 @@ class NetworkStats:
         logger.info(f"Relative Density = {d}")
         return d
 
+    def get_degree_dispersion(self) -> float:
+        """Get the dipsersion coefficient <k^2>/<k>.
+        If coefficient is highter > 2, an giant component exists.
+        """
+        k = self.get_degree_distribution(normalized=False)
+        k_2 = list(map(lambda x: pow(x, 2), k))
+        dispersion = np.mean(k_2) / np.mean(k)
+
+        if dispersion > 2:
+            logger.info("Dispersion criterion is {}>2 -> A giant component is present!")
+        elif dispersion <= 2:
+            logger.info(
+                "Dispersion criterion is {}<=2 -> A giant component isn't exist!"
+            )
+        return dispersion
+
 
 if __name__ == "__main__":
 
@@ -150,3 +168,5 @@ if __name__ == "__main__":
     # x = network_stats.get_diameter()
     # r = network_stats.get_radius()
     d = network_stats.get_relative_density()
+
+    network_stats.get_degree_dispersion()
