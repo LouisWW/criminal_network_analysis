@@ -12,6 +12,8 @@ __date__   = 23/02/2022
 """
 import networkx as nx
 import pytest
+from network_stats import NetworkStats
+from utils.network_converter import NetworkConverter
 
 
 @pytest.fixture(scope="session")
@@ -45,3 +47,14 @@ def create_networkx() -> nx.Graph:
     network.nodes[4]["age"] = 4
 
     return network
+
+
+@pytest.fixture(scope="session")
+def network_stats_obj(create_networkx: nx.Graph) -> NetworkStats:
+    """Create a NetworkStats object.
+
+    Thereby the create_networkx is converted to nk
+    """
+    conv_graph = NetworkConverter.nx_to_nk(create_networkx)
+    network_stats = NetworkStats(conv_graph)
+    return network_stats

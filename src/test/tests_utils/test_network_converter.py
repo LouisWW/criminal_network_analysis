@@ -3,7 +3,7 @@ import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
 import pytest
-from utils.graph_converter import NetworkConverter
+from utils.network_converter import NetworkConverter
 
 
 class TestNetworkConverter:

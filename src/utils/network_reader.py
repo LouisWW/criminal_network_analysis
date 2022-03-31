@@ -6,7 +6,6 @@ __date__   = 5/02/2022
 """
 import os
 
-import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 
@@ -16,7 +15,10 @@ class NetworkReader:
 
     def __init__(self) -> None:
         """Set the directory right."""
-        self.directory = os.path.dirname(os.path.realpath(__file__)) + "/data/"
+        # Get current directory
+        path = os.getcwd()
+        par_dir = os.path.abspath(path)
+        self.directory = par_dir + "/data/"
 
     def read_cunha(self) -> nx.Graph:
         """Get data from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/ ."""
@@ -49,12 +51,3 @@ class NetworkReader:
             data, source="Source", target="Target", edge_attr=["Weight"]
         )
         return graph_obj
-
-
-if __name__ == "__main__":
-
-    network_reader = NetworkReader()
-    print(network_reader.directory)
-    network_obj = network_reader.read_montagna_phone_calls()
-    nx.draw(network_obj)
-    plt.show()

@@ -164,33 +164,7 @@ class NetworkStats:
         arr_inv_dist = np.reciprocal(arr_dist)
 
         n = self.network.numberOfNodes()
-        efficiency = (1 / (n * (n - 1))) * np.mean(arr_inv_dist)
+        efficiency = (1 / (n * (n - 1))) * np.sum(arr_inv_dist)
+
+        logger.info(f"Efficiency = {efficiency}")
         return efficiency
-
-
-if __name__ == "__main__":
-
-    from network_generator import NetworkGenerator
-    import os
-
-    os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
-
-    network_generator = NetworkGenerator()
-    network = network_generator.generate_barabasi_albert(n_nodes=1000)
-
-    network_stats = NetworkStats(network)
-
-    """
-    data = network_stats.get_degree_distribution
-    _, alpha = network_stats.check_if_powerlaw(data)
-    from utils.plotter import Plotter
-
-    plotter = Plotter()
-    plotter.plot_log_log(data, "Degree", "P(X)")
-    """
-    # c =network_stats.get_community()
-    # x = network_stats.get_diameter()
-    # r = network_stats.get_radius()
-    d = network_stats.get_relative_density()
-
-    network_stats.get_efficiency()

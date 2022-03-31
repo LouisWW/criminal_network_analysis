@@ -1,7 +1,7 @@
 """
 This script's intention is to get the convert graphs between packages.
 
-It converts grahp objects from networkx to networkit
+It converts graph objects from networkx to networkit
 vice versa and networkx to graph-tool.
 So as for now to convert networkit graphs to graph-tool,
 the graphs need to be firstly converted to networkx.
