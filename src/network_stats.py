@@ -84,7 +84,7 @@ class NetworkStats:
             diam.run()
             diameter = diam.getDiameter()[0]
             logger.info(f"Diameter = {diameter}")
-            return diameter
+            return int(diameter)
         else:
             logger.warning("Graph must be connected! Otherwise distance == inf")
             return -1
@@ -92,7 +92,7 @@ class NetworkStats:
     def get_radius(self) -> int:
         """Get the radius of a graph which is the minimum eccentricity."""
         # predefine the len of the list for speed
-        eccentricity = np.zeros(self.network.numberOfNodes())
+        eccentricity = np.zeros(self.network.numberOfNodes(), dtype=np.int64)
         # to append to the right idx in the list
         iterator = iter(range(0, self.network.numberOfNodes()))
 
@@ -101,7 +101,7 @@ class NetworkStats:
 
         radius = min(eccentricity)
         logger.info(f"Radius = {radius}")
-        return radius
+        return int(radius)
 
     def get_eccentricity(self, node: int) -> int:
         """Return the eccentricity of a node."""
@@ -115,7 +115,7 @@ class NetworkStats:
         """Get the density of a network."""
         m = self.network.numberOfEdges()
         n = self.network.numberOfNodes()
-        d = (2 * m) / n * (n - 1)
+        d = (2 * m) / (n * (n - 1))
         logger.info(f"Density = {d}")
         return d
 
@@ -126,6 +126,7 @@ class NetworkStats:
         mean_degree = (2 * m) / n
         d = (n * mean_degree) / (n * (n - 1))
         logger.info(f"Relative Density = {d}")
+        raise ValueError("Relative Density is just normal density...")
         return d
 
     def get_degree_dispersion(self) -> float:
