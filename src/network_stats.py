@@ -92,14 +92,12 @@ class NetworkStats:
     def get_radius(self) -> int:
         """Get the radius of a graph which is the minimum eccentricity."""
         # predefine the len of the list for speed
-        eccentricity = np.zeros(self.network.numberOfNodes(), dtype=np.int64)
-        # to append to the right idx in the list
-        iterator = iter(range(0, self.network.numberOfNodes()))
+        eccentricity = []
 
         for node in self.network.iterNodes():
-            eccentricity[next(iterator)] = self.get_eccentricity(node)
+            eccentricity.append(self.get_eccentricity(node))
 
-        radius = min(eccentricity)
+        radius = np.min(eccentricity)
         logger.info(f"Radius = {radius}")
         return int(radius)
 
