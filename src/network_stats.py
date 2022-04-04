@@ -119,12 +119,10 @@ class NetworkStats:
 
     def get_relative_density(self) -> float:
         """Get the relative density of a graph as defined in Scott J."""
-        m = self.network.numberOfEdges()
         n = self.network.numberOfNodes()
-        mean_degree = (2 * m) / n
+        mean_degree = np.mean(self.get_degree_distribution(normalized=False))
         d = (n * mean_degree) / (n * (n - 1))
         logger.info(f"Relative Density = {d}")
-        raise ValueError("Relative Density is just normal density...")
         return d
 
     def get_degree_dispersion(self) -> float:

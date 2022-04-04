@@ -33,6 +33,13 @@ class TestNetworkStats:
     @pytest.mark.essential
     def test_get_density(self, network_stats_obj: NetworkStats) -> None:
         """Test if density is correct."""
+        rel_density = network_stats_obj.get_relative_density()
+        assert isinstance(rel_density, float), "Density should be float"
+        assert rel_density == 0.6, "Density score is not correct"
+
+    @pytest.mark.essential
+    def test_get_relative_density(self, network_stats_obj: NetworkStats) -> None:
+        """Test if density is correct."""
         density = network_stats_obj.get_density()
         assert isinstance(density, float), "Density should be float"
         assert density == 0.6, "Density score is not correct"
