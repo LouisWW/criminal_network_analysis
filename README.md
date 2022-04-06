@@ -25,14 +25,16 @@ Additionally to the pipenv environment, a python package called **graph-tool** i
 
     # Install Graph-tool
 
+    # Make sure to activate python environment
     # First install all missing dependencies
     # In my case:
 
+    $ sudo apt-get install libboost-all-dev
     $ sudo apt-get install libcgal-dev
     $ sudo apt-get install expat
     $ sudo apt install libsparsehash-dev
+    $ sudo apt install libcairomm-1.0-dev
 
-    # Activate python environment
     $ git clone https://github.com/pygobject/pycairo.git
     $ cd pycairo/
     $ python3 setup.py build
