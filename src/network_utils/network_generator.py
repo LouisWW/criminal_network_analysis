@@ -4,7 +4,7 @@ __author__ = Louis Weyland
 __date__   = 6/02/2022
 """
 import networkit as nk
-
+import graph_tool.all as gt
 
 class NetworkGenerator:
     """Generate desired random,scale-free or other sorts of networks."""
