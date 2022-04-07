@@ -32,6 +32,9 @@ class NetworkReader:
         # Set state of the nodes to be criminals
         state = "c"
         nx.set_node_attributes(graph_obj, state, "state")
+
+        # Set the name of the graph
+        graph_obj.name = "cunha"
         return graph_obj
 
     def read_montagna_meetings(self) -> nx.Graph:
@@ -47,6 +50,9 @@ class NetworkReader:
         # Set state of the nodes to be criminals
         state = "c"
         nx.set_node_attributes(graph_obj, state, "state")
+
+        # Set the name of the graph
+        graph_obj.name = "montagna_meetings"
         return graph_obj
 
     def read_montagna_phone_calls(self) -> nx.Graph:
@@ -63,4 +69,6 @@ class NetworkReader:
         state = "c"
         nx.set_node_attributes(graph_obj, state, "state")
 
+        # Set the name of the graph
+        graph_obj.name = "montagna_phone_calls"
         return graph_obj

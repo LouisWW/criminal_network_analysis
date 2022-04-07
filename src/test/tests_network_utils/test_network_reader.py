@@ -23,6 +23,8 @@ class TestNetworkReader:
             network_obj.nodes["adad9e1c91a7e0f63a139458941b1c66"]["state"] == "c"
         ), "Attributes are set wrong"
 
+        assert network_obj.name == "cunha", "Network name is not correct"
+
     @pytest.mark.essential
     def test_read_montagna_meetings(self) -> None:
         """Test if the montagna data is read correctly in nx format."""
@@ -34,6 +36,8 @@ class TestNetworkReader:
         assert network_obj.nodes["N1"]["state"] == "c", "Attributes are set wrong"
         assert network_obj.nodes["N20"]["state"] == "c", "Attributes are set wrong"
 
+        assert network_obj.name == "montagna_meetings", "Network name is not correct"
+
     @pytest.mark.essential
     def test_read_montagna_phone_calls(self) -> None:
         """Test if the montagna phone call data is read correctly in nx format."""
@@ -44,3 +48,5 @@ class TestNetworkReader:
         # Check if attributes are set right for all the nodes
         assert network_obj.nodes["N100"]["state"] == "c", "Attributes are set wrong"
         assert network_obj.nodes["N80"]["state"] == "c", "Attributes are set wrong"
+
+        assert network_obj.name == "montagna_phone_calls", "Network name is not correct"
