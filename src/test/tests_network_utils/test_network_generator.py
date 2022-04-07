@@ -1,7 +1,7 @@
 """Test if the generating of network is done correctly."""
 import networkit as nk
 import pytest
-from utils.network_generator import NetworkGenerator
+from network_utils.network_generator import NetworkGenerator
 
 
 class TestNetworkGenerator:

@@ -8,7 +8,7 @@ from typing import Tuple
 
 import networkit as nk
 import numpy as np
-from utils.graph_converter import NetworkConverter
+from network_utils.network_converter import NetworkConverter
 
 
 class NodeStats:
@@ -19,7 +19,7 @@ class NodeStats:
 
     def __init__(self, network: nk.Graph) -> None:
         """Initialize the network as an attribute."""
-        self.network = NetworkConverter(network).nx_to_nk()
+        self.network = NetworkConverter.nx_to_nk(network)
 
     def get_katz(self) -> Sequence[Tuple[int, float]]:
         """Get the katz score for each node."""
@@ -63,7 +63,7 @@ class NodeStats:
         """Get the eigenvector centrality of a node."""
         raise NotImplementedError
 
-    def get_average_path(self):
+    def get_average_path(self) -> None:
         """Get average path over a node."""
         raise NotImplementedError
 

@@ -9,12 +9,12 @@ the graphs need to be firstly converted to networkx.
 __author__ = Louis Weyland
 __date__   = 14/02/2022
 """
-from asyncio.log import logger
 from typing import Optional
 from typing import Tuple
 from typing import Union
 
 import graph_tool.all as gt
+import logger
 import networkit as nk
 import networkx as nx
 import numpy as np
