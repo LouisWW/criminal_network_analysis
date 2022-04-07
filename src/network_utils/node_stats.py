@@ -8,7 +8,7 @@ from typing import Tuple
 
 import networkit as nk
 import numpy as np
-from network_utils.network_converter import NetworkConverter
+from network_converter import NetworkConverter
 
 
 class NodeStats:
