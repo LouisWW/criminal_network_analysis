@@ -11,7 +11,7 @@ import pandas as pd
 
 
 class NetworkReader:
-    """The NetworkReader reads the data from various files and return a networkx graph."""
+    """The NetworkReader reads the data from various files and return a graph."""
 
     def __init__(self) -> None:
         """Set the directory right."""
@@ -28,6 +28,10 @@ class NetworkReader:
             names=["vertex1", "vertex2"],
         )
         graph_obj = nx.Graph(list(zip(data["vertex1"], data["vertex2"])))
+
+        # Set state of the nodes to be criminals
+        state = "c"
+        nx.set_node_attributes(graph_obj, state, "state")
         return graph_obj
 
     def read_montagna_meetings(self) -> nx.Graph:
@@ -39,6 +43,10 @@ class NetworkReader:
         graph_obj = nx.from_pandas_edgelist(
             data, source="Source", target="Target", edge_attr=["Weight"]
         )
+
+        # Set state of the nodes to be criminals
+        state = "c"
+        nx.set_node_attributes(graph_obj, state, "state")
         return graph_obj
 
     def read_montagna_phone_calls(self) -> nx.Graph:
@@ -50,4 +58,9 @@ class NetworkReader:
         graph_obj = nx.from_pandas_edgelist(
             data, source="Source", target="Target", edge_attr=["Weight"]
         )
+
+        # Set state of the nodes to be criminals
+        state = "c"
+        nx.set_node_attributes(graph_obj, state, "state")
+
         return graph_obj
