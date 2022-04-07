@@ -12,8 +12,8 @@ __date__   = 23/02/2022
 """
 import networkx as nx
 import pytest
-from network_stats import NetworkStats
-from utils.network_converter import NetworkConverter
+from network_utils.network_converter import NetworkConverter
+from network_utils.network_stats import NetworkStats
 
 
 @pytest.fixture(scope="session")

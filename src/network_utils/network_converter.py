@@ -9,16 +9,19 @@ the graphs need to be firstly converted to networkx.
 __author__ = Louis Weyland
 __date__   = 14/02/2022
 """
+import logging
 from typing import Optional
 from typing import Tuple
 from typing import Union
 
 import graph_tool.all as gt
-import logger
 import networkit as nk
 import networkx as nx
 import numpy as np
 import pyintergraph
+
+
+logger = logging.getLogger("logger")
 
 
 def get_prop_type(
