@@ -16,8 +16,7 @@ class NetworkReader:
     def __init__(self) -> None:
         """Set the directory right."""
         # Get current directory
-        path = os.getcwd()
-        par_dir = os.path.abspath(path)
+        par_dir = os.path.abspath(os.path.join(__file__, "../../"))
         self.directory = par_dir + "/data/"
 
     def read_cunha(self) -> nx.Graph:
