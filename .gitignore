@@ -5,6 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
+*.c
 
 # Distribution / packaging
 .Python
@@ -134,3 +135,5 @@ dmypy.json
 # Pipenv lock files
 Pipfile.lock
 
+# Ignore test.py
+test.py

@@ -18,6 +18,7 @@ pytest-xdist = "*"
 pytest-subtests = "*"
 pytest-cov = "*"
 pyintergraph = "*"
+tqdm = "*"
 
 [dev-packages]
 ipykernel = "*"

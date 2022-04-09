@@ -1,4 +1,7 @@
 """Test if all the function from NetworkStats work correctly."""
+import warnings
+
+import networkit as nk
 import networkx as nx
 import pytest
 from network_utils.network_stats import NetworkStats
@@ -64,3 +67,25 @@ class TestNetworkStats:
         diameter = network_stats_obj.get_diameter()
         assert isinstance(diameter, int), "Diameter should be int"
         assert diameter == 2, "Diameter score is not correct"
+
+    @pytest.mark.essential
+    def test_check_if_powerlaw(
+        self, scale_free_network: nk.Graph, random_network: nk.Graph
+    ) -> None:
+        """Test if the check_if_powerlaw_function is working.
+
+        For this test, a scale-free network is used and an random
+        one to test, true positive and true negative. The network form
+        conftest is to small to tes that!
+        """
+        # Check if the scale-free network returns correct results
+        network_stats_scf = NetworkStats(scale_free_network)
+        nodes_degree_dist = network_stats_scf.get_degree_distribution(normalized=False)
+        if network_stats_scf.check_if_powerlaw(nodes_degree_dist)[0] is False:
+            warnings.warn("Network should be scale-free")
+
+        # Check if the random network returns correct results
+        network_stats_rdm = NetworkStats(random_network)
+        nodes_degree_dist = network_stats_rdm.get_degree_distribution()
+        if network_stats_rdm.check_if_powerlaw(nodes_degree_dist)[0] is True:
+            warnings.warn("Network should not be scale-free")

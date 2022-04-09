@@ -140,7 +140,7 @@ class NetworkStats:
             logger.info(
                 "Dispersion criterion is {}<=2 -> A giant component isn't exist!"
             )
-        return dispersion
+        return float(dispersion)
 
     def get_efficiency(self) -> float:
         """Get the efficiency of a Network.

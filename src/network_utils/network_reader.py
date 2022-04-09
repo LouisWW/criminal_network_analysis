@@ -26,6 +26,7 @@ class NetworkReader:
             delimiter=";",
             names=["vertex1", "vertex2"],
         )
+
         graph_obj = nx.Graph(list(zip(data["vertex1"], data["vertex2"])))
 
         # Set state of the nodes to be criminals

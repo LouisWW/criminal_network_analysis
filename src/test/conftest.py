@@ -10,9 +10,11 @@ for multiple tests
 __author__ = Louis Weyland
 __date__   = 23/02/2022
 """
+import networkit as nk
 import networkx as nx
 import pytest
 from network_utils.network_converter import NetworkConverter
+from network_utils.network_generator import NetworkGenerator
 from network_utils.network_stats import NetworkStats
 
 
@@ -58,3 +60,15 @@ def network_stats_obj(create_networkx: nx.Graph) -> NetworkStats:
     conv_graph = NetworkConverter.nx_to_nk(create_networkx)
     network_stats = NetworkStats(conv_graph)
     return network_stats
+
+
+@pytest.fixture(scope="session")
+def scale_free_network() -> nk.Graph:
+    """Return a nk scale-free network."""
+    return NetworkGenerator.generate_barabasi_albert(n_nodes=5000, n_edges=200)
+
+
+@pytest.fixture(scope="session")
+def random_network() -> nk.Graph:
+    """Return a nk random network."""
+    return NetworkGenerator.generate_random(n_nodes=5000)
