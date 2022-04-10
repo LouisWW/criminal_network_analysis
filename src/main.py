@@ -7,6 +7,7 @@ __date__   = 22/02/2022
 import logging
 
 from config.config import ConfigParser
+from network_utils.network_combiner import NetworkCombiner
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
@@ -47,12 +48,22 @@ if args.sim_mart_vaq:
     Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
     Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
     """
-    # get actual criminal network
+    # Get actual criminal network
     nx_network = NetworkReader().get_data(args.read_data)
     logger.info(f"The data used is {nx_network.name}")
-    # get stats about network_obj
+    # Get stats about network_obj
     nk_network = NetworkConverter.nx_to_nk(nx_network)
     network_stats = NetworkStats(nk_network)
     network_stats.get_overview()
 
-    # add nodes to network
+    # Add nodes to network
+    # First convert to gt
+    gt_network = NetworkConverter.nx_to_gt(nx_network)
+    combined_gt_network = NetworkCombiner.combine_by_preferential_attachment_faster(
+        gt_network, new_nodes=10000, n_new_edges=10
+    )
+    combined_nk_network = NetworkConverter.gt_to_nk(combined_gt_network)
+
+    # Get stats about network_obj
+    network_stats = NetworkStats(combined_nk_network)
+    network_stats.get_overview()

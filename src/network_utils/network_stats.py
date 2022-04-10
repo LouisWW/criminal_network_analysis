@@ -10,6 +10,7 @@ from typing import Tuple
 import networkit as nk
 import numpy as np
 import powerlaw
+from tqdm import tqdm
 from utils.suppress_stdout_stderr import suppress_stdout_stderr
 
 logger = logging.getLogger("logger")
@@ -35,7 +36,7 @@ class NetworkStats:
         self.get_diameter()
         self.get_radius()
         self.get_degree_dispersion()
-        self.get_efficiency()
+        # self.get_efficiency()
         print("----------------------------")
 
     def get_connected_components(self) -> int:
@@ -108,7 +109,12 @@ class NetworkStats:
         # predefine the len of the list for speed
         eccentricity = []
 
-        for node in self.network.iterNodes():
+        for node in tqdm(
+            self.network.iterNodes(),
+            total=self.network.numberOfNodes(),
+            desc="Getting the radius...",
+            leave=False,
+        ):
             eccentricity.append(self.get_eccentricity(node))
 
         radius = np.min(eccentricity)
