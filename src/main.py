@@ -4,13 +4,30 @@ This script contains regroups all the functions and pipelines needed to recreate
 __author__ = Louis Weyland
 __date__   = 22/02/2022
 """
+import logging
+
 from config.config import ConfigParser
-from network_reader import NetworkReader
-from utils.graph_converter import NetworkConverter
+from network_utils.network_converter import NetworkConverter
+from network_utils.network_reader import NetworkReader
+from network_utils.network_stats import NetworkStats
 from utils.plotter import Plotter
 
-# catch the flags
+# Catch the flags
 args = ConfigParser().args
+
+
+# Define logger output
+logger = logging.getLogger("logger")
+logger_handler = logging.StreamHandler()  # Handler for the logger
+logger_handler.setFormatter(
+    logging.Formatter(
+        "[%(levelname)s]\n\t %(message)-100s ---- (%(asctime)s.%(msecs)03d) %(filename)s",
+        datefmt="%H:%M:%S",
+    )
+)
+logger.addHandler(logger_handler)
+logger.propagate = False
+logger.setLevel(logging.INFO)
 
 
 if args.draw_network:
@@ -19,8 +36,23 @@ if args.draw_network:
 
     Default is circular representation
     """
-    network_reader = NetworkReader()
-    network_obj = network_reader.read_montagna_phone_calls()
+    network = NetworkReader().read_montagna_phone_calls()
     # convert graph_obj
-    network_obj = NetworkConverter.nx_to_gt(network_obj)
-    Plotter().draw_network(network_obj)
+    network = NetworkConverter.nx_to_gt(network)
+    Plotter().draw_network(network)
+
+
+if args.sim_mart_vaq:
+    """Simulate the simulation form
+    Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
+    Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
+    """
+    # get actual criminal network
+    nx_network = NetworkReader().get_data(args.read_data)
+    logger.info(f"The data used is {nx_network.name}")
+    # get stats about network_obj
+    nk_network = NetworkConverter.nx_to_nk(nx_network)
+    network_stats = NetworkStats(nk_network)
+    network_stats.get_overview()
+
+    # add nodes to network

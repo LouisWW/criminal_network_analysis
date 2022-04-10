@@ -72,3 +72,14 @@ class NetworkReader:
         # Set the name of the graph
         graph_obj.name = "montagna_phone_calls"
         return graph_obj
+
+    def get_data(self, data_type: str) -> nx.Graph:
+        """Return a data."""
+        if data_type == "cunha":
+            return self.read_cunha()
+        elif data_type == "montagna_calls":
+            return self.read_montagna_phone_calls()
+        elif data_type == "montagna_meetings":
+            return self.read_montagna_meetings()
+        else:
+            raise RuntimeError("No criminal network data has been defined!")

@@ -13,7 +13,7 @@ import argparse
 class ConfigParser:
     """Catches all the flags."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Make sure when inherited everything works fine."""
         super().__init__()
 
@@ -33,6 +33,24 @@ class ConfigParser:
                             c = circular network,
                             n = normal/random""",
         )
+
+        parser.add_argument(
+            "-read-data",
+            type=str,
+            default=None,
+            nargs="?",
+            const="cunha",
+            choices=["cunha", "montagna_calls", "montagna_meetings"],
+            help="""Defines which network to read; cunha, montagna_meetings, montagna_calls.""",
+        )
+
+        parser.add_argument(
+            "-sim-mart-vaq",
+            action="store_true",
+            help="""Defines if the simulation based on Martiez-Vaquero is run.""",
+        )
+
+        parser.add_argument("-verbose", action="store_true", help="Print extra info")
 
         # compile the flags
         self.args = parser.parse_args()

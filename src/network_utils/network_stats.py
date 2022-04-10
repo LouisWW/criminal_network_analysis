@@ -10,13 +10,8 @@ from typing import Tuple
 import networkit as nk
 import numpy as np
 import powerlaw
+from utils.suppress_stdout_stderr import suppress_stdout_stderr
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(levelname)s] %(message)s ---- (%(asctime)s.%(msecs)03d) %(filename)s",
-    datefmt="%H:%M:%S",
-)
 logger = logging.getLogger("logger")
 
 
@@ -30,8 +25,18 @@ class NetworkStats:
 
     def get_overview(self) -> None:
         """Get an overview of the network."""
+        print("----------------------------")
         nk.overview(self.network)
         nk.community.detectCommunities(self.network)
+        self.get_connected_components()
+        self.check_if_powerlaw()
+        self.get_density()
+        self.get_relative_density()
+        self.get_diameter()
+        self.get_radius()
+        self.get_degree_dispersion()
+        self.get_efficiency()
+        print("----------------------------")
 
     def get_connected_components(self) -> int:
         """Return the number of connected components."""
@@ -49,26 +54,35 @@ class NetworkStats:
             .scores()
         )
 
-    def check_if_powerlaw(self, data: List[float]) -> Tuple[bool, float]:
+    def check_if_powerlaw(self, data: List[float] = None) -> Tuple[bool, float]:
         """Check if a given data follows a powerlaw distribution.
 
         Data needs to be sorted first!
         """
+        if data is None:
+            data = self.get_degree_distribution()
         data = sorted(data, reverse=True)
         distributions = ["exponential", "lognormal"]
-        fit = powerlaw.Fit(data)
+        # Suppress the powerlaw info
+        with suppress_stdout_stderr():
+            fit = powerlaw.Fit(data)
 
         for distribution in distributions:
             # if power_law value is negative than other distributions are preferred
             res = fit.distribution_compare("power_law", distribution)
             if res[0] < 0:
                 logger.info(
-                    f"{distribution} is preferred over powerlaw, results = {res}"
+                    f"{distribution.title()} is preferred over powerlaw, p_value = {res[1]:.4f}"
                 )
                 is_powerlaw = False
                 break
             else:
                 is_powerlaw = True
+
+        if is_powerlaw is True:
+            logger.info(
+                f"Network degree distribution follows a powerlaw, p_value = {res[1]:.4f}"
+            )
         return is_powerlaw, fit.alpha
 
     def get_community(self) -> int:
@@ -135,10 +149,12 @@ class NetworkStats:
         dispersion = np.mean(k_2) / np.mean(k)
 
         if dispersion > 2:
-            logger.info("Dispersion criterion is {}>2 -> A giant component is present!")
+            logger.info(
+                f"Dispersion criterion is {dispersion:.3f}>2 -> A giant component is present!"
+            )
         elif dispersion <= 2:
             logger.info(
-                "Dispersion criterion is {}<=2 -> A giant component isn't exist!"
+                f"Dispersion criterion is {dispersion:3.f}<=2 -> A giant component isn't exist!"
             )
         return float(dispersion)
 
