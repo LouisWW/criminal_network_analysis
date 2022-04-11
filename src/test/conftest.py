@@ -10,11 +10,13 @@ for multiple tests
 __author__ = Louis Weyland
 __date__   = 23/02/2022
 """
+import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
 import pytest
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_generator import NetworkGenerator
+from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
 
 
@@ -72,3 +74,11 @@ def scale_free_network() -> nk.Graph:
 def random_network() -> nk.Graph:
     """Return a nk random network."""
     return NetworkGenerator.generate_random(n_nodes=5000)
+
+
+@pytest.fixture(scope="session")
+def gt_network() -> gt.Graph:
+    """Return the montagna_calls network as gt."""
+    nx_network = NetworkReader().get_data("montagna_calls")
+    gt_network = NetworkConverter.nx_to_gt(nx_network)
+    return gt_network
