@@ -26,3 +26,4 @@ dependencies:
     - pytest-cov
     - ipykernel
     - pyintergraph
+    - tqdm
