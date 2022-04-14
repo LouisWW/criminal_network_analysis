@@ -53,12 +53,10 @@ class SimMartVaq:
         self.new_nodes = self.total_number_nodes - self.n_criminal
 
         # Init either honest or lone wolf
-        self.relative_ratio_honest = round(
-            self.ratio_honest / (self.ratio_honest + self.ratio_wolf), 2
+        self.relative_ratio_honest = self.ratio_honest / (
+            self.ratio_honest + self.ratio_wolf
         )
-        self.relative_ratio_wolf = round(
-            self.ratio_wolf / (self.ratio_honest + self.ratio_wolf), 2
-        )
+        self.relative_ratio_wolf = 1 - self.relative_ratio_honest
 
     @property
     def name(self) -> str:
@@ -90,15 +88,44 @@ class SimMartVaq:
 
         return new_network
 
-    def acting_stage(self, network: gt.Graph) -> None:
-        """Correspond to the acting stage in the paper.
+    def play(self, network: gt.Graph, rounds: int = 1, n_new_edges: int = 2) -> None:
+        """Run the simulation.
 
         Network is subdivided in to n groups.
         In each group, a person is selected.
         If selected person is a wolf or criminal,
         damage is inflicted on others.
         """
-        pass
+        # Init a population
+        network = self.initialise_network(network, n_new_edges)
+        # Init fitness attribute
+        network = self.init_fitness(network)
+
+        # Run the simulation
+        for i in tqdm(range(0, rounds), desc="Playing the rounds...", total=rounds):
+            # Divide the network in random new groups
+            mbr_list, group_numbers = self.divide_in_groups(network)
+            logger.debug(f"The Network is divided in {len(group_numbers)} groups")
+
+            # Go through each group
+            for number in group_numbers:
+                self.acting_stage(network, mbr_list, number)
+
+    def acting_stage(
+        self, network: gt.Graph, mbr_list: List[int], group_number: int
+    ) -> None:
+        """Correspond to the acting stage in the paper.
+
+        Given an group, select on person and proceed to the acting.
+        """
+        # Get all the people from the same group
+        group_member = gt.find_vertex(network, mbr_list, group_number)
+        # Select one person
+        slct_pers = np.random.choice(group_member, 1)
+        # check the person status
+        slct_pers_st = network.vp.state[network.vertex(slct_pers)]
+
+        return network
 
     def divide_in_groups(self, network: gt.Graph) -> Tuple[List[int], FrozenSet[int]]:
         """Divide the network in groups.
@@ -108,7 +135,17 @@ class SimMartVaq:
         Returns a list with the group number/label.
         """
         partitions = gt.minimize_blockmodel_dl(network)
-        groups = partitions.get_blocks()
-        groups_label = frozenset(groups)
+        mbr_list = partitions.get_blocks()
+        group_numbers = frozenset(mbr_list)
 
-        return groups, groups_label
+        return mbr_list, group_numbers
+
+    def init_fitness(self, network: gt.Graph) -> gt.Graph:
+        """Add the attribute fitness to the network."""
+        if "fitness" in network.vp:
+            return network
+        else:
+            fitness = network.new_vertex_property("double")
+            network.vertex_properties["fitness"] = fitness
+
+        return network

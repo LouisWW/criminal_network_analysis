@@ -23,7 +23,7 @@ class ConfigParser:
         )
 
         parser.add_argument(
-            "-draw_network",
+            "-draw-network",
             type=str,
             default="None",
             nargs="?",

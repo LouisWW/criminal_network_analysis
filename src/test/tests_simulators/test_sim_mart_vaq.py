@@ -1,7 +1,7 @@
 """Test if the simulation from Martinez-Vaquero is running correctly."""
 import graph_tool.all as gt
+import numpy as np
 import pytest
-from numpy import empty
 from simulators.sim_mart_vaq import SimMartVaq
 
 
@@ -67,14 +67,15 @@ class TestSimMartVaq:
 
         # Criminal network size should be 95
         # Honest and Wolf ration should be within a range given the init is stochastic
+        np.random.seed(0)
         assert (
             len(gt.find_vertex(network, network.vp.state, "c")) == 95
         ), "Criminal ratio not correct"
         assert (
-            38 - 5 <= len(gt.find_vertex(network, network.vp.state, "h")) <= 38 + 5
+            38 - 10 <= len(gt.find_vertex(network, network.vp.state, "h")) <= 38 + 10
         ), "Honest ratio not correct"
         assert (
-            57 - 5 <= len(gt.find_vertex(network, network.vp.state, "w")) <= 57 + 5
+            57 - 10 <= len(gt.find_vertex(network, network.vp.state, "w")) <= 57 + 10
         ), "Wolf ratio not correct"
 
     @pytest.mark.essential
@@ -83,7 +84,7 @@ class TestSimMartVaq:
         simulators = SimMartVaq(gt_network)
         groups, groups_label = simulators.divide_in_groups(simulators.network)
 
-        assert groups is not empty, "Group list is empty"
+        assert groups is not np.empty, "Group list is empty"
         assert all(
             [isinstance(item, int) for item in groups]
         ), "Items in Group should be int"
@@ -92,3 +93,32 @@ class TestSimMartVaq:
         assert all(
             [isinstance(item, int) for item in groups_label]
         ), "Items in Group label should be int"
+
+        # Make sure that the group membership are random each time
+        # This will make sure that not always the same groups are selected
+        # and that some behaviour might be able to spread over the network
+        groups_1, _ = simulators.divide_in_groups(simulators.network)
+        groups_2, _ = simulators.divide_in_groups(simulators.network)
+
+        assert not (
+            groups_1 == groups_2
+        ).all(), "Every time the same groups are formed..."
+
+    @pytest.mark.essential
+    def test_init_fitness(self, gt_network: gt.Graph) -> None:
+        """Test if the init of the fitness attribute is done correctly."""
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        assert network.vp.fitness, "Fitness attribute doesn't exists..."
+
+    @pytest.mark.essential
+    def test_acting_stage(self, gt_network: gt.Graph) -> None:
+        """Test if the acting stage process is working correclty."""
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        mbr_list, group_numbers = simulators.divide_in_groups(network)
+
+        # Select one group number from the all the numbers
+        group_number = next(iter(group_numbers))
+        network = simulators.acting_stage(network, mbr_list, group_number)
+        raise NotImplementedError
