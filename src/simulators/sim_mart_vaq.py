@@ -6,6 +6,7 @@ Evolutionary dynamics of organised crime and terrorist networks. Scientific repo
 __author__ = Louis Weyland
 __date__   = 11/04/2022
 """
+import itertools
 import logging
 import random
 from typing import FrozenSet
@@ -210,7 +211,7 @@ class SimMartVaq:
 
             pbar.update(1)
 
-        return network
+        return network, n_groups
 
     def act_divide_in_groups_faster(
         self, network: gt.Graph, min_grp: int, max_grp: int
@@ -248,7 +249,25 @@ class SimMartVaq:
                 # In order to make sure the result is the same as for the slower function
                 network.vp.grp_nbr[network.vertex(node)] = 0
 
-        return network
+        return network, n_groups
+
+    def select_communities(
+        self, network: gt.Graph, radius: int, seed: int
+    ) -> FrozenSet[int]:
+        """Select the neighbours and neighbours neighbours of a given node/seed.
+
+        Args:
+            network (gt.Graph): graph-tool network
+            radius (int): how many neigbours to select(neighbours of neighbours of...)
+            seed (int):  starting node
+        """
+        nbrs = {seed}
+        all_neighbours = []
+        for _ in range(radius):
+            nbrs = {nbr for n in nbrs for nbr in network.iter_all_neighbors(n)}
+            all_neighbours.append(list(nbrs))
+        all_neighbours = list(itertools.chain.from_iterable(all_neighbours))
+        return frozenset(all_neighbours)
 
     def init_fitness(self, network: gt.Graph) -> gt.Graph:
         """Add the attribute fitness to the network."""

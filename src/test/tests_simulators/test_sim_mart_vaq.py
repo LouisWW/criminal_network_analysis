@@ -110,7 +110,7 @@ class TestSimMartVaq:
         ratio_wolf = np.random.uniform(0.1, (1 - 0.99))
         simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
         simulators.network = simulators.initialise_network(simulators.network)
-        divided_network = simulators.act_divide_in_groups_faster(
+        divided_network, n_groups = simulators.act_divide_in_groups_faster(
             simulators.network, min_grp=2, max_grp=2
         )
 
@@ -132,11 +132,11 @@ class TestSimMartVaq:
 
         # Check if recalled, the attributes are indeed reset
         # Set group number to avoid the chance to have same group number again
-        divided_network_1 = simulators.act_divide_in_groups_faster(
+        divided_network_1, n_groups = simulators.act_divide_in_groups_faster(
             simulators.network, min_grp=100, max_grp=100
         )
         x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
-        divided_network_2 = simulators.act_divide_in_groups_faster(
+        divided_network_2, n_groups = simulators.act_divide_in_groups_faster(
             divided_network_1, min_grp=100, max_grp=100
         )
         x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
@@ -149,7 +149,7 @@ class TestSimMartVaq:
         ratio_wolf = np.random.uniform(0.1, (1 - 0.99))
         simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
         simulators.network = simulators.initialise_network(simulators.network)
-        divided_network = simulators.act_divide_in_groups(
+        divided_network, n_groups = simulators.act_divide_in_groups(
             simulators.network, min_grp=2, max_grp=2
         )
 
@@ -171,11 +171,11 @@ class TestSimMartVaq:
 
         # Check if recalled, the attributes are indeed reset
         # Set group number to avoid the chance to have same group number again
-        divided_network_1 = simulators.act_divide_in_groups(
+        divided_network_1, n_groups = simulators.act_divide_in_groups(
             simulators.network, min_grp=100, max_grp=100
         )
         x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
-        divided_network_2 = simulators.act_divide_in_groups(
+        divided_network_2, n_groups = simulators.act_divide_in_groups(
             divided_network_1, min_grp=100, max_grp=100
         )
         x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
@@ -199,3 +199,41 @@ class TestSimMartVaq:
         group_number = next(iter(group_numbers))
         network = simulators.acting_stage(network, mbr_list, group_number)
         raise NotImplementedError
+
+    @pytest.mark.essential
+    def test_select_communities(self, gt_network: gt.Graph) -> None:
+        """Test if the random select communites is working correctly."""
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+
+        # Depth 1
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=1, seed=seed)
+        nbrs = network.iter_all_neighbors(seed)
+        assert list(nbrs) != community
+
+        # Depth 2
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=2, seed=seed)
+        nbrs = list(network.iter_all_neighbors(seed))
+        scnd_degree_nbr: list = []
+        for nbr in nbrs:
+            scnd_degree_nbr = scnd_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        nbrs = nbrs + scnd_degree_nbr
+        assert set(nbrs) == community
+
+        # Depth 3
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=3, seed=seed)
+        nbrs = list(network.iter_all_neighbors(seed))
+        scnd_degree_nbr = []
+        for nbr in nbrs:
+            scnd_degree_nbr = scnd_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        third_degree_nbr: list = []
+        for nbr in scnd_degree_nbr:
+            third_degree_nbr = third_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        nbrs = nbrs + scnd_degree_nbr + third_degree_nbr
+        assert set(nbrs) == community
