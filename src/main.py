@@ -7,10 +7,10 @@ __date__   = 22/02/2022
 import logging
 
 from config.config import ConfigParser
-from network_utils.network_combiner import NetworkCombiner
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
+from simulators.sim_mart_vaq import SimMartVaq
 from utils.plotter import Plotter
 
 # Catch the flags
@@ -30,18 +30,18 @@ logger.addHandler(logger_handler)
 logger.propagate = False
 logger.setLevel(logging.INFO)
 
-
+"""
 if args.draw_network:
-    """
+
     Visualize the network.
 
     Default is circular representation
-    """
+
     network = NetworkReader().read_montagna_phone_calls()
     # convert graph_obj
     network = NetworkConverter.nx_to_gt(network)
     Plotter().draw_network(network)
-
+"""
 
 if args.sim_mart_vaq:
     """Simulate the simulation form
@@ -59,11 +59,12 @@ if args.sim_mart_vaq:
     # Add nodes to network
     # First convert to gt
     gt_network = NetworkConverter.nx_to_gt(nx_network)
-    combined_gt_network = NetworkCombiner.combine_by_preferential_attachment_faster(
-        gt_network, new_nodes=10000, n_new_edges=10
-    )
-    combined_nk_network = NetworkConverter.gt_to_nk(combined_gt_network)
+    simulator = SimMartVaq(gt_network, ratio_honest=0.4, ratio_wolf=0.05)
+    new_gt_network = simulator.initialise_network(gt_network)
+    combined_nk_network = NetworkConverter.gt_to_nk(new_gt_network)
 
     # Get stats about network_obj
     network_stats = NetworkStats(combined_nk_network)
     network_stats.get_overview()
+
+    Plotter().draw_network(new_gt_network, color_vertex_property="state")

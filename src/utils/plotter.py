@@ -32,10 +32,23 @@ class Plotter(ConfigParser):
         mpl.rcParams["figure.dpi"] = 100
         mpl.rcParams["savefig.dpi"] = 300
 
-    def draw_network(self, network: gt.Graph) -> None:
-        """Visualizes the Network."""
-        # draw circular
+    def draw_network(
+        self, network: gt.Graph, color_vertex_property: str = None
+    ) -> None:
+        """Visualizes the Network.
+
+        If vertex_property is given, then the vertex are colored based on their
+        property
+        """
         assert isinstance(network, gt.Graph), "network type is not from graph-tool"
+        # Add a color map corresponding to the chosen vertex_property
+        if color_vertex_property is not None:
+            network = self.get_color_map(network, color_vertex_property)
+
+        # Define pos to circumvent error produced by graph_tool
+        pos = gt.sfdp_layout(network)
+
+        # draw circular
         if self.args.draw_network == "c":
             g = gt.GraphView(network)
             state = gt.minimize_nested_blockmodel_dl(g)
@@ -56,8 +69,15 @@ class Plotter(ConfigParser):
                 vertex_anchor=0,
             )
 
-        elif self.args.draw_network == "n":
-            gt.graph_draw(network)
+        elif self.args.draw_network == "n" and color_vertex_property is None:
+            gt.graph_draw(network, pos=pos)
+
+        elif self.args.draw_network == "n" and color_vertex_property is not None:
+            gt.graph_draw(
+                network,
+                pos=pos,
+                vertex_fill_color=network.vertex_properties["state_color"],
+            )
 
     def plot_log_log(self, data: List[float], x_label: str, y_label: str) -> plt.Axes:
         """
@@ -88,3 +108,18 @@ class Plotter(ConfigParser):
         ax.set_ylabel(y_label)
 
         return ax
+
+    def get_color_map(
+        self, network: gt.Graph, color_vertex_property: str = None
+    ) -> gt.PropertyMap:
+        """Define the color of the vertex based on the vertex property."""
+        if color_vertex_property == "state":
+            # c = red, h = blue, w = green
+            color_map = {"c": (1, 0, 0, 1), "h": (0, 0, 1, 1), "w": (0, 1, 0, 1)}
+            color_code = network.new_vertex_property("vector<double>")
+            network.vertex_properties["state_color"] = color_code
+            for v in network.vertices():
+                color_code[v] = color_map[network.vertex_properties["state"][v]]
+            return network
+        else:
+            return None
