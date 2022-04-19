@@ -82,3 +82,10 @@ def gt_network() -> gt.Graph:
     nx_network = NetworkReader().get_data("montagna_calls")
     gt_network = NetworkConverter.nx_to_gt(nx_network)
     return gt_network
+
+
+@pytest.fixture(scope="session")
+def bigger_gt_network(random_network: gt.Graph) -> gt.Graph:
+    """Return a bigger gt network."""
+    gt_network = NetworkConverter.nx_to_gt(random_network)
+    return gt_network

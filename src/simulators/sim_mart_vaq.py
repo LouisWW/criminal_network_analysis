@@ -7,6 +7,7 @@ __author__ = Louis Weyland
 __date__   = 11/04/2022
 """
 import logging
+import random
 from typing import FrozenSet
 from typing import List
 from typing import Tuple
@@ -14,6 +15,7 @@ from typing import Tuple
 import graph_tool.all as gt
 import numpy as np
 from network_utils.network_combiner import NetworkCombiner
+from sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
 
 logger = logging.getLogger("logger")
@@ -104,7 +106,7 @@ class SimMartVaq:
         # Run the simulation
         for i in tqdm(range(0, rounds), desc="Playing the rounds...", total=rounds):
             # Divide the network in random new groups
-            mbr_list, group_numbers = self.divide_in_groups(network)
+            mbr_list, group_numbers = self.divide_in_groups(network, min_group=3)
             logger.debug(f"The Network is divided in {len(group_numbers)} groups")
 
             # Go through each group
@@ -123,22 +125,130 @@ class SimMartVaq:
         # Select one person
         slct_pers = np.random.choice(group_member, 1)
         # check the person status
-        slct_pers_st = network.vp.state[network.vertex(slct_pers)]
+        network.vp.state[network.vertex(slct_pers)]
 
         return network
 
-    def divide_in_groups(self, network: gt.Graph) -> Tuple[List[int], FrozenSet[int]]:
+    def divide_in_groups(
+        self, network: gt.Graph, min_group: int
+    ) -> Tuple[List[int], FrozenSet[int]]:
         """Divide the network in groups.
 
         Making use of the  minimize_blockmodel_dl func.
         For now, the number of groups can't be imposed.
         Returns a list with the group number/label.
         """
-        partitions = gt.minimize_blockmodel_dl(network)
+        logger.warning("This function is deprecated!")
+        partitions = gt.minimize_blockmodel_dl(
+            network, multilevel_mcmc_args={"B_min": min_group}
+        )
         mbr_list = partitions.get_blocks()
         group_numbers = frozenset(mbr_list)
+        return list(mbr_list), group_numbers
 
-        return mbr_list, group_numbers
+    def act_divide_in_groups(
+        self, network: gt.Graph, min_grp: int, max_grp: int
+    ) -> gt.Graph:
+        """Divide the network in groups.
+
+        Actually divides in n_groups of connected components
+        """
+        assert (
+            2 <= min_grp <= max_grp
+        ), f"Min number of groups must be between 2 and {max_grp}"
+        assert (
+            min_grp <= max_grp <= network.num_vertices()
+        ), "Maximum group number can exceed network size"
+        n_groups = int(np.random.uniform(low=min_grp, high=max_grp))
+        logger.debug(f"Number of groups is {n_groups}")
+        # Define group_numbers attribute
+        # If it already exists it will overwrite it
+        gpr_nbr = network.new_vertex_property("int32_t")
+        network.vertex_properties["grp_nbr"] = gpr_nbr
+
+        # Get a map of the nodes and its neighbours
+        dict_nodes_and_neighbour = {}
+        for v in network.iter_vertices():
+            dict_nodes_and_neighbour[v] = list(network.iter_all_neighbors(v))
+
+        # Set the seed, number needs to start from 1 because default is 0
+        for v, group_number in zip(
+            np.random.choice(
+                list(range(0, network.num_vertices())),
+                n_groups,
+            ),
+            range(1, n_groups + 1),
+        ):
+            network.vp.grp_nbr[network.vertex(v)] = group_number
+
+        # Loop through the dict and assinging same value to its neigbours
+        pbar = tqdm(total=len(dict_nodes_and_neighbour))
+        while len(dict_nodes_and_neighbour) > 0:
+            key_to_del = []
+            # random order in order to avoid an group to grow too much
+            nodes = list(dict_nodes_and_neighbour.keys())
+            random.shuffle(nodes)
+            for i in nodes:
+                # if node has group number
+                if network.vp.grp_nbr[network.vertex(i)] != 0:
+                    neighbours = list(network.iter_all_neighbors(i))
+                    for neighbour in neighbours:
+                        if network.vp.grp_nbr[network.vertex(neighbour)] == 0:
+                            network.vp.grp_nbr[
+                                network.vertex(neighbour)
+                            ] = network.vp.grp_nbr[network.vertex(i)]
+                    # del key since all neighbours have a group number
+                    key_to_del.append(i)
+
+            # if key_to_del is empty
+            # means the seed can not reach some isolated components
+            if len(key_to_del) == 0:
+                break
+            else:
+                for k in key_to_del:
+                    dict_nodes_and_neighbour.pop(k, None)
+
+            pbar.update(1)
+
+        return network
+
+    def act_divide_in_groups_faster(
+        self, network: gt.Graph, min_grp: int, max_grp: int
+    ) -> gt.Graph:
+        """Divide the network in groups.
+
+        Actually divides in n_groups of connected components
+        """
+        assert (
+            2 <= min_grp <= max_grp
+        ), f"Min number of groups must be between 2 and {max_grp}"
+        assert (
+            min_grp <= max_grp <= network.num_vertices()
+        ), "Maximum group number can exceed network size"
+        n_groups = int(np.random.uniform(low=min_grp, high=max_grp))
+        logger.debug(f"Number of groups is {n_groups}")
+        # Define group_numbers attribute
+        # If it already exists it will overwrite it
+        gpr_nbr = network.new_vertex_property("int32_t")
+        network.vertex_properties["grp_nbr"] = gpr_nbr
+
+        # Get a map of the nodes and its neighbours
+        dict_nodes_and_neighbour = {}
+        for v in network.iter_vertices():
+            dict_nodes_and_neighbour[v] = list(network.iter_all_neighbors(v))
+
+        nodes_group = divide_network_fast_loop(
+            dict_nodes_and_neighbour, n_groups, network.num_vertices()
+        )
+
+        for node, group_number in nodes_group.items():
+            if group_number is not None:
+                network.vp.grp_nbr[network.vertex(node)] = group_number
+            elif group_number is None:
+                # In order to make sure the result is the same as for the slower function
+                network.vp.grp_nbr[network.vertex(node)] = 0
+
+        return network
 
     def init_fitness(self, network: gt.Graph) -> gt.Graph:
         """Add the attribute fitness to the network."""
