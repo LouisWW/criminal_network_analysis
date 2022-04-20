@@ -100,4 +100,5 @@ What you need to do it either change your stuff, if an error is shown and/or do 
 
 The last step to run the code is to compile the cython code (.pyx files)
 To do so, run in src/ the following command 
+
     python3 setup.py build_ext --inplace
