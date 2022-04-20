@@ -9,6 +9,7 @@ __date__   = 11/04/2022
 import itertools
 import logging
 import random
+from typing import Dict
 from typing import FrozenSet
 from typing import List
 from typing import Tuple
@@ -31,6 +32,18 @@ class SimMartVaq:
         ratio_honest: float = 0.7,
         ratio_wolf: float = 0.1,
         n_new_edges: int = 2,
+        delta: int = 0,
+        tau: int = 0,
+        gamma: float = 0.5,
+        beta_s: int = 0,
+        beta_h: int = 10,
+        beta_c: int = 400,
+        c_w: int = 1,
+        c_c: int = 1,
+        c_k: int = 5,
+        r_w: int = 1,
+        r_c: int = 1,
+        r_k: int = 1,
     ) -> None:
         """Init the network charaterisics."""
         # Define name of simulator
@@ -60,6 +73,20 @@ class SimMartVaq:
             self.ratio_honest + self.ratio_wolf
         )
         self.relative_ratio_wolf = 1 - self.relative_ratio_honest
+
+        # Set damaging and punishing parameters
+        self.delta = delta
+        self.tau = tau
+        self.gamma = gamma
+        self.beta_s = beta_s
+        self.beta_h = beta_h
+        self.beta_c = beta_c
+        self.c_w = c_w
+        self.c_c = c_c
+        self.c_k = c_k
+        self.r_w = r_w
+        self.r_c = r_c
+        self.r_k = r_k
 
     @property
     def name(self) -> str:
@@ -91,7 +118,15 @@ class SimMartVaq:
 
         return new_network
 
-    def play(self, network: gt.Graph, rounds: int = 1, n_new_edges: int = 2) -> None:
+    def play(
+        self,
+        network: gt.Graph,
+        rounds: int = 1,
+        n_new_edges: int = 2,
+        min_grp: int = 5,
+        max_grp: int = 20,
+        radius: int = 3,
+    ) -> None:
         """Run the simulation.
 
         Network is subdivided in to n groups.
@@ -107,28 +142,93 @@ class SimMartVaq:
         # Run the simulation
         for i in tqdm(range(0, rounds), desc="Playing the rounds...", total=rounds):
             # Divide the network in random new groups
-            mbr_list, group_numbers = self.divide_in_groups(network, min_group=3)
-            logger.debug(f"The Network is divided in {len(group_numbers)} groups")
+            dict_of_group = self.select_multiple_communities(
+                network=network, radius=radius, min_grp=min_grp, max_grp=max_grp
+            )
+            logger.debug(f"The Network is divided in {len(dict_of_group)} groups")
 
             # Go through each group
-            for number in group_numbers:
-                self.acting_stage(network, mbr_list, number)
+            for group_number, group_members in dict_of_group:
+                self.acting_stage(network, group_number, group_members)
 
     def acting_stage(
-        self, network: gt.Graph, mbr_list: List[int], group_number: int
-    ) -> None:
+        self,
+        network: gt.Graph,
+        group_number: int,
+        group_members: List[int],
+    ) -> Tuple[int, str]:
         """Correspond to the acting stage in the paper.
 
         Given an group, select on person and proceed to the acting.
         """
-        # Get all the people from the same group
-        group_member = gt.find_vertex(network, mbr_list, group_number)
         # Select one person
-        slct_pers = np.random.choice(group_member, 1)
-        # check the person status
-        network.vp.state[network.vertex(slct_pers)]
+        slct_pers = np.random.choice(group_members, 1)
+        # Check the person status
+        slct_pers_status = network.vp.state[network.vertex(slct_pers)]
 
-        return network
+        if slct_pers_status == "h":
+            return slct_pers, slct_pers_status
+        elif slct_pers_status == "c":
+            self.inflict_damage(network, group_members, slct_pers, slct_pers_status)
+            return slct_pers, slct_pers_status
+        elif slct_pers_status == "w":
+            self.inflict_damage(network, group_members, slct_pers, slct_pers_status)
+            return slct_pers, slct_pers_status
+        else:
+            raise KeyError("Person status didn't correspond to h/c/w...")
+
+    def inflict_damage(
+        self,
+        network: gt.Graph,
+        group_members: List[int],
+        slct_pers: int,
+        slct_pers_status: str,
+    ) -> gt.Graph:
+        """Perform criminal activity.
+
+        Rest of the group gets a damage inflicted
+        """
+        p_c, p_h, p_w = self.counting_status_proprotions(
+            network=network, group_members=group_members
+        )
+
+        if slct_pers_status == "c":
+            # Inflict damage to all the wolfs and honest
+            for member in group_members:
+                if (
+                    network.vp.state[network.vertex(member)] == "h"
+                    or network.vp.state[network.vertex(member)] == "w"
+                ):
+                    network.vp.fitness[network.vertex(member)] = (
+                        network.vp.state[network.vertex(member)] - self.c_k
+                    )
+                elif network.vp.state[network.vertex(member)] == "c":
+                    network.vp.fitness[network.vertex(member)] = (
+                        network.vp.state[network.vertex(member)] + self.r_k * self.c_k
+                    )
+                else:
+                    raise KeyError("Person status didn't correspond to h/c/w...")
+
+        elif slct_pers_status == "w":
+            # Infli
+            pass
+        else:
+            raise KeyError("Person status didn't correspond to h/c/w...")
+
+    def counting_status_proprotions(
+        self, network: gt.Graph, group_members: List[int]
+    ) -> Tuple[float, float, float]:
+        """Return the proportions of criminals,honest and wolfs."""
+        # First get proportions of h/c/w within the group
+        statuses = []
+        size_group = len(group_members)
+        for member in group_members:
+            statuses.append(network.vp.state[network.vertex(member)])
+
+        p_h = statuses.count("h") / size_group
+        p_c = statuses.count("c") / size_group
+        p_w = statuses.count("w") / size_group
+        return p_c, p_h, p_w
 
     def divide_in_groups(
         self, network: gt.Graph, min_group: int
@@ -154,6 +254,7 @@ class SimMartVaq:
 
         Actually divides in n_groups of connected components
         """
+        logger.info("This function is deprecated")
         assert (
             2 <= min_grp <= max_grp
         ), f"Min number of groups must be between 2 and {max_grp}"
@@ -250,6 +351,29 @@ class SimMartVaq:
                 network.vp.grp_nbr[network.vertex(node)] = 0
 
         return network, n_groups
+
+    def select_multiple_communities(
+        self, network: gt.Graph, radius: int, min_grp: int, max_grp: int
+    ) -> Dict[int, FrozenSet[int]]:
+        """Define the groups by randomly selecting one node and it's neighbours within radius r.
+
+        This is done in an iterative fashion.Thus some groups can overlapp.
+        """
+        assert (
+            2 <= min_grp <= max_grp
+        ), f"Min number of groups must be between 2 and {max_grp}"
+        assert (
+            min_grp <= max_grp <= network.num_vertices()
+        ), "Maximum group number can exceed network size"
+        n_groups = int(np.random.uniform(low=min_grp, high=max_grp))
+        logger.debug(f"Number of groups is {n_groups}")
+
+        dict_of_groups = {}
+        for n in range(0, n_groups):
+            seed = np.random.randint(0, network.num_vertices())
+            dict_of_groups[n] = self.select_communities(network, radius, seed)
+
+        return dict_of_groups
 
     def select_communities(
         self, network: gt.Graph, radius: int, seed: int

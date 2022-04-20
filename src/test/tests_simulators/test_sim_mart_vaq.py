@@ -193,12 +193,16 @@ class TestSimMartVaq:
         """Test if the acting stage process is working correclty."""
         simulators = SimMartVaq(gt_network)
         network = simulators.init_fitness(simulators.network)
-        mbr_list, group_numbers = simulators.divide_in_groups(network)
+        min_grp = 5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
 
         # Select one group number from the all the numbers
-        group_number = next(iter(group_numbers))
-        network = simulators.acting_stage(network, mbr_list, group_number)
-        raise NotImplementedError
+        network = simulators.acting_stage(
+            network, dict_of_communities[min_grp], min_grp
+        )
 
     @pytest.mark.essential
     def test_select_communities(self, gt_network: gt.Graph) -> None:
@@ -237,3 +241,43 @@ class TestSimMartVaq:
 
         nbrs = nbrs + scnd_degree_nbr + third_degree_nbr
         assert set(nbrs) == community
+
+    @pytest.mark.essential
+    def test_select_multiple_communities(self, gt_network: gt.Graph) -> None:
+        """Test if select_multiple_communities works correctly."""
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        min_grp = 5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+
+        assert len(dict_of_communities) != 0, "Dict of communities is empty..."
+        assert (
+            min_grp <= len(dict_of_communities) <= max_grp
+        ), "Number of communites is not correct..."
+
+        for k, v in dict_of_communities.items():
+            assert isinstance(k, int)
+            assert len(dict_of_communities[k]) >= 1, "Some communities are empty..."
+
+    @pytest.mark.essential
+    def test_counting_status_proportions(self, gt_network: gt.Graph) -> None:
+        """Test if the counting works correctly."""
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        min_grp = 5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+
+        for k, v in dict_of_communities.items():
+            p_c, p_h, p_w = simulators.counting_status_proprotions(
+                network=network, group_members=v
+            )
+
+            assert 0 <= p_c <= 1, "Proportion is not calculated correctly"
+            assert 0 <= p_h <= 1, "Proportion is not calculated correctly"
+            assert 0 <= p_w <= 1, "Proportion is not calculated correctly"
