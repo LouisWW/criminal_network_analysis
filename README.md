@@ -74,6 +74,7 @@ If you try to run some code outside of conda and you experience some troubles wi
 
 
 ---
+#### Pre-commit
 
 A pre-commit hook is used in this repo to uniform the linting. Thus after the first commit, some additional packages will automatically be installed. Commit will only go through if the pylinting is successful! More info can be found on https://www.youtube.com/watch?v=psjz6rwzMdk&ab_channel=mCoding
 
@@ -95,3 +96,8 @@ What you need to do it either change your stuff, if an error is shown and/or do 
     git commit -m"Your message"
 
 ---
+#### Compile cython 
+
+The last step to run the code is to compile the cython code (.pyx files)
+To do so, run in src/ the following command 
+    python3 setup.py build_ext --inplace
