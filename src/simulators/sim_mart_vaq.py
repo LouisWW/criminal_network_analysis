@@ -9,6 +9,7 @@ __date__   = 11/04/2022
 import itertools
 import logging
 import random
+from typing import Any
 from typing import Dict
 from typing import FrozenSet
 from typing import List
@@ -63,7 +64,7 @@ class SimMartVaq:
 
         # Network needs to have a base criminal network
         self.n_criminal = len(gt.find_vertex(network, network.vp.state, "c"))
-        assert self.n_criminal > 1, "The given network contains no criminals..."
+        assert self.n_criminal >= 1, "The given network contains no criminals..."
 
         self.total_number_nodes = int(self.n_criminal / self.ratio_criminal)
         self.new_nodes = self.total_number_nodes - self.n_criminal
@@ -156,24 +157,28 @@ class SimMartVaq:
         network: gt.Graph,
         group_number: int,
         group_members: FrozenSet[int],
-    ) -> Tuple[int, str]:
+    ) -> Tuple[Any, int, str]:
         """Correspond to the acting stage in the paper.
 
         Given an group, select on person and proceed to the acting.
         """
         # Select one person
-        slct_pers = np.random.choice(group_members, 1)
+        slct_pers = np.random.choice(list(group_members), 1)
         # Check the person status
         slct_pers_status = network.vp.state[network.vertex(slct_pers)]
 
         if slct_pers_status == "h":
-            return slct_pers, slct_pers_status
+            return network, slct_pers, slct_pers_status
         elif slct_pers_status == "c":
-            self.inflict_damage(network, group_members, slct_pers, slct_pers_status)
-            return slct_pers, slct_pers_status
+            new_network = self.inflict_damage(
+                network, group_members, slct_pers, slct_pers_status
+            )
+            return new_network, slct_pers, slct_pers_status
         elif slct_pers_status == "w":
-            self.inflict_damage(network, group_members, slct_pers, slct_pers_status)
-            return slct_pers, slct_pers_status
+            new_network = self.inflict_damage(
+                network, group_members, slct_pers, slct_pers_status
+            )
+            return new_network, slct_pers, slct_pers_status
         else:
             raise KeyError("Person status didn't correspond to h/c/w...")
 
@@ -194,25 +199,18 @@ class SimMartVaq:
 
         if slct_pers_status == "c":
             # Inflict damage to all the wolfs and honest
-            people_getting_damage_counter = 0
             for member in group_members:
                 if (
                     network.vp.state[network.vertex(member)] == "h"
                     or network.vp.state[network.vertex(member)] == "w"
                 ):
                     network.vp.fitness[network.vertex(member)] = (
-                        network.vp.fitness[network.vertex(member)] - self.c_k
+                        network.vp.fitness[network.vertex(member)] - self.r_k * self.c_k
                     )
-                    people_getting_damage_counter += 1
-            for member in group_members:
-                assert (
-                    n_h + n_w == people_getting_damage_counter
-                ), "Number should be the same..."
-                if network.vp.state[network.vertex(member)] == "c":
-                    network.vp.fitness[network.vertex(member)] = (
-                        network.vp.fintess[network.vertex(member)]
-                        + ((n_h + n_w) * (self.r_k * self.c_k)) / n_c
-                    )
+                elif network.vp.state[network.vertex(member)] == "c":
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] + (((n_h + n_w) * (self.r_k * self.c_k)) / n_c)
 
         elif slct_pers_status == "w":
             # Inflicting damage to everyone but himself
@@ -222,8 +220,8 @@ class SimMartVaq:
                         network.vertex(member)
                     ] - (self.r_k * self.c_k)
                 elif member == slct_pers:
-                    network.vp.fitness[network.vertex(member)] = network.vp.fitnes[
-                        network.verte(member)
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
                     ] + (len(group_members) - 1) * (self.r_k * self.c_k)
 
         else:
@@ -280,7 +278,7 @@ class SimMartVaq:
         assert (
             min_grp <= max_grp <= network.num_vertices()
         ), "Maximum group number can exceed network size"
-        n_groups = int(np.random.uniform(low=min_grp, high=max_grp))
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
         logger.debug(f"Number of groups is {n_groups}")
         # Define group_numbers attribute
         # If it already exists it will overwrite it
@@ -346,7 +344,7 @@ class SimMartVaq:
         assert (
             min_grp <= max_grp <= network.num_vertices()
         ), "Maximum group number can exceed network size"
-        n_groups = int(np.random.uniform(low=min_grp, high=max_grp))
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
         logger.debug(f"Number of groups is {n_groups}")
         # Define group_numbers attribute
         # If it already exists it will overwrite it
@@ -384,11 +382,11 @@ class SimMartVaq:
         assert (
             min_grp <= max_grp <= network.num_vertices()
         ), "Maximum group number can exceed network size"
-        n_groups = int(np.random.uniform(low=min_grp, high=max_grp))
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
         logger.debug(f"Number of groups is {n_groups}")
 
         dict_of_groups = {}
-        for n in range(0, n_groups):
+        for n in range(1, n_groups + 1):
             seed = np.random.randint(0, network.num_vertices())
             dict_of_groups[n] = self.select_communities(network, radius, seed)
 

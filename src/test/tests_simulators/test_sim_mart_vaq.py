@@ -1,4 +1,6 @@
 """Test if the simulation from Martinez-Vaquero is running correctly."""
+from copy import deepcopy
+
 import graph_tool.all as gt
 import numpy as np
 import pytest
@@ -191,18 +193,70 @@ class TestSimMartVaq:
     @pytest.mark.essential
     def test_acting_stage(self, gt_network: gt.Graph) -> None:
         """Test if the acting stage process is working correclty."""
-        simulators = SimMartVaq(gt_network)
+        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4)
         network = simulators.init_fitness(simulators.network)
+        network = simulators.initialise_network(network)
+        # Network and network_aft_dmge are same object
+        # To compare network create an independent copy
+        untouched_network = deepcopy(network)
         min_grp = 5
         max_grp = 10
         dict_of_communities = simulators.select_multiple_communities(
             network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
         )
+        mbrs = dict_of_communities[min_grp]
+        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+            network=network, group_members=mbrs
+        )
 
         # Select one group number from the all the numbers
-        network = simulators.acting_stage(
-            network, dict_of_communities[min_grp], min_grp
+        network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
+            network, min_grp, mbrs
         )
+
+        # select random node from group
+        node = np.random.choice(list(mbrs), 1)
+        if slct_pers_status == "h":
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), "Fitness should be unchanged..."
+
+        elif slct_pers_status == "c":
+            if network.vp.state[network.vertex(node)] == "c":
+                print(f"{n_c=}")
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    ((n_h + n_w) * (simulators.r_k * simulators.c_k)) / n_c
+                )
+            elif network.vp.state[network.vertex(node)] in ["h", "w"]:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
+                    simulators.r_k * simulators.c_k
+                )
+
+        elif slct_pers_status == "w":
+            if node == slct_pers:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    len(mbrs) - 1
+                ) * (
+                    simulators.r_k * simulators.c_k
+                )
+            else:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
+                    simulators.r_k * simulators.c_k
+                )
+        else:
+            assert slct_pers_status in [
+                "c",
+                "h",
+                "w",
+            ], "Returned status should be either c/h/w"
 
     @pytest.mark.essential
     def test_select_communities(self, gt_network: gt.Graph) -> None:
@@ -274,10 +328,47 @@ class TestSimMartVaq:
         )
 
         for k, v in dict_of_communities.items():
-            p_c, p_h, p_w = simulators.counting_status_proprotions(
+            n_h, n_c, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
                 network=network, group_members=v
             )
 
             assert 0 <= p_c <= 1, "Proportion is not calculated correctly"
             assert 0 <= p_h <= 1, "Proportion is not calculated correctly"
             assert 0 <= p_w <= 1, "Proportion is not calculated correctly"
+            assert p_h + p_c + p_w == 1, "Total ration should sum up to 1"
+
+            assert isinstance(n_h, int), "Number should be an int"
+            assert isinstance(n_c, int), "Number should be an int"
+            assert isinstance(n_w, int), "Number should be an int"
+            assert n_h + n_c + n_w == len(v), "Everyone should be c,h,w"
+
+    def test_inflicting_damage(self, create_gt_network: gt.Graph) -> None:
+        """Test if the inflicting damage function works correclty."""
+        simulators = SimMartVaq(create_gt_network, c_k=5, r_k=1)
+        network = simulators.init_fitness(simulators.network)
+
+        # What if the criminal is chosen
+        node = 0
+        network = simulators.inflict_damage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 30
+        assert network.vp.fitness[network.vertex(2)] == 1
+        assert network.vp.fitness[network.vertex(3)] == 6
+
+        # What if the criminal is chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        node = 3
+        network = simulators.inflict_damage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 25
+        assert network.vp.fitness[network.vertex(2)] == -4
+        assert network.vp.fitness[network.vertex(3)] == 26

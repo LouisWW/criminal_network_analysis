@@ -50,6 +50,13 @@ def create_networkx() -> nx.Graph:
     network.nodes[3]["age"] = 60
     network.nodes[4]["age"] = 4
 
+    # set nodes attributes state
+    network.nodes[0]["state"] = "c"
+    network.nodes[1]["state"] = "h"
+    network.nodes[2]["state"] = "h"
+    network.nodes[3]["state"] = "w"
+    network.nodes[4]["state"] = "w"
+
     return network
 
 
@@ -89,3 +96,9 @@ def bigger_gt_network(random_network: gt.Graph) -> gt.Graph:
     """Return a bigger gt network."""
     gt_network = NetworkConverter.nx_to_gt(random_network)
     return gt_network
+
+
+@pytest.fixture(scope="session")
+def create_gt_network(create_networkx: nx.Graph) -> gt.Graph:
+    """Return the known networkx graph."""
+    return NetworkConverter.nx_to_gt(create_networkx)
