@@ -148,14 +148,14 @@ class SimMartVaq:
             logger.debug(f"The Network is divided in {len(dict_of_group)} groups")
 
             # Go through each group
-            for group_number, group_members in dict_of_group:
+            for group_number, group_members in dict_of_group.items():
                 self.acting_stage(network, group_number, group_members)
 
     def acting_stage(
         self,
         network: gt.Graph,
         group_number: int,
-        group_members: List[int],
+        group_members: FrozenSet[int],
     ) -> Tuple[int, str]:
         """Correspond to the acting stage in the paper.
 
@@ -180,7 +180,7 @@ class SimMartVaq:
     def inflict_damage(
         self,
         network: gt.Graph,
-        group_members: List[int],
+        group_members: FrozenSet[int],
         slct_pers: int,
         slct_pers_status: str,
     ) -> gt.Graph:
@@ -188,36 +188,52 @@ class SimMartVaq:
 
         Rest of the group gets a damage inflicted
         """
-        p_c, p_h, p_w = self.counting_status_proprotions(
+        n_c, n_h, n_w, p_c, p_h, p_w = self.counting_status_proprotions(
             network=network, group_members=group_members
         )
 
         if slct_pers_status == "c":
             # Inflict damage to all the wolfs and honest
+            people_getting_damage_counter = 0
             for member in group_members:
                 if (
                     network.vp.state[network.vertex(member)] == "h"
                     or network.vp.state[network.vertex(member)] == "w"
                 ):
                     network.vp.fitness[network.vertex(member)] = (
-                        network.vp.state[network.vertex(member)] - self.c_k
+                        network.vp.fitness[network.vertex(member)] - self.c_k
                     )
-                elif network.vp.state[network.vertex(member)] == "c":
+                    people_getting_damage_counter += 1
+            for member in group_members:
+                assert (
+                    n_h + n_w == people_getting_damage_counter
+                ), "Number should be the same..."
+                if network.vp.state[network.vertex(member)] == "c":
                     network.vp.fitness[network.vertex(member)] = (
-                        network.vp.state[network.vertex(member)] + self.r_k * self.c_k
+                        network.vp.fintess[network.vertex(member)]
+                        + ((n_h + n_w) * (self.r_k * self.c_k)) / n_c
                     )
-                else:
-                    raise KeyError("Person status didn't correspond to h/c/w...")
 
         elif slct_pers_status == "w":
-            # Infli
-            pass
+            # Inflicting damage to everyone but himself
+            for member in group_members:
+                if member != slct_pers:
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] - (self.r_k * self.c_k)
+                elif member == slct_pers:
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitnes[
+                        network.verte(member)
+                    ] + (len(group_members) - 1) * (self.r_k * self.c_k)
+
         else:
-            raise KeyError("Person status didn't correspond to h/c/w...")
+            raise KeyError("Person status didn't correspond to c/w...")
+
+        return network
 
     def counting_status_proprotions(
-        self, network: gt.Graph, group_members: List[int]
-    ) -> Tuple[float, float, float]:
+        self, network: gt.Graph, group_members: FrozenSet[int]
+    ) -> Tuple[int, int, int, float, float, float]:
         """Return the proportions of criminals,honest and wolfs."""
         # First get proportions of h/c/w within the group
         statuses = []
@@ -225,10 +241,13 @@ class SimMartVaq:
         for member in group_members:
             statuses.append(network.vp.state[network.vertex(member)])
 
-        p_h = statuses.count("h") / size_group
-        p_c = statuses.count("c") / size_group
-        p_w = statuses.count("w") / size_group
-        return p_c, p_h, p_w
+        n_h = statuses.count("h")
+        n_c = statuses.count("c")
+        n_w = statuses.count("w")
+        p_h = n_h / size_group
+        p_c = n_c / size_group
+        p_w = n_w / size_group
+        return n_c, n_h, n_w, p_c, p_h, p_w
 
     def divide_in_groups(
         self, network: gt.Graph, min_group: int
@@ -390,8 +409,8 @@ class SimMartVaq:
         for _ in range(radius):
             nbrs = {nbr for n in nbrs for nbr in network.iter_all_neighbors(n)}
             all_neighbours.append(list(nbrs))
-        all_neighbours = list(itertools.chain.from_iterable(all_neighbours))
-        return frozenset(all_neighbours)
+        all_neighbours_list = list(itertools.chain.from_iterable(all_neighbours))
+        return frozenset(all_neighbours_list)
 
     def init_fitness(self, network: gt.Graph) -> gt.Graph:
         """Add the attribute fitness to the network."""
