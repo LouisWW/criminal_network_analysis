@@ -98,7 +98,7 @@ def bigger_gt_network(random_network: gt.Graph) -> gt.Graph:
     return gt_network
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def create_gt_network(create_networkx: nx.Graph) -> gt.Graph:
     """Return the known networkx graph."""
     return NetworkConverter.nx_to_gt(create_networkx)
