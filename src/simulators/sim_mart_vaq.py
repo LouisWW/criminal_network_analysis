@@ -148,11 +148,11 @@ class SimMartVaq:
             for group_number, group_members in dict_of_group.items():
                 # Acting stage
                 network, slct_pers, slct_status = self.acting_stage(
-                    network, group_number, group_members
+                    network, group_members
                 )
                 # Investigation stage
                 network = self.investigation_stage(
-                    network, group_number, group_members, slct_pers, slct_status
+                    network, group_members, slct_pers, slct_status
                 )
 
         return network
@@ -160,30 +160,84 @@ class SimMartVaq:
     def investigation_stage(
         self,
         network: gt.Graph,
-        group_number: int,
         group_members: FrozenSet[int],
         slct_pers: int,
         slct_status: str,
     ) -> Tuple[Any]:
         """Correspond to the investigation stage.
 
-        Given an group, if the victimiser is found, a punishment is conducted
+        Given an group, if the victimizer is found, a punishment is conducted
         """
-
+        # Get the status proportions of the group
+        _, _, _, p_c, p_h, _ = self.counting_status_proprotions(network, group_members)
         if slct_status == "h":
-            # No punishment is since no victimizer
+            # No victimizer ->  No punishment
             return network
-        elif slct_status == "c":
-            raise NotImplementedError
+
+        # If vicitmizer is found, penalties shouldn't 0.
+        # state investigation
+        state_penalty = self.conducting_investigation(
+            group_members, slct_pers, self.beta_s
+        )
+        # civil investigation
+        civil_penalty = (
+            self.conducting_investigation(group_members, slct_pers, self.beta_h) * p_h
+        )
+        # criminal investigation
+        criminal_penalty = (
+            self.conducting_investigation(group_members, slct_pers, self.beta_c) * p_c
+        )
+
+        if slct_status == "c":
+            # Punish the victimizer
+            network.vp.fitness[network.vertex(slct_pers)] = (
+                network.vp.fitness[network.vertex(slct_pers)]
+                - state_penalty
+                - civil_penalty
+            )
+            # Punish the partner in crime
+            for member in group_members:
+                if (
+                    network.vp.state[network.vertex(member)] == "c"
+                    and member != slct_pers
+                ):
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] - self.gamma * (state_penalty + civil_penalty)
+
         elif slct_status == "w":
-            raise NotImplementedError
+            # Punish the victimizer
+            network.vp.fitness[network.vertex(slct_pers)] = (
+                network.vp.fitness[network.vertex(slct_pers)]
+                - state_penalty
+                - civil_penalty
+                - criminal_penalty
+            )
+
         else:
             raise KeyError("sclt_status should be either h/w/c...")
+
+        return network
+
+    def conducting_investigation(
+        self, group_members: FrozenSet[int], slct_pers: int, penalty_score: int
+    ) -> int:
+        """Perform an state investigation.
+
+        Pick a random person, if victimizer is found, penalty is returned
+        """
+        random_picked_person = np.random.choice(list(group_members), 1)
+        if random_picked_person == slct_pers:
+            # Found victimizer
+            return penalty_score
+        elif random_picked_person != slct_pers:
+            # Victimizer not found
+            return 0
+        return None
 
     def acting_stage(
         self,
         network: gt.Graph,
-        group_number: int,
         group_members: FrozenSet[int],
     ) -> Tuple[Any, int, str]:
         """Correspond to the acting stage in the paper.

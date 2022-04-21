@@ -429,6 +429,7 @@ class TestSimMartVaq:
             assert isinstance(n_w, int), "Number should be an int"
             assert n_h + n_c + n_w == len(v), "Everyone should be c,h,w"
 
+    @pytest.mark.essential
     def test_inflicting_damage(self, create_gt_network: gt.Graph) -> None:
         """Test if the inflicting damage function works correclty."""
         # set delta to 100 to make sure lone wolf acts
@@ -464,3 +465,79 @@ class TestSimMartVaq:
         assert network.vp.fitness[network.vertex(2)] == -5
         assert network.vp.fitness[network.vertex(4)] == -8
         assert network.vp.fitness[network.vertex(3)] == 30
+
+    @pytest.mark.essential
+    def test_investigation_stage(self, create_gt_network: gt.Graph) -> None:
+        """Test if the investigation stage is working correctly."""
+        # Define the different penalties
+        simulators = SimMartVaq(
+            create_gt_network, gamma=0.5, beta_c=2, beta_s=3, beta_h=5
+        )
+        network = simulators.init_fitness(simulators.network)
+
+        # What if the criminal is chosen
+        # Triggers state and civilian punishment
+        np.random.seed(2)
+        node = 0
+        network = simulators.investigation_stage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 11
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # What if the lone wolf is not chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        np.random.seed(3)
+        node = 3
+        network = simulators.investigation_stage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 11
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # What if the lone wolf is chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        np.random.seed(6)
+        node = 3
+        network = simulators.investigation_stage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 10.6
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # Check in case multiple criminals are present
+        network.vp.state[network.vertex(4)] = "c"
+        # Triggers state and civilian punishment
+        np.random.seed(2)
+        node = 0
+        network = simulators.investigation_stage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 0
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 10.6
+        assert network.vp.fitness[network.vertex(4)] == 0.5
