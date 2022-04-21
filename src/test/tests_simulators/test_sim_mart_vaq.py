@@ -223,17 +223,16 @@ class TestSimMartVaq:
 
         elif slct_pers_status == "c":
             if network.vp.state[network.vertex(node)] == "c":
-                print(f"{n_c=}")
                 assert network_aft_dmge.vp.fitness[
                     network_aft_dmge.vertex(node)
                 ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
-                    ((n_h + n_w) * (simulators.r_k * simulators.c_k)) / n_c
+                    ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
                 )
             elif network.vp.state[network.vertex(node)] in ["h", "w"]:
                 assert network_aft_dmge.vp.fitness[
                     network_aft_dmge.vertex(node)
                 ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
-                    simulators.r_k * simulators.c_k
+                    simulators.r_c * simulators.c_c
                 )
 
         elif slct_pers_status == "w":
@@ -243,13 +242,13 @@ class TestSimMartVaq:
                 ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
                     len(mbrs) - 1
                 ) * (
-                    simulators.r_k * simulators.c_k
+                    simulators.r_w * simulators.c_w
                 )
             else:
                 assert network_aft_dmge.vp.fitness[
                     network_aft_dmge.vertex(node)
                 ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
-                    simulators.r_k * simulators.c_k
+                    simulators.r_w * simulators.c_w
                 )
         else:
             assert slct_pers_status in [
@@ -344,7 +343,7 @@ class TestSimMartVaq:
 
     def test_inflicting_damage(self, create_gt_network: gt.Graph) -> None:
         """Test if the inflicting damage function works correclty."""
-        simulators = SimMartVaq(create_gt_network, c_k=5, r_k=1)
+        simulators = SimMartVaq(create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2)
         network = simulators.init_fitness(simulators.network)
 
         # What if the criminal is chosen
@@ -369,6 +368,7 @@ class TestSimMartVaq:
             node,
             network.vp.state[network.vertex(node)],
         )
-        assert network.vp.fitness[network.vertex(0)] == 25
-        assert network.vp.fitness[network.vertex(2)] == -4
-        assert network.vp.fitness[network.vertex(3)] == 26
+        assert network.vp.fitness[network.vertex(0)] == 24
+        assert network.vp.fitness[network.vertex(2)] == -5
+        assert network.vp.fitness[network.vertex(4)] == -8
+        assert network.vp.fitness[network.vertex(3)] == 30

@@ -41,10 +41,8 @@ class SimMartVaq:
         beta_c: int = 400,
         c_w: int = 1,
         c_c: int = 1,
-        c_k: int = 5,
         r_w: int = 1,
         r_c: int = 1,
-        r_k: int = 1,
     ) -> None:
         """Init the network charaterisics."""
         # Define name of simulator
@@ -84,10 +82,8 @@ class SimMartVaq:
         self.beta_c = beta_c
         self.c_w = c_w
         self.c_c = c_c
-        self.c_k = c_k
         self.r_w = r_w
         self.r_c = r_c
-        self.r_k = r_k
 
     @property
     def name(self) -> str:
@@ -205,24 +201,25 @@ class SimMartVaq:
                     or network.vp.state[network.vertex(member)] == "w"
                 ):
                     network.vp.fitness[network.vertex(member)] = (
-                        network.vp.fitness[network.vertex(member)] - self.r_k * self.c_k
+                        network.vp.fitness[network.vertex(member)] - self.r_c * self.c_c
                     )
                 elif network.vp.state[network.vertex(member)] == "c":
                     network.vp.fitness[network.vertex(member)] = network.vp.fitness[
                         network.vertex(member)
-                    ] + (((n_h + n_w) * (self.r_k * self.c_k)) / n_c)
+                    ] + (((n_h + n_w) * (self.r_c * self.c_c)) / n_c)
 
         elif slct_pers_status == "w":
             # Inflicting damage to everyone but himself
             for member in group_members:
                 if member != slct_pers:
+                    logger.warning("Not sure about the following damage definition!!")
                     network.vp.fitness[network.vertex(member)] = network.vp.fitness[
                         network.vertex(member)
-                    ] - (self.r_k * self.c_k)
+                    ] - (self.r_w * self.c_w)
                 elif member == slct_pers:
                     network.vp.fitness[network.vertex(member)] = network.vp.fitness[
                         network.vertex(member)
-                    ] + (len(group_members) - 1) * (self.r_k * self.c_k)
+                    ] + (len(group_members) - 1) * (self.r_w * self.c_w)
 
         else:
             raise KeyError("Person status didn't correspond to c/w...")
