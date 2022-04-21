@@ -193,7 +193,8 @@ class TestSimMartVaq:
     @pytest.mark.essential
     def test_acting_stage(self, gt_network: gt.Graph) -> None:
         """Test if the acting stage process is working correclty."""
-        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4)
+        # Set delta to 100 to make sure wolf will always act
+        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=100)
         network = simulators.init_fitness(simulators.network)
         network = simulators.initialise_network(network)
         # Network and network_aft_dmge are same object
@@ -201,6 +202,7 @@ class TestSimMartVaq:
         untouched_network = deepcopy(network)
         min_grp = 5
         max_grp = 10
+
         dict_of_communities = simulators.select_multiple_communities(
             network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
         )
@@ -245,11 +247,97 @@ class TestSimMartVaq:
                     simulators.r_w * simulators.c_w
                 )
             else:
+                if network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] == "h":
+                    assert network_aft_dmge.vp.fitness[
+                        network_aft_dmge.vertex(node)
+                    ] == untouched_network.vp.fitness[
+                        untouched_network.vertex(node)
+                    ] - (
+                        simulators.r_w * simulators.c_w
+                    )
+                if network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] == "c":
+                    assert network_aft_dmge.vp.fitness[
+                        network_aft_dmge.vertex(node)
+                    ] == untouched_network.vp.fitness[
+                        untouched_network.vertex(node)
+                    ] - (
+                        simulators.r_w * simulators.c_w
+                    ) + (
+                        (
+                            simulators.tau
+                            * ((len(mbrs) - 1) * (simulators.r_w * simulators.c_w))
+                        )
+                        / n_c
+                    )
+
+                else:
+                    raise KeyError(
+                        f"Node should have status w/c instead of \
+                        {network_aft_dmge.vp.state[network_aft_dmge.vertex(node)]}"
+                    )
+
+        else:
+            assert slct_pers_status in [
+                "c",
+                "h",
+                "w",
+            ], "Returned status should be either c/h/w"
+
+    @pytest.mark.essential
+    def test_acting_stage_2(self, gt_network: gt.Graph) -> None:
+        """Test if the acting stage process is working correclty.
+
+        This time, lone wolf never act!
+        """
+        # Set delta to 0 to make sure wolf will never act
+        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=0)
+        network = simulators.init_fitness(simulators.network)
+        network = simulators.initialise_network(network)
+        # Network and network_aft_dmge are same object
+        # To compare network create an independent copy
+        untouched_network = deepcopy(network)
+        min_grp = 5
+        max_grp = 10
+
+        dict_of_communities = simulators.select_multiple_communities(
+            network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+        mbrs = dict_of_communities[min_grp]
+        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+            network=network, group_members=mbrs
+        )
+
+        # Select one group number from the all the numbers
+        network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
+            network, min_grp, mbrs
+        )
+
+        # select random node from group
+        node = np.random.choice(list(mbrs), 1)
+        if slct_pers_status == "h":
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), "Fitness should be unchanged..."
+
+        elif slct_pers_status == "c":
+            if network.vp.state[network.vertex(node)] == "c":
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+                )
+            elif network.vp.state[network.vertex(node)] in ["h", "w"]:
                 assert network_aft_dmge.vp.fitness[
                     network_aft_dmge.vertex(node)
                 ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
-                    simulators.r_w * simulators.c_w
+                    simulators.r_c * simulators.c_c
                 )
+
+        elif slct_pers_status == "w":
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), "Fitness should be unchanged..."
+
         else:
             assert slct_pers_status in [
                 "c",
@@ -343,7 +431,10 @@ class TestSimMartVaq:
 
     def test_inflicting_damage(self, create_gt_network: gt.Graph) -> None:
         """Test if the inflicting damage function works correclty."""
-        simulators = SimMartVaq(create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2)
+        # set delta to 100 to make sure lone wolf acts
+        simulators = SimMartVaq(
+            create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2, delta=100, tau=0.5
+        )
         network = simulators.init_fitness(simulators.network)
 
         # What if the criminal is chosen
@@ -357,6 +448,7 @@ class TestSimMartVaq:
         assert network.vp.fitness[network.vertex(0)] == 30
         assert network.vp.fitness[network.vertex(2)] == 1
         assert network.vp.fitness[network.vertex(3)] == 6
+        assert network.vp.fitness[network.vertex(4)] == -2
 
         # What if the criminal is chosen
         # Based on the previous fitness resulting from the criminal
@@ -368,7 +460,7 @@ class TestSimMartVaq:
             node,
             network.vp.state[network.vertex(node)],
         )
-        assert network.vp.fitness[network.vertex(0)] == 24
+        assert network.vp.fitness[network.vertex(0)] == 36
         assert network.vp.fitness[network.vertex(2)] == -5
         assert network.vp.fitness[network.vertex(4)] == -8
         assert network.vp.fitness[network.vertex(3)] == 30

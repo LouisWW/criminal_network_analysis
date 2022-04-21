@@ -196,10 +196,7 @@ class SimMartVaq:
         if slct_pers_status == "c":
             # Inflict damage to all the wolfs and honest
             for member in group_members:
-                if (
-                    network.vp.state[network.vertex(member)] == "h"
-                    or network.vp.state[network.vertex(member)] == "w"
-                ):
+                if network.vp.state[network.vertex(member)] in ["h", "w"]:
                     network.vp.fitness[network.vertex(member)] = (
                         network.vp.fitness[network.vertex(member)] - self.r_c * self.c_c
                     )
@@ -209,17 +206,40 @@ class SimMartVaq:
                     ] + (((n_h + n_w) * (self.r_c * self.c_c)) / n_c)
 
         elif slct_pers_status == "w":
+            # Decide if lone wolf dares to act
+            acting = False
+            if np.random.uniform() >= 1 - self.delta * (1 - p_c):
+                acting = True
             # Inflicting damage to everyone but himself
-            for member in group_members:
-                if member != slct_pers:
-                    logger.warning("Not sure about the following damage definition!!")
-                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+            if acting is True:
+                for member in group_members:
+                    if member != slct_pers and network.vp.state[
                         network.vertex(member)
-                    ] - (self.r_w * self.c_w)
-                elif member == slct_pers:
-                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
-                        network.vertex(member)
-                    ] + (len(group_members) - 1) * (self.r_w * self.c_w)
+                    ] in ["h", "w"]:
+                        network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                            network.vertex(member)
+                        ] - (self.r_w * self.c_w)
+
+                    elif (
+                        member != slct_pers
+                        and network.vp.state[network.vertex(member)] == "c"
+                    ):
+                        network.vp.fitness[network.vertex(member)] = (
+                            network.vp.fitness[network.vertex(member)]
+                            - (self.r_w * self.c_w)
+                            + (
+                                (
+                                    self.tau
+                                    * ((len(group_members) - 1) * (self.r_w * self.c_w))
+                                )
+                                / n_c
+                            )
+                        )
+
+                    elif member == slct_pers:
+                        network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                            network.vertex(member)
+                        ] + (len(group_members) - 1) * (self.r_w * self.c_w)
 
         else:
             raise KeyError("Person status didn't correspond to c/w...")
