@@ -146,7 +146,39 @@ class SimMartVaq:
 
             # Go through each group
             for group_number, group_members in dict_of_group.items():
-                self.acting_stage(network, group_number, group_members)
+                # Acting stage
+                network, slct_pers, slct_status = self.acting_stage(
+                    network, group_number, group_members
+                )
+                # Investigation stage
+                network = self.investigation_stage(
+                    network, group_number, group_members, slct_pers, slct_status
+                )
+
+        return network
+
+    def investigation_stage(
+        self,
+        network: gt.Graph,
+        group_number: int,
+        group_members: FrozenSet[int],
+        slct_pers: int,
+        slct_status: str,
+    ) -> Tuple[Any]:
+        """Correspond to the investigation stage.
+
+        Given an group, if the victimiser is found, a punishment is conducted
+        """
+
+        if slct_status == "h":
+            # No punishment is since no victimizer
+            return network
+        elif slct_status == "c":
+            raise NotImplementedError
+        elif slct_status == "w":
+            raise NotImplementedError
+        else:
+            raise KeyError("sclt_status should be either h/w/c...")
 
     def acting_stage(
         self,
