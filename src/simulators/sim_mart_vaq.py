@@ -351,6 +351,7 @@ class SimMartVaq:
         or a role switch with a certain probability.
         """
         person_a, person_b = np.random.choice(list(group_members), 2)
+        print(person_a)
         if np.random.rand() > self.mutation_prob:
             # Based on the fermi function will check if an interaction will happen
             network = self.interchange_roles(network, person_a, person_b)

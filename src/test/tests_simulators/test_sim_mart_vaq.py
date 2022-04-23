@@ -613,7 +613,7 @@ class TestSimMartVaq:
         min_grp = 5
         max_grp = 10
         dict_of_communities = simulators.select_multiple_communities(
-            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+            network=network, radius=3, min_grp=min_grp, max_grp=max_grp
         )
         mbrs = dict_of_communities[min_grp]
 
@@ -623,20 +623,20 @@ class TestSimMartVaq:
         network = simulators.evolutionary_stage(network, mbrs)
 
         assert (
-            network.vp.state[network.vertex(419)]
-            == untouched_network.vp.state[untouched_network.vertex(419)]
+            network.vp.state[network.vertex(74)]
+            == untouched_network.vp.state[untouched_network.vertex(291)]
         ), "Interchange function didn't work properly"
         assert (
-            network.vp.state[network.vertex(289)]
-            == untouched_network.vp.state[untouched_network.vertex(419)]
+            network.vp.state[network.vertex(291)]
+            == untouched_network.vp.state[untouched_network.vertex(291)]
         ), "Interchange function didn't work properly"
 
         # Check if the players changed status
         # With seed 5, mutation is triggered
-        np.random.seed(5)
+        np.random.seed(10)
         network = simulators.evolutionary_stage(network, mbrs)
         assert (
-            network.vp.state[network.vertex(2133)] == "h"
+            network.vp.state[network.vertex(515)] == "c"
         ), "Mutation function didn't work properly"
 
     @pytest.mark.essential
