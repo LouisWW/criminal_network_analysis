@@ -6,7 +6,7 @@ test:
 
 .PHONY: docs_view
 docs_view:
-	@echo creating API documentation
+	@echo Creating API documentation
 	pdoc3 --html config -o ./docs --force
 	pdoc3 --html network_utils -o ./docs --force
 	pdoc3 --html simulators -o ./docs -force
@@ -16,6 +16,7 @@ docs_view:
 ## Delete all compiled Python files
 .PHONY: clean
 clean:
+	@echo Deleting all chache files as well as *.so & *.c
 	find . -type f -name "*.py[co]" -delete
 	find . -type f -name "*.c" -delete
 	find . -type f -name "*.so" -delete
