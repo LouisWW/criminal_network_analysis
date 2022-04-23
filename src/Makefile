@@ -1,10 +1,8 @@
-.PHONY:
-	all docs_view clean
 
-
+.PHONY: test
 test:
 	@echo Running the tests with pytest
-	python -m pytest
+	python3 -m pytest
 
 .PHONY: docs_view
 docs_view:
