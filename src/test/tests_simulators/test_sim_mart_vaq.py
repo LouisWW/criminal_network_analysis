@@ -434,6 +434,20 @@ class TestSimMartVaq:
             assert n_h + n_c + n_w == len(v), "Everyone should be c,h,w"
 
     @pytest.mark.essential
+    def test_get_overall_fitness_distribution(
+        self, create_gt_network: gt.Graph
+    ) -> None:
+        """Test if the get overall fitness distribution works."""
+        simulators = SimMartVaq(network=create_gt_network)
+        mean_h, mean_c, mean_w = simulators.get_overall_fitness_distribution(
+            simulators.network, list(range(0, 5))
+        )
+
+        assert mean_h == 7, "Mean fitness is not correct..."
+        assert mean_c == 10, "Mean fitness is not correct..."
+        assert mean_w == 7, "Mean fitness is not correct..."
+
+    @pytest.mark.essential
     def test_inflicting_damage(self, create_gt_network: gt.Graph) -> None:
         """Test if the inflicting damage function works correclty."""
         # set delta to 100 to make sure lone wolf acts
@@ -643,5 +657,46 @@ class TestSimMartVaq:
     def test_play(self, gt_network: gt.Graph) -> None:
         """Test if the play function is working."""
         # Play the simulation
+        rounds = 50
         simulator = SimMartVaq(gt_network, ratio_honest=0.7, ratio_wolf=0.05)
-        simulator.play(simulator.network, rounds=50)
+        network, data_collector = simulator.play(simulator.network, rounds=rounds)
+
+        # Check if the data_collectors collect at each round data
+        assert (
+            len(data_collector["ratio_honest"]) == rounds
+        ), "Length of the collected data is not correct..."
+        assert (
+            len(data_collector["ratio_wolf"]) == rounds
+        ), "Length of the collected data is not correct..."
+        assert (
+            len(data_collector["ration_criminal"]) == rounds
+        ), "Length of the collected data is not correct..."
+        assert (
+            len(data_collector["fitness_honest"]) == rounds
+        ), "Length of the collected data is not correct..."
+        assert (
+            len(data_collector["fitness_criminal"]) == rounds
+        ), "Length of the collected data is not correct..."
+        assert (
+            len(data_collector["fitness_wolf"]) == rounds
+        ), "Length of the collected data is not correct..."
+
+        # Check if the data does indeed changes, checks the simulation is working
+        assert (
+            len(set(data_collector["ratio_honest"])) > 1
+        ), "Collectors keep collecting same value..."
+        assert (
+            len(set(data_collector["ratio_wolf"])) > 1
+        ), "Collectors keep collecting same value..."
+        assert (
+            len(set(data_collector["ration_criminal"])) > 1
+        ), "Collectors keep collecting same value..."
+        assert (
+            len(set(data_collector["fitness_honest"])) > 1
+        ), "Collectors keep collecting same value..."
+        assert (
+            len(set(data_collector["fitness_criminal"])) > 1
+        ), "Collectors keep collecting same value..."
+        assert (
+            len(set(data_collector["fitness_wolf"])) > 1
+        ), "Collectors keep collecting same value..."

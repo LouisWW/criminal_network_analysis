@@ -10,8 +10,10 @@ import itertools
 import logging
 import math
 import random
+from collections import defaultdict
 from copy import deepcopy
 from typing import Any
+from typing import DefaultDict
 from typing import Dict
 from typing import FrozenSet
 from typing import List
@@ -131,7 +133,7 @@ class SimMartVaq:
         min_grp: int = 5,
         max_grp: int = 20,
         radius: int = 3,
-    ) -> None:
+    ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
         Network is subdivided in to n groups.
@@ -139,6 +141,21 @@ class SimMartVaq:
         If selected person is a wolf or criminal,
         damage is inflicted on others.
         """
+        # collectors which collects the ration and fitness over each iteration
+        data_collector = defaultdict(
+            list,
+            {
+                k: []
+                for k in (
+                    "ratio_honest",
+                    "ratio_criminal",
+                    "ratio_wolf",
+                    "fitness_honest",
+                    "fitness_criminal",
+                    "fitness_wolf",
+                )
+            },
+        )  # type: DefaultDict[str, List[Any]]
         # Init a population
         network = self.initialise_network(network, n_new_edges)
         # Init fitness attribute
@@ -165,7 +182,23 @@ class SimMartVaq:
                 # Evolutionary stage
                 network = self.evolutionary_stage(network, group_members)
 
-        return network
+            # Collect the data
+            _, _, _, p_c, p_h, p_w = self.counting_status_proprotions(
+                network=network,
+                group_members=frozenset(range(0, network.num_vertices())),
+            )
+            mean_h_fit, mean_c_fit, mean_w_fit = self.get_overall_fitness_distribution(
+                network=network,
+                group_members=list(range(0, network.num_vertices())),
+            )
+            data_collector["ratio_honest"].append(p_h)
+            data_collector["ratio_wolf"].append(p_w)
+            data_collector["ration_criminal"].append(p_c)
+            data_collector["fitness_honest"].append(mean_h_fit)
+            data_collector["fitness_criminal"].append(mean_c_fit)
+            data_collector["fitness_wolf"].append(mean_w_fit)
+
+        return network, data_collector
 
     def investigation_stage(
         self,
@@ -173,7 +206,7 @@ class SimMartVaq:
         group_members: FrozenSet[int],
         slct_pers: int,
         slct_status: str,
-    ) -> Tuple[Any]:
+    ) -> gt.Graph:
         """Correspond to the investigation stage.
 
         Given an group, if the victimizer is found, a punishment is conducted
@@ -249,7 +282,7 @@ class SimMartVaq:
         self,
         network: gt.Graph,
         group_members: FrozenSet[int],
-    ) -> Tuple[Any, int, str]:
+    ) -> Tuple[gt.Graph, int, str]:
         """Correspond to the acting stage in the paper.
 
         Given an group, select on person and proceed to the acting.
@@ -377,6 +410,30 @@ class SimMartVaq:
         p_c = n_c / size_group
         p_w = n_w / size_group
         return n_c, n_h, n_w, p_c, p_h, p_w
+
+    def get_overall_fitness_distribution(
+        self, network: gt.Graph, group_members: List[int]
+    ) -> Tuple[float, float, float]:
+        """Get the mean fintess for the different states in a group."""
+        h_fit = []
+        c_fit = []
+        w_fit = []
+        for member in group_members:
+            state = network.vp.state[network.vertex(member)]
+            if state == "h":
+                h_fit.append(network.vp.fitness[network.vertex(member)])
+            elif state == "c":
+                c_fit.append(network.vp.fitness[network.vertex(member)])
+            elif state == "w":
+                w_fit.append(network.vp.fitness[network.vertex(member)])
+            else:
+                raise KeyError("sclt_status should be either h/w/c...")
+
+        mean_h_fit = np.mean(h_fit)
+        mean_c_fit = np.mean(c_fit)
+        mean_w_fit = np.mean(w_fit)
+
+        return mean_h_fit, mean_c_fit, mean_w_fit
 
     def divide_in_groups(
         self, network: gt.Graph, min_group: int
