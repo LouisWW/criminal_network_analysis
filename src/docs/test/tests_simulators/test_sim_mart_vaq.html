@@ -1,0 +1,2147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>test.tests_simulators.test_sim_mart_vaq API documentation</title>
+<meta name="description" content="Test if the simulation from Martinez-Vaquero is running correctly." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>test.tests_simulators.test_sim_mart_vaq</code></h1>
+</header>
+<section id="section-intro">
+<p>Test if the simulation from Martinez-Vaquero is running correctly.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Test if the simulation from Martinez-Vaquero is running correctly.&#34;&#34;&#34;
+from copy import deepcopy
+
+import graph_tool.all as gt
+import numpy as np
+import pytest
+from simulators.sim_mart_vaq import SimMartVaq
+
+
+class TestSimMartVaq:
+    &#34;&#34;&#34;Class for unit tests for  SimMartVaq.&#34;&#34;&#34;
+
+    @pytest.mark.essential
+    def test_sim_mart_vaq(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the initialization works.&#34;&#34;&#34;
+        org_size = gt_network.num_vertices()
+        # Keep the ratio small so the test will be faster
+        # by adding less nodes
+        ratio_honest = 0.3
+        ratio_wolf = 0.1
+
+        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+
+        # Test if the obj is init correctly
+        assert isinstance(
+            simulators, SimMartVaq
+        ), &#34;Simulator hasn&#39;t been init correctly&#34;
+
+        # Test if the ration is caluclated correctly
+        assert simulators.ratio_criminal == 0.6, &#34;Ratio is wrong.&#34;
+        assert (
+            simulators.n_criminal == org_size
+        ), &#34;Determined number of criminals is wrong.&#34;
+        assert simulators.total_number_nodes == 158, &#34;Ratio is wrong&#34;
+        assert simulators.new_nodes == 63, &#34;Number of nodes to add is wrong&#34;
+        assert (
+            round(simulators.relative_ratio_honest, 2) == 0.75
+        ), &#34;Relative ratio is wrong&#34;
+        assert (
+            round(simulators.relative_ratio_wolf, 2) == 0.25
+        ), &#34;Relative ratio is wrong&#34;
+
+        # Try to change its name
+        with pytest.raises(Exception):
+            simulators.name = &#34;New name&#34;
+
+    @pytest.mark.essential
+    def test_sim_mart_vaq_wrong_init(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if a wrong init triggers the assert statements.&#34;&#34;&#34;
+        # With ratio_honest == 0
+        with pytest.raises(Exception):
+            assert SimMartVaq(gt_network, ratio_honest=0)
+
+        # With ratio_wolf == 1.1
+        with pytest.raises(Exception):
+            assert SimMartVaq(gt_network, ratio_wolf=1.1)
+
+        # With ratios not adding up more than 1
+        with pytest.raises(Exception):
+            assert SimMartVaq(gt_network, ratio_honest=0.8, ratio_wolf=0.3)
+            assert SimMartVaq(gt_network, ratio_honest=0.8, ratio_wolf=0.2)
+            assert SimMartVaq(gt_network, ratio_honest=-0.8, ratio_wolf=0.1)
+            assert SimMartVaq(gt_network, ratio_honest=-0.8, ratio_wolf=0.2)
+
+    @pytest.mark.essential
+    def test_initialise_network(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the init process is done corretly.
+
+        More precisely tests if the ratio of c/h/w is correct
+        &#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network, ratio_honest=0.2, ratio_wolf=0.3)
+        network = simulators.initialise_network(simulators.network)
+
+        # Criminal network size should be 95
+        # Honest and Wolf ration should be within a range given the init is stochastic
+        assert (
+            len(gt.find_vertex(network, network.vp.state, &#34;c&#34;)) == 95
+        ), &#34;Criminal ratio not correct&#34;
+        assert (
+            38 - 15 &lt;= len(gt.find_vertex(network, network.vp.state, &#34;h&#34;)) &lt;= 38 + 15
+        ), &#34;Honest ratio not correct&#34;
+        assert (
+            57 - 15 &lt;= len(gt.find_vertex(network, network.vp.state, &#34;w&#34;)) &lt;= 57 + 15
+        ), &#34;Wolf ratio not correct&#34;
+
+    @pytest.mark.essential
+    def test_divide_in_groups(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+        ratio_honest = np.random.uniform(0.1, 0.99)
+        ratio_wolf = np.random.uniform(0.1, (1 - 0.99))
+        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+        simulators.network = simulators.initialise_network(simulators.network)
+        groups, groups_label = simulators.divide_in_groups(
+            simulators.network, min_group=3
+        )
+
+        assert groups is not np.empty, &#34;Group list is empty&#34;
+        assert all(
+            [isinstance(item, int) for item in groups]
+        ), &#34;Items in Group should be int&#34;
+        assert isinstance(groups_label, frozenset), &#34;Group label should be frozenset&#34;
+        assert len(groups_label) &gt; 0, &#34;Group label is empty&#34;
+        assert all(
+            [isinstance(item, int) for item in groups_label]
+        ), &#34;Items in Group label should be int&#34;
+
+    @pytest.mark.essential
+    def test_act_divide_in_groups_faster(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+        ratio_honest = np.random.uniform(0.1, 0.80)
+        ratio_wolf = np.random.uniform(0.1, (1 - 0.80))
+        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+        simulators.network = simulators.initialise_network(simulators.network)
+        divided_network, n_groups = simulators.act_divide_in_groups_faster(
+            simulators.network, min_grp=2, max_grp=2
+        )
+
+        # Group attribute needs to exist
+        assert divided_network.vp.grp_nbr, &#34;Attribute grp_nbr doesn&#39;t exist....&#34;
+
+        # Check if divided in two, every node should have a neighbour of the same group#
+        # Pick random neighbors
+        for i in range(0, 100):
+            # Get random node
+            x = np.random.uniform(1, divided_network.num_vertices())
+            x_group = divided_network.vp.grp_nbr[divided_network.vertex(x)]
+            neighbours = list(divided_network.iter_all_neighbors(x))
+            neighbours_group = [
+                divided_network.vp.grp_nbr[divided_network.vertex(neighbour)]
+                for neighbour in neighbours
+            ]
+            assert x_group in neighbours_group, &#34;No neighbour is of the same group...&#34;
+
+        # Check if recalled, the attributes are indeed reset
+        # Set group number to avoid the chance to have same group number again
+        divided_network_1, n_groups = simulators.act_divide_in_groups_faster(
+            simulators.network, min_grp=100, max_grp=100
+        )
+        x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
+        divided_network_2, n_groups = simulators.act_divide_in_groups_faster(
+            divided_network_1, min_grp=100, max_grp=100
+        )
+        x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
+        assert x_group_1 != x_group_2, &#34;Attributes are not reset correctly&#34;
+
+    @pytest.mark.essential
+    def test_act_divide_in_groups(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+        ratio_honest = np.random.uniform(0.1, 0.90)
+        ratio_wolf = np.random.uniform(0.1, (1 - ratio_honest-0.1))
+        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+        simulators.network = simulators.initialise_network(simulators.network)
+        divided_network, n_groups = simulators.act_divide_in_groups(
+            simulators.network, min_grp=2, max_grp=2
+        )
+
+        # Group attribute needs to exist
+        assert divided_network.vp.grp_nbr, &#34;Attribute grp_nbr doesn&#39;t exist....&#34;
+
+        # Check if divided in two, every node should have a neighbour of the same group#
+        # Pick random neighbors
+        for i in range(0, 100):
+            # Get random node
+            x = np.random.uniform(1, divided_network.num_vertices())
+            x_group = divided_network.vp.grp_nbr[divided_network.vertex(x)]
+            neighbours = list(divided_network.iter_all_neighbors(x))
+            neighbours_group = [
+                divided_network.vp.grp_nbr[divided_network.vertex(neighbour)]
+                for neighbour in neighbours
+            ]
+            assert x_group in neighbours_group, &#34;No neighbour is of the same group...&#34;
+
+        # Check if recalled, the attributes are indeed reset
+        # Set group number to avoid the chance to have same group number again
+        divided_network_1, n_groups = simulators.act_divide_in_groups(
+            simulators.network, min_grp=100, max_grp=100
+        )
+        x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
+        divided_network_2, n_groups = simulators.act_divide_in_groups(
+            divided_network_1, min_grp=100, max_grp=100
+        )
+        x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
+        assert x_group_1 != x_group_2, &#34;Attributes are not reset correctly&#34;
+
+    @pytest.mark.essential
+    def test_init_fitness(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the init of the fitness attribute is done correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        assert network.vp.fitness, &#34;Fitness attribute doesn&#39;t exists...&#34;
+
+    @pytest.mark.essential
+    def test_acting_stage(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the acting stage process is working correctly.&#34;&#34;&#34;
+        # Set delta to 100 to make sure wolf will always act
+        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=100)
+        network = simulators.init_fitness(simulators.network)
+        network = simulators.initialise_network(network)
+        # Network and network_aft_dmge are same object
+        # To compare network create an independent copy
+        untouched_network = deepcopy(network)
+        min_grp = 5
+        max_grp = 10
+
+        dict_of_communities = simulators.select_multiple_communities(
+            network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+        mbrs = dict_of_communities[min_grp]
+        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+            network=network, group_members=mbrs
+        )
+
+        # Select one group number from the all the numbers
+        network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
+            network, mbrs
+        )
+
+        # select random node from group
+        node = np.random.choice(list(mbrs), 1)
+        if slct_pers_status == &#34;h&#34;:
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), &#34;Fitness should be unchanged...&#34;
+
+        elif slct_pers_status == &#34;c&#34;:
+            if network.vp.state[network.vertex(node)] == &#34;c&#34;:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+                )
+            elif network.vp.state[network.vertex(node)] in [&#34;h&#34;, &#34;w&#34;]:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
+                    simulators.r_c * simulators.c_c
+                )
+
+        elif slct_pers_status == &#34;w&#34;:
+            if node == slct_pers:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    len(mbrs) - 1
+                ) * (
+                    simulators.r_w * simulators.c_w
+                )
+            else:
+                if network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] in [&#34;h&#34;,&#34;w&#34;]:
+                    assert network_aft_dmge.vp.fitness[
+                        network_aft_dmge.vertex(node)
+                    ] == untouched_network.vp.fitness[
+                        untouched_network.vertex(node)
+                    ] - (
+                        simulators.r_w * simulators.c_w
+                    )
+                elif network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] == &#34;c&#34;:
+                    assert network_aft_dmge.vp.fitness[
+                        network_aft_dmge.vertex(node)
+                    ] == untouched_network.vp.fitness[
+                        untouched_network.vertex(node)
+                    ] - (
+                        simulators.r_w * simulators.c_w
+                    ) + (
+                        (
+                            simulators.tau
+                            * ((len(mbrs) - 1) * (simulators.r_w * simulators.c_w))
+                        )
+                        / n_c
+                    )
+
+                else:
+                    raise KeyError(
+                        f&#34;Node should have status w/c instead of \
+                        {network_aft_dmge.vp.state[network_aft_dmge.vertex(node)]}&#34;
+                    )
+
+        else:
+            assert slct_pers_status in [
+                &#34;c&#34;,
+                &#34;h&#34;,
+                &#34;w&#34;,
+            ], &#34;Returned status should be either c/h/w&#34;
+
+    @pytest.mark.essential
+    def test_acting_stage_2(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the acting stage process is working correclty.
+
+        This time, lone wolf never act!
+        &#34;&#34;&#34;
+        # Set delta to 0 to make sure wolf will never act
+        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=0)
+        network = simulators.init_fitness(simulators.network)
+        network = simulators.initialise_network(network)
+        # Network and network_aft_dmge are same object
+        # To compare network create an independent copy
+        untouched_network = deepcopy(network)
+        min_grp = 5
+        max_grp = 10
+
+        dict_of_communities = simulators.select_multiple_communities(
+            network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+        mbrs = dict_of_communities[min_grp]
+        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+            network=network, group_members=mbrs
+        )
+
+        # Select one group number from the all the numbers
+        network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
+            network, mbrs
+        )
+
+        # select random node from group
+        node = np.random.choice(list(mbrs), 1)
+        if slct_pers_status == &#34;h&#34;:
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), &#34;Fitness should be unchanged...&#34;
+
+        elif slct_pers_status == &#34;c&#34;:
+            if network.vp.state[network.vertex(node)] == &#34;c&#34;:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+                )
+            elif network.vp.state[network.vertex(node)] in [&#34;h&#34;, &#34;w&#34;]:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
+                    simulators.r_c * simulators.c_c
+                )
+
+        elif slct_pers_status == &#34;w&#34;:
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), &#34;Fitness should be unchanged...&#34;
+
+        else:
+            assert slct_pers_status in [
+                &#34;c&#34;,
+                &#34;h&#34;,
+                &#34;w&#34;,
+            ], &#34;Returned status should be either c/h/w&#34;
+
+    @pytest.mark.essential
+    def test_select_communities(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the random select communites is working correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+
+        # Depth 1
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=1, seed=seed)
+        nbrs = network.iter_all_neighbors(seed)
+        assert list(nbrs) != community
+
+        # Depth 2
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=2, seed=seed)
+        nbrs = list(network.iter_all_neighbors(seed))
+        scnd_degree_nbr: list = []
+        for nbr in nbrs:
+            scnd_degree_nbr = scnd_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        nbrs = nbrs + scnd_degree_nbr
+        assert set(nbrs) == community
+
+        # Depth 3
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=3, seed=seed)
+        nbrs = list(network.iter_all_neighbors(seed))
+        scnd_degree_nbr = []
+        for nbr in nbrs:
+            scnd_degree_nbr = scnd_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        third_degree_nbr: list = []
+        for nbr in scnd_degree_nbr:
+            third_degree_nbr = third_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        nbrs = nbrs + scnd_degree_nbr + third_degree_nbr
+        assert set(nbrs) == community
+
+    @pytest.mark.essential
+    def test_select_multiple_communities(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if select_multiple_communities works correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        min_grp = 5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+
+        assert len(dict_of_communities) != 0, &#34;Dict of communities is empty...&#34;
+        assert (
+            min_grp &lt;= len(dict_of_communities) &lt;= max_grp
+        ), &#34;Number of communites is not correct...&#34;
+
+        for k, v in dict_of_communities.items():
+            assert isinstance(k, int)
+            assert len(dict_of_communities[k]) &gt;= 1, &#34;Some communities are empty...&#34;
+
+    @pytest.mark.essential
+    def test_counting_status_proportions(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the counting works correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        min_grp = 5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+
+        for k, v in dict_of_communities.items():
+            n_h, n_c, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+                network=network, group_members=v
+            )
+
+            assert 0 &lt;= p_c &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+            assert 0 &lt;= p_h &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+            assert 0 &lt;= p_w &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+            assert (
+                pytest.approx(p_h + p_c + p_w, 0.1) == 1
+            ), &#34;Total ration should sum up to 1&#34;
+
+            assert isinstance(n_h, int), &#34;Number should be an int&#34;
+            assert isinstance(n_c, int), &#34;Number should be an int&#34;
+            assert isinstance(n_w, int), &#34;Number should be an int&#34;
+            assert n_h + n_c + n_w == len(v), &#34;Everyone should be c,h,w&#34;
+
+    @pytest.mark.essential
+    def test_inflicting_damage(self, create_gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the inflicting damage function works correclty.&#34;&#34;&#34;
+        # set delta to 100 to make sure lone wolf acts
+        simulators = SimMartVaq(
+            create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2, delta=100, tau=0.5
+        )
+        network = simulators.init_fitness(simulators.network)
+
+        # What if the criminal is chosen
+        node = 0
+        network = simulators.inflict_damage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 30
+        assert network.vp.fitness[network.vertex(2)] == 1
+        assert network.vp.fitness[network.vertex(3)] == 6
+        assert network.vp.fitness[network.vertex(4)] == -2
+
+        # What if the criminal is chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        node = 3
+        network = simulators.inflict_damage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 36
+        assert network.vp.fitness[network.vertex(2)] == -5
+        assert network.vp.fitness[network.vertex(4)] == -8
+        assert network.vp.fitness[network.vertex(3)] == 30
+
+    @pytest.mark.essential
+    def test_investigation_stage(self, create_gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the investigation stage is working correctly.&#34;&#34;&#34;
+        # Define the different penalties
+        simulators = SimMartVaq(
+            create_gt_network, gamma=0.5, beta_c=2, beta_s=3, beta_h=5
+        )
+        network = simulators.init_fitness(simulators.network)
+
+        # What if the criminal is chosen
+        # Triggers state and civilian punishment
+        np.random.seed(2)
+        node = 0
+        network = simulators.investigation_stage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 11
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # What if the lone wolf is not chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        np.random.seed(3)
+        node = 3
+        network = simulators.investigation_stage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 11
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # What if the lone wolf is chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        np.random.seed(6)
+        node = 3
+        network = simulators.investigation_stage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 10.6
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # Check in case multiple criminals are present
+        network.vp.state[network.vertex(4)] = &#34;c&#34;
+        # Triggers state and civilian punishment
+        np.random.seed(2)
+        node = 0
+        network = simulators.investigation_stage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 0
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 10.6
+        assert network.vp.fitness[network.vertex(4)] == 0.5
+
+    @pytest.mark.essential
+    def test_fermi_function(self,create_gt_network:gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the fermi function is working correclty.&#34;&#34;&#34;
+        # The given network is just a placeholder
+        simulators = SimMartVaq(create_gt_network)
+        np.random.seed(0)
+        assert simulators.fermi_function(40,3), &#34;Should be True&#34;
+        assert simulators.fermi_function(-40.1,3) is False, &#34;Should be False&#34;
+
+    @pytest.mark.essential
+    def test_interchange_roles(self,create_gt_network:gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the interchanging role is working.&#34;&#34;&#34;
+        simulators = SimMartVaq(create_gt_network,temperature=10)
+        # Seed 2 will trigger that the roles are interchanged
+        np.random.seed(2)
+        network = simulators.interchange_roles(network=simulators.network,person_a=0,person_b=4)
+        # Check if wolf turned criminal based on the criminal&#39;s fitness
+        assert network.vp.state[network.vertex(4)] == &#39;c&#39; , &#34;Wolf didn&#39;t copied criminal....&#34;
+        assert network.vp.state[network.vertex(0)] == &#39;w&#39; , &#34;Criminal didn&#39;t copied wolf....&#34;
+
+
+    @pytest.mark.essential
+    def test_mutation(self,create_gt_network:gt.Graph)-&gt; None:
+        &#34;&#34;&#34;Test if the mutation works correclty.&#34;&#34;&#34;
+        simulators = SimMartVaq(create_gt_network,temperature=10)
+        # The seed should turn nodes into a criminal,honest or wolf
+        np.random.seed(0)
+        node = 4
+        network = simulators.mutation(simulators.network,person=node)
+        assert network.vp.state[network.vertex(node)] == &#39;c&#39; , &#34;Mutation didn&#39;t work properly&#34;
+        node = 0
+        network = simulators.mutation(simulators.network,person=node)
+        assert network.vp.state[network.vertex(node)] == &#39;h&#39; , &#34;Mutation didn&#39;t work properly&#34;
+        node = 3
+        network = simulators.mutation(simulators.network,person=node)
+        assert network.vp.state[network.vertex(node)] == &#39;c&#39; , &#34;Mutation didn&#39;t work properly&#34;
+
+    @pytest.mark.essential
+    def test_evolutionary_stage(self,gt_network:gt.Graph)-&gt; None:
+        &#34;&#34;&#34;Test if the evolutionary stage is working correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network,mutation_prob=0.3,temperature=10,ratio_honest=0.8)
+        # Need to randomly change the fitness
+        np.random.seed(0)
+        network = simulators.initialise_network(simulators.network)
+        network = simulators.init_fitness(simulators.network)
+        np.random.seed(0)
+        for i in range(0,network.num_vertices()):
+            network.vp.fitness[network.vertex(i)] = np.random.randint(0,200)
+
+        # To compare it to the other object
+        untouched_network = deepcopy(network)
+        min_grp=5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+        mbrs = dict_of_communities[min_grp]
+
+        # Check if the players changed status
+        # With seed 0, role interchange is triggered
+        np.random.seed(0)
+        network = simulators.evolutionary_stage(network,mbrs)
+
+        assert network.vp.state[network.vertex(419)] == untouched_network.vp.state[untouched_network.vertex(419)], &#34;Interchange function didn&#39;t work properly&#34;
+        assert network.vp.state[network.vertex(289)] == untouched_network.vp.state[untouched_network.vertex(419)], &#34;Interchange function didn&#39;t work properly&#34;
+
+        # Check if the players changed status
+        # With seed 5, mutation is triggered
+        np.random.seed(5)
+        network = simulators.evolutionary_stage(network,mbrs)
+        assert network.vp.state[network.vertex(2133)] == &#39;h&#39;, &#34;Mutation function didn&#39;t work properly&#34;
+
+
+    @pytest.mark.essential
+    def test_play(self,gt_network:gt.Graph)-&gt; None:
+        &#34;&#34;&#34;Test if the play function is working.&#34;&#34;&#34;
+        # Play the simulation
+        simulator = SimMartVaq(gt_network, ratio_honest=0.7, ratio_wolf=0.05)
+        simulator.play(simulator.network,rounds=50)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq"><code class="flex name class">
+<span>class <span class="ident">TestSimMartVaq</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class for unit tests for
+SimMartVaq.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TestSimMartVaq:
+    &#34;&#34;&#34;Class for unit tests for  SimMartVaq.&#34;&#34;&#34;
+
+    @pytest.mark.essential
+    def test_sim_mart_vaq(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the initialization works.&#34;&#34;&#34;
+        org_size = gt_network.num_vertices()
+        # Keep the ratio small so the test will be faster
+        # by adding less nodes
+        ratio_honest = 0.3
+        ratio_wolf = 0.1
+
+        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+
+        # Test if the obj is init correctly
+        assert isinstance(
+            simulators, SimMartVaq
+        ), &#34;Simulator hasn&#39;t been init correctly&#34;
+
+        # Test if the ration is caluclated correctly
+        assert simulators.ratio_criminal == 0.6, &#34;Ratio is wrong.&#34;
+        assert (
+            simulators.n_criminal == org_size
+        ), &#34;Determined number of criminals is wrong.&#34;
+        assert simulators.total_number_nodes == 158, &#34;Ratio is wrong&#34;
+        assert simulators.new_nodes == 63, &#34;Number of nodes to add is wrong&#34;
+        assert (
+            round(simulators.relative_ratio_honest, 2) == 0.75
+        ), &#34;Relative ratio is wrong&#34;
+        assert (
+            round(simulators.relative_ratio_wolf, 2) == 0.25
+        ), &#34;Relative ratio is wrong&#34;
+
+        # Try to change its name
+        with pytest.raises(Exception):
+            simulators.name = &#34;New name&#34;
+
+    @pytest.mark.essential
+    def test_sim_mart_vaq_wrong_init(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if a wrong init triggers the assert statements.&#34;&#34;&#34;
+        # With ratio_honest == 0
+        with pytest.raises(Exception):
+            assert SimMartVaq(gt_network, ratio_honest=0)
+
+        # With ratio_wolf == 1.1
+        with pytest.raises(Exception):
+            assert SimMartVaq(gt_network, ratio_wolf=1.1)
+
+        # With ratios not adding up more than 1
+        with pytest.raises(Exception):
+            assert SimMartVaq(gt_network, ratio_honest=0.8, ratio_wolf=0.3)
+            assert SimMartVaq(gt_network, ratio_honest=0.8, ratio_wolf=0.2)
+            assert SimMartVaq(gt_network, ratio_honest=-0.8, ratio_wolf=0.1)
+            assert SimMartVaq(gt_network, ratio_honest=-0.8, ratio_wolf=0.2)
+
+    @pytest.mark.essential
+    def test_initialise_network(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the init process is done corretly.
+
+        More precisely tests if the ratio of c/h/w is correct
+        &#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network, ratio_honest=0.2, ratio_wolf=0.3)
+        network = simulators.initialise_network(simulators.network)
+
+        # Criminal network size should be 95
+        # Honest and Wolf ration should be within a range given the init is stochastic
+        assert (
+            len(gt.find_vertex(network, network.vp.state, &#34;c&#34;)) == 95
+        ), &#34;Criminal ratio not correct&#34;
+        assert (
+            38 - 15 &lt;= len(gt.find_vertex(network, network.vp.state, &#34;h&#34;)) &lt;= 38 + 15
+        ), &#34;Honest ratio not correct&#34;
+        assert (
+            57 - 15 &lt;= len(gt.find_vertex(network, network.vp.state, &#34;w&#34;)) &lt;= 57 + 15
+        ), &#34;Wolf ratio not correct&#34;
+
+    @pytest.mark.essential
+    def test_divide_in_groups(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+        ratio_honest = np.random.uniform(0.1, 0.99)
+        ratio_wolf = np.random.uniform(0.1, (1 - 0.99))
+        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+        simulators.network = simulators.initialise_network(simulators.network)
+        groups, groups_label = simulators.divide_in_groups(
+            simulators.network, min_group=3
+        )
+
+        assert groups is not np.empty, &#34;Group list is empty&#34;
+        assert all(
+            [isinstance(item, int) for item in groups]
+        ), &#34;Items in Group should be int&#34;
+        assert isinstance(groups_label, frozenset), &#34;Group label should be frozenset&#34;
+        assert len(groups_label) &gt; 0, &#34;Group label is empty&#34;
+        assert all(
+            [isinstance(item, int) for item in groups_label]
+        ), &#34;Items in Group label should be int&#34;
+
+    @pytest.mark.essential
+    def test_act_divide_in_groups_faster(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+        ratio_honest = np.random.uniform(0.1, 0.80)
+        ratio_wolf = np.random.uniform(0.1, (1 - 0.80))
+        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+        simulators.network = simulators.initialise_network(simulators.network)
+        divided_network, n_groups = simulators.act_divide_in_groups_faster(
+            simulators.network, min_grp=2, max_grp=2
+        )
+
+        # Group attribute needs to exist
+        assert divided_network.vp.grp_nbr, &#34;Attribute grp_nbr doesn&#39;t exist....&#34;
+
+        # Check if divided in two, every node should have a neighbour of the same group#
+        # Pick random neighbors
+        for i in range(0, 100):
+            # Get random node
+            x = np.random.uniform(1, divided_network.num_vertices())
+            x_group = divided_network.vp.grp_nbr[divided_network.vertex(x)]
+            neighbours = list(divided_network.iter_all_neighbors(x))
+            neighbours_group = [
+                divided_network.vp.grp_nbr[divided_network.vertex(neighbour)]
+                for neighbour in neighbours
+            ]
+            assert x_group in neighbours_group, &#34;No neighbour is of the same group...&#34;
+
+        # Check if recalled, the attributes are indeed reset
+        # Set group number to avoid the chance to have same group number again
+        divided_network_1, n_groups = simulators.act_divide_in_groups_faster(
+            simulators.network, min_grp=100, max_grp=100
+        )
+        x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
+        divided_network_2, n_groups = simulators.act_divide_in_groups_faster(
+            divided_network_1, min_grp=100, max_grp=100
+        )
+        x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
+        assert x_group_1 != x_group_2, &#34;Attributes are not reset correctly&#34;
+
+    @pytest.mark.essential
+    def test_act_divide_in_groups(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+        ratio_honest = np.random.uniform(0.1, 0.90)
+        ratio_wolf = np.random.uniform(0.1, (1 - ratio_honest-0.1))
+        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+        simulators.network = simulators.initialise_network(simulators.network)
+        divided_network, n_groups = simulators.act_divide_in_groups(
+            simulators.network, min_grp=2, max_grp=2
+        )
+
+        # Group attribute needs to exist
+        assert divided_network.vp.grp_nbr, &#34;Attribute grp_nbr doesn&#39;t exist....&#34;
+
+        # Check if divided in two, every node should have a neighbour of the same group#
+        # Pick random neighbors
+        for i in range(0, 100):
+            # Get random node
+            x = np.random.uniform(1, divided_network.num_vertices())
+            x_group = divided_network.vp.grp_nbr[divided_network.vertex(x)]
+            neighbours = list(divided_network.iter_all_neighbors(x))
+            neighbours_group = [
+                divided_network.vp.grp_nbr[divided_network.vertex(neighbour)]
+                for neighbour in neighbours
+            ]
+            assert x_group in neighbours_group, &#34;No neighbour is of the same group...&#34;
+
+        # Check if recalled, the attributes are indeed reset
+        # Set group number to avoid the chance to have same group number again
+        divided_network_1, n_groups = simulators.act_divide_in_groups(
+            simulators.network, min_grp=100, max_grp=100
+        )
+        x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
+        divided_network_2, n_groups = simulators.act_divide_in_groups(
+            divided_network_1, min_grp=100, max_grp=100
+        )
+        x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
+        assert x_group_1 != x_group_2, &#34;Attributes are not reset correctly&#34;
+
+    @pytest.mark.essential
+    def test_init_fitness(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the init of the fitness attribute is done correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        assert network.vp.fitness, &#34;Fitness attribute doesn&#39;t exists...&#34;
+
+    @pytest.mark.essential
+    def test_acting_stage(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the acting stage process is working correctly.&#34;&#34;&#34;
+        # Set delta to 100 to make sure wolf will always act
+        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=100)
+        network = simulators.init_fitness(simulators.network)
+        network = simulators.initialise_network(network)
+        # Network and network_aft_dmge are same object
+        # To compare network create an independent copy
+        untouched_network = deepcopy(network)
+        min_grp = 5
+        max_grp = 10
+
+        dict_of_communities = simulators.select_multiple_communities(
+            network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+        mbrs = dict_of_communities[min_grp]
+        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+            network=network, group_members=mbrs
+        )
+
+        # Select one group number from the all the numbers
+        network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
+            network, mbrs
+        )
+
+        # select random node from group
+        node = np.random.choice(list(mbrs), 1)
+        if slct_pers_status == &#34;h&#34;:
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), &#34;Fitness should be unchanged...&#34;
+
+        elif slct_pers_status == &#34;c&#34;:
+            if network.vp.state[network.vertex(node)] == &#34;c&#34;:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+                )
+            elif network.vp.state[network.vertex(node)] in [&#34;h&#34;, &#34;w&#34;]:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
+                    simulators.r_c * simulators.c_c
+                )
+
+        elif slct_pers_status == &#34;w&#34;:
+            if node == slct_pers:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    len(mbrs) - 1
+                ) * (
+                    simulators.r_w * simulators.c_w
+                )
+            else:
+                if network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] in [&#34;h&#34;,&#34;w&#34;]:
+                    assert network_aft_dmge.vp.fitness[
+                        network_aft_dmge.vertex(node)
+                    ] == untouched_network.vp.fitness[
+                        untouched_network.vertex(node)
+                    ] - (
+                        simulators.r_w * simulators.c_w
+                    )
+                elif network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] == &#34;c&#34;:
+                    assert network_aft_dmge.vp.fitness[
+                        network_aft_dmge.vertex(node)
+                    ] == untouched_network.vp.fitness[
+                        untouched_network.vertex(node)
+                    ] - (
+                        simulators.r_w * simulators.c_w
+                    ) + (
+                        (
+                            simulators.tau
+                            * ((len(mbrs) - 1) * (simulators.r_w * simulators.c_w))
+                        )
+                        / n_c
+                    )
+
+                else:
+                    raise KeyError(
+                        f&#34;Node should have status w/c instead of \
+                        {network_aft_dmge.vp.state[network_aft_dmge.vertex(node)]}&#34;
+                    )
+
+        else:
+            assert slct_pers_status in [
+                &#34;c&#34;,
+                &#34;h&#34;,
+                &#34;w&#34;,
+            ], &#34;Returned status should be either c/h/w&#34;
+
+    @pytest.mark.essential
+    def test_acting_stage_2(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the acting stage process is working correclty.
+
+        This time, lone wolf never act!
+        &#34;&#34;&#34;
+        # Set delta to 0 to make sure wolf will never act
+        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=0)
+        network = simulators.init_fitness(simulators.network)
+        network = simulators.initialise_network(network)
+        # Network and network_aft_dmge are same object
+        # To compare network create an independent copy
+        untouched_network = deepcopy(network)
+        min_grp = 5
+        max_grp = 10
+
+        dict_of_communities = simulators.select_multiple_communities(
+            network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+        mbrs = dict_of_communities[min_grp]
+        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+            network=network, group_members=mbrs
+        )
+
+        # Select one group number from the all the numbers
+        network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
+            network, mbrs
+        )
+
+        # select random node from group
+        node = np.random.choice(list(mbrs), 1)
+        if slct_pers_status == &#34;h&#34;:
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), &#34;Fitness should be unchanged...&#34;
+
+        elif slct_pers_status == &#34;c&#34;:
+            if network.vp.state[network.vertex(node)] == &#34;c&#34;:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                    ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+                )
+            elif network.vp.state[network.vertex(node)] in [&#34;h&#34;, &#34;w&#34;]:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
+                    simulators.r_c * simulators.c_c
+                )
+
+        elif slct_pers_status == &#34;w&#34;:
+            assert list(network_aft_dmge.vp.fitness) == list(
+                untouched_network.vp.fitness
+            ), &#34;Fitness should be unchanged...&#34;
+
+        else:
+            assert slct_pers_status in [
+                &#34;c&#34;,
+                &#34;h&#34;,
+                &#34;w&#34;,
+            ], &#34;Returned status should be either c/h/w&#34;
+
+    @pytest.mark.essential
+    def test_select_communities(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the random select communites is working correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+
+        # Depth 1
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=1, seed=seed)
+        nbrs = network.iter_all_neighbors(seed)
+        assert list(nbrs) != community
+
+        # Depth 2
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=2, seed=seed)
+        nbrs = list(network.iter_all_neighbors(seed))
+        scnd_degree_nbr: list = []
+        for nbr in nbrs:
+            scnd_degree_nbr = scnd_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        nbrs = nbrs + scnd_degree_nbr
+        assert set(nbrs) == community
+
+        # Depth 3
+        seed = np.random.randint(0, gt_network.num_vertices())
+        community = simulators.select_communities(network, radius=3, seed=seed)
+        nbrs = list(network.iter_all_neighbors(seed))
+        scnd_degree_nbr = []
+        for nbr in nbrs:
+            scnd_degree_nbr = scnd_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        third_degree_nbr: list = []
+        for nbr in scnd_degree_nbr:
+            third_degree_nbr = third_degree_nbr + list(network.get_all_neighbors(nbr))
+
+        nbrs = nbrs + scnd_degree_nbr + third_degree_nbr
+        assert set(nbrs) == community
+
+    @pytest.mark.essential
+    def test_select_multiple_communities(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if select_multiple_communities works correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        min_grp = 5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+
+        assert len(dict_of_communities) != 0, &#34;Dict of communities is empty...&#34;
+        assert (
+            min_grp &lt;= len(dict_of_communities) &lt;= max_grp
+        ), &#34;Number of communites is not correct...&#34;
+
+        for k, v in dict_of_communities.items():
+            assert isinstance(k, int)
+            assert len(dict_of_communities[k]) &gt;= 1, &#34;Some communities are empty...&#34;
+
+    @pytest.mark.essential
+    def test_counting_status_proportions(self, gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the counting works correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network)
+        network = simulators.init_fitness(simulators.network)
+        min_grp = 5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+
+        for k, v in dict_of_communities.items():
+            n_h, n_c, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+                network=network, group_members=v
+            )
+
+            assert 0 &lt;= p_c &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+            assert 0 &lt;= p_h &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+            assert 0 &lt;= p_w &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+            assert (
+                pytest.approx(p_h + p_c + p_w, 0.1) == 1
+            ), &#34;Total ration should sum up to 1&#34;
+
+            assert isinstance(n_h, int), &#34;Number should be an int&#34;
+            assert isinstance(n_c, int), &#34;Number should be an int&#34;
+            assert isinstance(n_w, int), &#34;Number should be an int&#34;
+            assert n_h + n_c + n_w == len(v), &#34;Everyone should be c,h,w&#34;
+
+    @pytest.mark.essential
+    def test_inflicting_damage(self, create_gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the inflicting damage function works correclty.&#34;&#34;&#34;
+        # set delta to 100 to make sure lone wolf acts
+        simulators = SimMartVaq(
+            create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2, delta=100, tau=0.5
+        )
+        network = simulators.init_fitness(simulators.network)
+
+        # What if the criminal is chosen
+        node = 0
+        network = simulators.inflict_damage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 30
+        assert network.vp.fitness[network.vertex(2)] == 1
+        assert network.vp.fitness[network.vertex(3)] == 6
+        assert network.vp.fitness[network.vertex(4)] == -2
+
+        # What if the criminal is chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        node = 3
+        network = simulators.inflict_damage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 36
+        assert network.vp.fitness[network.vertex(2)] == -5
+        assert network.vp.fitness[network.vertex(4)] == -8
+        assert network.vp.fitness[network.vertex(3)] == 30
+
+    @pytest.mark.essential
+    def test_investigation_stage(self, create_gt_network: gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the investigation stage is working correctly.&#34;&#34;&#34;
+        # Define the different penalties
+        simulators = SimMartVaq(
+            create_gt_network, gamma=0.5, beta_c=2, beta_s=3, beta_h=5
+        )
+        network = simulators.init_fitness(simulators.network)
+
+        # What if the criminal is chosen
+        # Triggers state and civilian punishment
+        np.random.seed(2)
+        node = 0
+        network = simulators.investigation_stage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 11
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # What if the lone wolf is not chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        np.random.seed(3)
+        node = 3
+        network = simulators.investigation_stage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 11
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # What if the lone wolf is chosen
+        # Based on the previous fitness resulting from the criminal
+        # activity above.
+        np.random.seed(6)
+        node = 3
+        network = simulators.investigation_stage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 5
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 10.6
+        assert network.vp.fitness[network.vertex(4)] == 3
+
+        # Check in case multiple criminals are present
+        network.vp.state[network.vertex(4)] = &#34;c&#34;
+        # Triggers state and civilian punishment
+        np.random.seed(2)
+        node = 0
+        network = simulators.investigation_stage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 0
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 10.6
+        assert network.vp.fitness[network.vertex(4)] == 0.5
+
+    @pytest.mark.essential
+    def test_fermi_function(self,create_gt_network:gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the fermi function is working correclty.&#34;&#34;&#34;
+        # The given network is just a placeholder
+        simulators = SimMartVaq(create_gt_network)
+        np.random.seed(0)
+        assert simulators.fermi_function(40,3), &#34;Should be True&#34;
+        assert simulators.fermi_function(-40.1,3) is False, &#34;Should be False&#34;
+
+    @pytest.mark.essential
+    def test_interchange_roles(self,create_gt_network:gt.Graph) -&gt; None:
+        &#34;&#34;&#34;Test if the interchanging role is working.&#34;&#34;&#34;
+        simulators = SimMartVaq(create_gt_network,temperature=10)
+        # Seed 2 will trigger that the roles are interchanged
+        np.random.seed(2)
+        network = simulators.interchange_roles(network=simulators.network,person_a=0,person_b=4)
+        # Check if wolf turned criminal based on the criminal&#39;s fitness
+        assert network.vp.state[network.vertex(4)] == &#39;c&#39; , &#34;Wolf didn&#39;t copied criminal....&#34;
+        assert network.vp.state[network.vertex(0)] == &#39;w&#39; , &#34;Criminal didn&#39;t copied wolf....&#34;
+
+
+    @pytest.mark.essential
+    def test_mutation(self,create_gt_network:gt.Graph)-&gt; None:
+        &#34;&#34;&#34;Test if the mutation works correclty.&#34;&#34;&#34;
+        simulators = SimMartVaq(create_gt_network,temperature=10)
+        # The seed should turn nodes into a criminal,honest or wolf
+        np.random.seed(0)
+        node = 4
+        network = simulators.mutation(simulators.network,person=node)
+        assert network.vp.state[network.vertex(node)] == &#39;c&#39; , &#34;Mutation didn&#39;t work properly&#34;
+        node = 0
+        network = simulators.mutation(simulators.network,person=node)
+        assert network.vp.state[network.vertex(node)] == &#39;h&#39; , &#34;Mutation didn&#39;t work properly&#34;
+        node = 3
+        network = simulators.mutation(simulators.network,person=node)
+        assert network.vp.state[network.vertex(node)] == &#39;c&#39; , &#34;Mutation didn&#39;t work properly&#34;
+
+    @pytest.mark.essential
+    def test_evolutionary_stage(self,gt_network:gt.Graph)-&gt; None:
+        &#34;&#34;&#34;Test if the evolutionary stage is working correctly.&#34;&#34;&#34;
+        simulators = SimMartVaq(gt_network,mutation_prob=0.3,temperature=10,ratio_honest=0.8)
+        # Need to randomly change the fitness
+        np.random.seed(0)
+        network = simulators.initialise_network(simulators.network)
+        network = simulators.init_fitness(simulators.network)
+        np.random.seed(0)
+        for i in range(0,network.num_vertices()):
+            network.vp.fitness[network.vertex(i)] = np.random.randint(0,200)
+
+        # To compare it to the other object
+        untouched_network = deepcopy(network)
+        min_grp=5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+        mbrs = dict_of_communities[min_grp]
+
+        # Check if the players changed status
+        # With seed 0, role interchange is triggered
+        np.random.seed(0)
+        network = simulators.evolutionary_stage(network,mbrs)
+
+        assert network.vp.state[network.vertex(419)] == untouched_network.vp.state[untouched_network.vertex(419)], &#34;Interchange function didn&#39;t work properly&#34;
+        assert network.vp.state[network.vertex(289)] == untouched_network.vp.state[untouched_network.vertex(419)], &#34;Interchange function didn&#39;t work properly&#34;
+
+        # Check if the players changed status
+        # With seed 5, mutation is triggered
+        np.random.seed(5)
+        network = simulators.evolutionary_stage(network,mbrs)
+        assert network.vp.state[network.vertex(2133)] == &#39;h&#39;, &#34;Mutation function didn&#39;t work properly&#34;
+
+
+    @pytest.mark.essential
+    def test_play(self,gt_network:gt.Graph)-&gt; None:
+        &#34;&#34;&#34;Test if the play function is working.&#34;&#34;&#34;
+        # Play the simulation
+        simulator = SimMartVaq(gt_network, ratio_honest=0.7, ratio_wolf=0.05)
+        simulator.play(simulator.network,rounds=50)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_act_divide_in_groups"><code class="name flex">
+<span>def <span class="ident">test_act_divide_in_groups</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the division into groups works correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_act_divide_in_groups(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+    ratio_honest = np.random.uniform(0.1, 0.90)
+    ratio_wolf = np.random.uniform(0.1, (1 - ratio_honest-0.1))
+    simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+    simulators.network = simulators.initialise_network(simulators.network)
+    divided_network, n_groups = simulators.act_divide_in_groups(
+        simulators.network, min_grp=2, max_grp=2
+    )
+
+    # Group attribute needs to exist
+    assert divided_network.vp.grp_nbr, &#34;Attribute grp_nbr doesn&#39;t exist....&#34;
+
+    # Check if divided in two, every node should have a neighbour of the same group#
+    # Pick random neighbors
+    for i in range(0, 100):
+        # Get random node
+        x = np.random.uniform(1, divided_network.num_vertices())
+        x_group = divided_network.vp.grp_nbr[divided_network.vertex(x)]
+        neighbours = list(divided_network.iter_all_neighbors(x))
+        neighbours_group = [
+            divided_network.vp.grp_nbr[divided_network.vertex(neighbour)]
+            for neighbour in neighbours
+        ]
+        assert x_group in neighbours_group, &#34;No neighbour is of the same group...&#34;
+
+    # Check if recalled, the attributes are indeed reset
+    # Set group number to avoid the chance to have same group number again
+    divided_network_1, n_groups = simulators.act_divide_in_groups(
+        simulators.network, min_grp=100, max_grp=100
+    )
+    x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
+    divided_network_2, n_groups = simulators.act_divide_in_groups(
+        divided_network_1, min_grp=100, max_grp=100
+    )
+    x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
+    assert x_group_1 != x_group_2, &#34;Attributes are not reset correctly&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_act_divide_in_groups_faster"><code class="name flex">
+<span>def <span class="ident">test_act_divide_in_groups_faster</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the division into groups works correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_act_divide_in_groups_faster(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+    ratio_honest = np.random.uniform(0.1, 0.80)
+    ratio_wolf = np.random.uniform(0.1, (1 - 0.80))
+    simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+    simulators.network = simulators.initialise_network(simulators.network)
+    divided_network, n_groups = simulators.act_divide_in_groups_faster(
+        simulators.network, min_grp=2, max_grp=2
+    )
+
+    # Group attribute needs to exist
+    assert divided_network.vp.grp_nbr, &#34;Attribute grp_nbr doesn&#39;t exist....&#34;
+
+    # Check if divided in two, every node should have a neighbour of the same group#
+    # Pick random neighbors
+    for i in range(0, 100):
+        # Get random node
+        x = np.random.uniform(1, divided_network.num_vertices())
+        x_group = divided_network.vp.grp_nbr[divided_network.vertex(x)]
+        neighbours = list(divided_network.iter_all_neighbors(x))
+        neighbours_group = [
+            divided_network.vp.grp_nbr[divided_network.vertex(neighbour)]
+            for neighbour in neighbours
+        ]
+        assert x_group in neighbours_group, &#34;No neighbour is of the same group...&#34;
+
+    # Check if recalled, the attributes are indeed reset
+    # Set group number to avoid the chance to have same group number again
+    divided_network_1, n_groups = simulators.act_divide_in_groups_faster(
+        simulators.network, min_grp=100, max_grp=100
+    )
+    x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
+    divided_network_2, n_groups = simulators.act_divide_in_groups_faster(
+        divided_network_1, min_grp=100, max_grp=100
+    )
+    x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
+    assert x_group_1 != x_group_2, &#34;Attributes are not reset correctly&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_acting_stage"><code class="name flex">
+<span>def <span class="ident">test_acting_stage</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the acting stage process is working correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_acting_stage(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the acting stage process is working correctly.&#34;&#34;&#34;
+    # Set delta to 100 to make sure wolf will always act
+    simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=100)
+    network = simulators.init_fitness(simulators.network)
+    network = simulators.initialise_network(network)
+    # Network and network_aft_dmge are same object
+    # To compare network create an independent copy
+    untouched_network = deepcopy(network)
+    min_grp = 5
+    max_grp = 10
+
+    dict_of_communities = simulators.select_multiple_communities(
+        network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+    )
+    mbrs = dict_of_communities[min_grp]
+    n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+        network=network, group_members=mbrs
+    )
+
+    # Select one group number from the all the numbers
+    network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
+        network, mbrs
+    )
+
+    # select random node from group
+    node = np.random.choice(list(mbrs), 1)
+    if slct_pers_status == &#34;h&#34;:
+        assert list(network_aft_dmge.vp.fitness) == list(
+            untouched_network.vp.fitness
+        ), &#34;Fitness should be unchanged...&#34;
+
+    elif slct_pers_status == &#34;c&#34;:
+        if network.vp.state[network.vertex(node)] == &#34;c&#34;:
+            assert network_aft_dmge.vp.fitness[
+                network_aft_dmge.vertex(node)
+            ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+            )
+        elif network.vp.state[network.vertex(node)] in [&#34;h&#34;, &#34;w&#34;]:
+            assert network_aft_dmge.vp.fitness[
+                network_aft_dmge.vertex(node)
+            ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
+                simulators.r_c * simulators.c_c
+            )
+
+    elif slct_pers_status == &#34;w&#34;:
+        if node == slct_pers:
+            assert network_aft_dmge.vp.fitness[
+                network_aft_dmge.vertex(node)
+            ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                len(mbrs) - 1
+            ) * (
+                simulators.r_w * simulators.c_w
+            )
+        else:
+            if network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] in [&#34;h&#34;,&#34;w&#34;]:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[
+                    untouched_network.vertex(node)
+                ] - (
+                    simulators.r_w * simulators.c_w
+                )
+            elif network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] == &#34;c&#34;:
+                assert network_aft_dmge.vp.fitness[
+                    network_aft_dmge.vertex(node)
+                ] == untouched_network.vp.fitness[
+                    untouched_network.vertex(node)
+                ] - (
+                    simulators.r_w * simulators.c_w
+                ) + (
+                    (
+                        simulators.tau
+                        * ((len(mbrs) - 1) * (simulators.r_w * simulators.c_w))
+                    )
+                    / n_c
+                )
+
+            else:
+                raise KeyError(
+                    f&#34;Node should have status w/c instead of \
+                    {network_aft_dmge.vp.state[network_aft_dmge.vertex(node)]}&#34;
+                )
+
+    else:
+        assert slct_pers_status in [
+            &#34;c&#34;,
+            &#34;h&#34;,
+            &#34;w&#34;,
+        ], &#34;Returned status should be either c/h/w&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_acting_stage_2"><code class="name flex">
+<span>def <span class="ident">test_acting_stage_2</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the acting stage process is working correclty.</p>
+<p>This time, lone wolf never act!</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_acting_stage_2(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the acting stage process is working correclty.
+
+    This time, lone wolf never act!
+    &#34;&#34;&#34;
+    # Set delta to 0 to make sure wolf will never act
+    simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=0)
+    network = simulators.init_fitness(simulators.network)
+    network = simulators.initialise_network(network)
+    # Network and network_aft_dmge are same object
+    # To compare network create an independent copy
+    untouched_network = deepcopy(network)
+    min_grp = 5
+    max_grp = 10
+
+    dict_of_communities = simulators.select_multiple_communities(
+        network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+    )
+    mbrs = dict_of_communities[min_grp]
+    n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+        network=network, group_members=mbrs
+    )
+
+    # Select one group number from the all the numbers
+    network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
+        network, mbrs
+    )
+
+    # select random node from group
+    node = np.random.choice(list(mbrs), 1)
+    if slct_pers_status == &#34;h&#34;:
+        assert list(network_aft_dmge.vp.fitness) == list(
+            untouched_network.vp.fitness
+        ), &#34;Fitness should be unchanged...&#34;
+
+    elif slct_pers_status == &#34;c&#34;:
+        if network.vp.state[network.vertex(node)] == &#34;c&#34;:
+            assert network_aft_dmge.vp.fitness[
+                network_aft_dmge.vertex(node)
+            ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
+                ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+            )
+        elif network.vp.state[network.vertex(node)] in [&#34;h&#34;, &#34;w&#34;]:
+            assert network_aft_dmge.vp.fitness[
+                network_aft_dmge.vertex(node)
+            ] == untouched_network.vp.fitness[untouched_network.vertex(node)] - (
+                simulators.r_c * simulators.c_c
+            )
+
+    elif slct_pers_status == &#34;w&#34;:
+        assert list(network_aft_dmge.vp.fitness) == list(
+            untouched_network.vp.fitness
+        ), &#34;Fitness should be unchanged...&#34;
+
+    else:
+        assert slct_pers_status in [
+            &#34;c&#34;,
+            &#34;h&#34;,
+            &#34;w&#34;,
+        ], &#34;Returned status should be either c/h/w&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_counting_status_proportions"><code class="name flex">
+<span>def <span class="ident">test_counting_status_proportions</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the counting works correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_counting_status_proportions(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the counting works correctly.&#34;&#34;&#34;
+    simulators = SimMartVaq(gt_network)
+    network = simulators.init_fitness(simulators.network)
+    min_grp = 5
+    max_grp = 10
+    dict_of_communities = simulators.select_multiple_communities(
+        network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+    )
+
+    for k, v in dict_of_communities.items():
+        n_h, n_c, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+            network=network, group_members=v
+        )
+
+        assert 0 &lt;= p_c &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+        assert 0 &lt;= p_h &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+        assert 0 &lt;= p_w &lt;= 1, &#34;Proportion is not calculated correctly&#34;
+        assert (
+            pytest.approx(p_h + p_c + p_w, 0.1) == 1
+        ), &#34;Total ration should sum up to 1&#34;
+
+        assert isinstance(n_h, int), &#34;Number should be an int&#34;
+        assert isinstance(n_c, int), &#34;Number should be an int&#34;
+        assert isinstance(n_w, int), &#34;Number should be an int&#34;
+        assert n_h + n_c + n_w == len(v), &#34;Everyone should be c,h,w&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_divide_in_groups"><code class="name flex">
+<span>def <span class="ident">test_divide_in_groups</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the division into groups works correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_divide_in_groups(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the division into groups works correctly.&#34;&#34;&#34;
+    ratio_honest = np.random.uniform(0.1, 0.99)
+    ratio_wolf = np.random.uniform(0.1, (1 - 0.99))
+    simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+    simulators.network = simulators.initialise_network(simulators.network)
+    groups, groups_label = simulators.divide_in_groups(
+        simulators.network, min_group=3
+    )
+
+    assert groups is not np.empty, &#34;Group list is empty&#34;
+    assert all(
+        [isinstance(item, int) for item in groups]
+    ), &#34;Items in Group should be int&#34;
+    assert isinstance(groups_label, frozenset), &#34;Group label should be frozenset&#34;
+    assert len(groups_label) &gt; 0, &#34;Group label is empty&#34;
+    assert all(
+        [isinstance(item, int) for item in groups_label]
+    ), &#34;Items in Group label should be int&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_evolutionary_stage"><code class="name flex">
+<span>def <span class="ident">test_evolutionary_stage</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the evolutionary stage is working correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_evolutionary_stage(self,gt_network:gt.Graph)-&gt; None:
+    &#34;&#34;&#34;Test if the evolutionary stage is working correctly.&#34;&#34;&#34;
+    simulators = SimMartVaq(gt_network,mutation_prob=0.3,temperature=10,ratio_honest=0.8)
+    # Need to randomly change the fitness
+    np.random.seed(0)
+    network = simulators.initialise_network(simulators.network)
+    network = simulators.init_fitness(simulators.network)
+    np.random.seed(0)
+    for i in range(0,network.num_vertices()):
+        network.vp.fitness[network.vertex(i)] = np.random.randint(0,200)
+
+    # To compare it to the other object
+    untouched_network = deepcopy(network)
+    min_grp=5
+    max_grp = 10
+    dict_of_communities = simulators.select_multiple_communities(
+        network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+    )
+    mbrs = dict_of_communities[min_grp]
+
+    # Check if the players changed status
+    # With seed 0, role interchange is triggered
+    np.random.seed(0)
+    network = simulators.evolutionary_stage(network,mbrs)
+
+    assert network.vp.state[network.vertex(419)] == untouched_network.vp.state[untouched_network.vertex(419)], &#34;Interchange function didn&#39;t work properly&#34;
+    assert network.vp.state[network.vertex(289)] == untouched_network.vp.state[untouched_network.vertex(419)], &#34;Interchange function didn&#39;t work properly&#34;
+
+    # Check if the players changed status
+    # With seed 5, mutation is triggered
+    np.random.seed(5)
+    network = simulators.evolutionary_stage(network,mbrs)
+    assert network.vp.state[network.vertex(2133)] == &#39;h&#39;, &#34;Mutation function didn&#39;t work properly&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_fermi_function"><code class="name flex">
+<span>def <span class="ident">test_fermi_function</span></span>(<span>self, create_gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the fermi function is working correclty.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_fermi_function(self,create_gt_network:gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the fermi function is working correclty.&#34;&#34;&#34;
+    # The given network is just a placeholder
+    simulators = SimMartVaq(create_gt_network)
+    np.random.seed(0)
+    assert simulators.fermi_function(40,3), &#34;Should be True&#34;
+    assert simulators.fermi_function(-40.1,3) is False, &#34;Should be False&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_inflicting_damage"><code class="name flex">
+<span>def <span class="ident">test_inflicting_damage</span></span>(<span>self, create_gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the inflicting damage function works correclty.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_inflicting_damage(self, create_gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the inflicting damage function works correclty.&#34;&#34;&#34;
+    # set delta to 100 to make sure lone wolf acts
+    simulators = SimMartVaq(
+        create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2, delta=100, tau=0.5
+    )
+    network = simulators.init_fitness(simulators.network)
+
+    # What if the criminal is chosen
+    node = 0
+    network = simulators.inflict_damage(
+        simulators.network,
+        frozenset([0, 1, 2, 3, 4]),
+        node,
+        network.vp.state[network.vertex(node)],
+    )
+    assert network.vp.fitness[network.vertex(0)] == 30
+    assert network.vp.fitness[network.vertex(2)] == 1
+    assert network.vp.fitness[network.vertex(3)] == 6
+    assert network.vp.fitness[network.vertex(4)] == -2
+
+    # What if the criminal is chosen
+    # Based on the previous fitness resulting from the criminal
+    # activity above.
+    node = 3
+    network = simulators.inflict_damage(
+        network,
+        frozenset([0, 1, 2, 3, 4]),
+        node,
+        network.vp.state[network.vertex(node)],
+    )
+    assert network.vp.fitness[network.vertex(0)] == 36
+    assert network.vp.fitness[network.vertex(2)] == -5
+    assert network.vp.fitness[network.vertex(4)] == -8
+    assert network.vp.fitness[network.vertex(3)] == 30</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_init_fitness"><code class="name flex">
+<span>def <span class="ident">test_init_fitness</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the init of the fitness attribute is done correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_init_fitness(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the init of the fitness attribute is done correctly.&#34;&#34;&#34;
+    simulators = SimMartVaq(gt_network)
+    network = simulators.init_fitness(simulators.network)
+    assert network.vp.fitness, &#34;Fitness attribute doesn&#39;t exists...&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_initialise_network"><code class="name flex">
+<span>def <span class="ident">test_initialise_network</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the init process is done corretly.</p>
+<p>More precisely tests if the ratio of c/h/w is correct</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_initialise_network(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the init process is done corretly.
+
+    More precisely tests if the ratio of c/h/w is correct
+    &#34;&#34;&#34;
+    simulators = SimMartVaq(gt_network, ratio_honest=0.2, ratio_wolf=0.3)
+    network = simulators.initialise_network(simulators.network)
+
+    # Criminal network size should be 95
+    # Honest and Wolf ration should be within a range given the init is stochastic
+    assert (
+        len(gt.find_vertex(network, network.vp.state, &#34;c&#34;)) == 95
+    ), &#34;Criminal ratio not correct&#34;
+    assert (
+        38 - 15 &lt;= len(gt.find_vertex(network, network.vp.state, &#34;h&#34;)) &lt;= 38 + 15
+    ), &#34;Honest ratio not correct&#34;
+    assert (
+        57 - 15 &lt;= len(gt.find_vertex(network, network.vp.state, &#34;w&#34;)) &lt;= 57 + 15
+    ), &#34;Wolf ratio not correct&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_interchange_roles"><code class="name flex">
+<span>def <span class="ident">test_interchange_roles</span></span>(<span>self, create_gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the interchanging role is working.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_interchange_roles(self,create_gt_network:gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the interchanging role is working.&#34;&#34;&#34;
+    simulators = SimMartVaq(create_gt_network,temperature=10)
+    # Seed 2 will trigger that the roles are interchanged
+    np.random.seed(2)
+    network = simulators.interchange_roles(network=simulators.network,person_a=0,person_b=4)
+    # Check if wolf turned criminal based on the criminal&#39;s fitness
+    assert network.vp.state[network.vertex(4)] == &#39;c&#39; , &#34;Wolf didn&#39;t copied criminal....&#34;
+    assert network.vp.state[network.vertex(0)] == &#39;w&#39; , &#34;Criminal didn&#39;t copied wolf....&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_investigation_stage"><code class="name flex">
+<span>def <span class="ident">test_investigation_stage</span></span>(<span>self, create_gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the investigation stage is working correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_investigation_stage(self, create_gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the investigation stage is working correctly.&#34;&#34;&#34;
+    # Define the different penalties
+    simulators = SimMartVaq(
+        create_gt_network, gamma=0.5, beta_c=2, beta_s=3, beta_h=5
+    )
+    network = simulators.init_fitness(simulators.network)
+
+    # What if the criminal is chosen
+    # Triggers state and civilian punishment
+    np.random.seed(2)
+    node = 0
+    network = simulators.investigation_stage(
+        simulators.network,
+        frozenset([0, 1, 2, 3, 4]),
+        node,
+        network.vp.state[network.vertex(node)],
+    )
+    assert network.vp.fitness[network.vertex(0)] == 5
+    assert network.vp.fitness[network.vertex(1)] == 8
+    assert network.vp.fitness[network.vertex(2)] == 6
+    assert network.vp.fitness[network.vertex(3)] == 11
+    assert network.vp.fitness[network.vertex(4)] == 3
+
+    # What if the lone wolf is not chosen
+    # Based on the previous fitness resulting from the criminal
+    # activity above.
+    np.random.seed(3)
+    node = 3
+    network = simulators.investigation_stage(
+        network,
+        frozenset([0, 1, 2, 3, 4]),
+        node,
+        network.vp.state[network.vertex(node)],
+    )
+    assert network.vp.fitness[network.vertex(0)] == 5
+    assert network.vp.fitness[network.vertex(1)] == 8
+    assert network.vp.fitness[network.vertex(2)] == 6
+    assert network.vp.fitness[network.vertex(3)] == 11
+    assert network.vp.fitness[network.vertex(4)] == 3
+
+    # What if the lone wolf is chosen
+    # Based on the previous fitness resulting from the criminal
+    # activity above.
+    np.random.seed(6)
+    node = 3
+    network = simulators.investigation_stage(
+        network,
+        frozenset([0, 1, 2, 3, 4]),
+        node,
+        network.vp.state[network.vertex(node)],
+    )
+    assert network.vp.fitness[network.vertex(0)] == 5
+    assert network.vp.fitness[network.vertex(1)] == 8
+    assert network.vp.fitness[network.vertex(2)] == 6
+    assert network.vp.fitness[network.vertex(3)] == 10.6
+    assert network.vp.fitness[network.vertex(4)] == 3
+
+    # Check in case multiple criminals are present
+    network.vp.state[network.vertex(4)] = &#34;c&#34;
+    # Triggers state and civilian punishment
+    np.random.seed(2)
+    node = 0
+    network = simulators.investigation_stage(
+        simulators.network,
+        frozenset([0, 1, 2, 3, 4]),
+        node,
+        network.vp.state[network.vertex(node)],
+    )
+    assert network.vp.fitness[network.vertex(0)] == 0
+    assert network.vp.fitness[network.vertex(1)] == 8
+    assert network.vp.fitness[network.vertex(2)] == 6
+    assert network.vp.fitness[network.vertex(3)] == 10.6
+    assert network.vp.fitness[network.vertex(4)] == 0.5</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_mutation"><code class="name flex">
+<span>def <span class="ident">test_mutation</span></span>(<span>self, create_gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the mutation works correclty.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_mutation(self,create_gt_network:gt.Graph)-&gt; None:
+    &#34;&#34;&#34;Test if the mutation works correclty.&#34;&#34;&#34;
+    simulators = SimMartVaq(create_gt_network,temperature=10)
+    # The seed should turn nodes into a criminal,honest or wolf
+    np.random.seed(0)
+    node = 4
+    network = simulators.mutation(simulators.network,person=node)
+    assert network.vp.state[network.vertex(node)] == &#39;c&#39; , &#34;Mutation didn&#39;t work properly&#34;
+    node = 0
+    network = simulators.mutation(simulators.network,person=node)
+    assert network.vp.state[network.vertex(node)] == &#39;h&#39; , &#34;Mutation didn&#39;t work properly&#34;
+    node = 3
+    network = simulators.mutation(simulators.network,person=node)
+    assert network.vp.state[network.vertex(node)] == &#39;c&#39; , &#34;Mutation didn&#39;t work properly&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_play"><code class="name flex">
+<span>def <span class="ident">test_play</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the play function is working.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_play(self,gt_network:gt.Graph)-&gt; None:
+    &#34;&#34;&#34;Test if the play function is working.&#34;&#34;&#34;
+    # Play the simulation
+    simulator = SimMartVaq(gt_network, ratio_honest=0.7, ratio_wolf=0.05)
+    simulator.play(simulator.network,rounds=50)</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_select_communities"><code class="name flex">
+<span>def <span class="ident">test_select_communities</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the random select communites is working correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_select_communities(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the random select communites is working correctly.&#34;&#34;&#34;
+    simulators = SimMartVaq(gt_network)
+    network = simulators.init_fitness(simulators.network)
+
+    # Depth 1
+    seed = np.random.randint(0, gt_network.num_vertices())
+    community = simulators.select_communities(network, radius=1, seed=seed)
+    nbrs = network.iter_all_neighbors(seed)
+    assert list(nbrs) != community
+
+    # Depth 2
+    seed = np.random.randint(0, gt_network.num_vertices())
+    community = simulators.select_communities(network, radius=2, seed=seed)
+    nbrs = list(network.iter_all_neighbors(seed))
+    scnd_degree_nbr: list = []
+    for nbr in nbrs:
+        scnd_degree_nbr = scnd_degree_nbr + list(network.get_all_neighbors(nbr))
+
+    nbrs = nbrs + scnd_degree_nbr
+    assert set(nbrs) == community
+
+    # Depth 3
+    seed = np.random.randint(0, gt_network.num_vertices())
+    community = simulators.select_communities(network, radius=3, seed=seed)
+    nbrs = list(network.iter_all_neighbors(seed))
+    scnd_degree_nbr = []
+    for nbr in nbrs:
+        scnd_degree_nbr = scnd_degree_nbr + list(network.get_all_neighbors(nbr))
+
+    third_degree_nbr: list = []
+    for nbr in scnd_degree_nbr:
+        third_degree_nbr = third_degree_nbr + list(network.get_all_neighbors(nbr))
+
+    nbrs = nbrs + scnd_degree_nbr + third_degree_nbr
+    assert set(nbrs) == community</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_select_multiple_communities"><code class="name flex">
+<span>def <span class="ident">test_select_multiple_communities</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if select_multiple_communities works correctly.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_select_multiple_communities(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if select_multiple_communities works correctly.&#34;&#34;&#34;
+    simulators = SimMartVaq(gt_network)
+    network = simulators.init_fitness(simulators.network)
+    min_grp = 5
+    max_grp = 10
+    dict_of_communities = simulators.select_multiple_communities(
+        network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+    )
+
+    assert len(dict_of_communities) != 0, &#34;Dict of communities is empty...&#34;
+    assert (
+        min_grp &lt;= len(dict_of_communities) &lt;= max_grp
+    ), &#34;Number of communites is not correct...&#34;
+
+    for k, v in dict_of_communities.items():
+        assert isinstance(k, int)
+        assert len(dict_of_communities[k]) &gt;= 1, &#34;Some communities are empty...&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_sim_mart_vaq"><code class="name flex">
+<span>def <span class="ident">test_sim_mart_vaq</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if the initialization works.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_sim_mart_vaq(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if the initialization works.&#34;&#34;&#34;
+    org_size = gt_network.num_vertices()
+    # Keep the ratio small so the test will be faster
+    # by adding less nodes
+    ratio_honest = 0.3
+    ratio_wolf = 0.1
+
+    simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+
+    # Test if the obj is init correctly
+    assert isinstance(
+        simulators, SimMartVaq
+    ), &#34;Simulator hasn&#39;t been init correctly&#34;
+
+    # Test if the ration is caluclated correctly
+    assert simulators.ratio_criminal == 0.6, &#34;Ratio is wrong.&#34;
+    assert (
+        simulators.n_criminal == org_size
+    ), &#34;Determined number of criminals is wrong.&#34;
+    assert simulators.total_number_nodes == 158, &#34;Ratio is wrong&#34;
+    assert simulators.new_nodes == 63, &#34;Number of nodes to add is wrong&#34;
+    assert (
+        round(simulators.relative_ratio_honest, 2) == 0.75
+    ), &#34;Relative ratio is wrong&#34;
+    assert (
+        round(simulators.relative_ratio_wolf, 2) == 0.25
+    ), &#34;Relative ratio is wrong&#34;
+
+    # Try to change its name
+    with pytest.raises(Exception):
+        simulators.name = &#34;New name&#34;</code></pre>
+</details>
+</dd>
+<dt id="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_sim_mart_vaq_wrong_init"><code class="name flex">
+<span>def <span class="ident">test_sim_mart_vaq_wrong_init</span></span>(<span>self, gt_network: graph_tool.Graph) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Test if a wrong init triggers the assert statements.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.essential
+def test_sim_mart_vaq_wrong_init(self, gt_network: gt.Graph) -&gt; None:
+    &#34;&#34;&#34;Test if a wrong init triggers the assert statements.&#34;&#34;&#34;
+    # With ratio_honest == 0
+    with pytest.raises(Exception):
+        assert SimMartVaq(gt_network, ratio_honest=0)
+
+    # With ratio_wolf == 1.1
+    with pytest.raises(Exception):
+        assert SimMartVaq(gt_network, ratio_wolf=1.1)
+
+    # With ratios not adding up more than 1
+    with pytest.raises(Exception):
+        assert SimMartVaq(gt_network, ratio_honest=0.8, ratio_wolf=0.3)
+        assert SimMartVaq(gt_network, ratio_honest=0.8, ratio_wolf=0.2)
+        assert SimMartVaq(gt_network, ratio_honest=-0.8, ratio_wolf=0.1)
+        assert SimMartVaq(gt_network, ratio_honest=-0.8, ratio_wolf=0.2)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="test.tests_simulators" href="index.html">test.tests_simulators</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq">TestSimMartVaq</a></code></h4>
+<ul class="">
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_act_divide_in_groups" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_act_divide_in_groups">test_act_divide_in_groups</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_act_divide_in_groups_faster" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_act_divide_in_groups_faster">test_act_divide_in_groups_faster</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_acting_stage" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_acting_stage">test_acting_stage</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_acting_stage_2" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_acting_stage_2">test_acting_stage_2</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_counting_status_proportions" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_counting_status_proportions">test_counting_status_proportions</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_divide_in_groups" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_divide_in_groups">test_divide_in_groups</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_evolutionary_stage" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_evolutionary_stage">test_evolutionary_stage</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_fermi_function" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_fermi_function">test_fermi_function</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_inflicting_damage" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_inflicting_damage">test_inflicting_damage</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_init_fitness" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_init_fitness">test_init_fitness</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_initialise_network" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_initialise_network">test_initialise_network</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_interchange_roles" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_interchange_roles">test_interchange_roles</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_investigation_stage" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_investigation_stage">test_investigation_stage</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_mutation" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_mutation">test_mutation</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_play" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_play">test_play</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_select_communities" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_select_communities">test_select_communities</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_select_multiple_communities" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_select_multiple_communities">test_select_multiple_communities</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_sim_mart_vaq" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_sim_mart_vaq">test_sim_mart_vaq</a></code></li>
+<li><code><a title="test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_sim_mart_vaq_wrong_init" href="#test.tests_simulators.test_sim_mart_vaq.TestSimMartVaq.test_sim_mart_vaq_wrong_init">test_sim_mart_vaq_wrong_init</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
