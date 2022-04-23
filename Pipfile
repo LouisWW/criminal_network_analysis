@@ -19,6 +19,7 @@ pytest-subtests = "*"
 pytest-cov = "*"
 pyintergraph = "*"
 tqdm = "*"
+pdoc3 = "*"
 
 [dev-packages]
 ipykernel = "*"
