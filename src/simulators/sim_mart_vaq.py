@@ -347,7 +347,7 @@ class SimMartVaq:
     ) -> gt.Graph:
         """Perform the evolutionary stage.
 
-        Randomly picks a two players and performs either mutation 
+        Randomly picks a two players and performs either mutation
         or a role switch with a certain probability.
         """
         person_a, person_b = np.random.choice(list(group_members), 2)

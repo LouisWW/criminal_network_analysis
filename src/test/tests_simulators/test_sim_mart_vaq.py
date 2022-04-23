@@ -146,8 +146,8 @@ class TestSimMartVaq:
     @pytest.mark.essential
     def test_act_divide_in_groups(self, gt_network: gt.Graph) -> None:
         """Test if the division into groups works correctly."""
-        ratio_honest = np.random.uniform(0.1, 0.99)
-        ratio_wolf = np.random.uniform(0.1, (1 - 0.99))
+        ratio_honest = np.random.uniform(0.1, 0.90)
+        ratio_wolf = np.random.uniform(0.1, (1 - ratio_honest - 0.1))
         simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
         simulators.network = simulators.initialise_network(simulators.network)
         divided_network, n_groups = simulators.act_divide_in_groups(
@@ -246,7 +246,10 @@ class TestSimMartVaq:
                     simulators.r_w * simulators.c_w
                 )
             else:
-                if network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] == "h":
+                if network_aft_dmge.vp.state[network_aft_dmge.vertex(node)] in [
+                    "h",
+                    "w",
+                ]:
                     assert network_aft_dmge.vp.fitness[
                         network_aft_dmge.vertex(node)
                     ] == untouched_network.vp.fitness[
@@ -542,3 +545,103 @@ class TestSimMartVaq:
         assert network.vp.fitness[network.vertex(2)] == 6
         assert network.vp.fitness[network.vertex(3)] == 10.6
         assert network.vp.fitness[network.vertex(4)] == 0.5
+
+    @pytest.mark.essential
+    def test_fermi_function(self, create_gt_network: gt.Graph) -> None:
+        """Test if the fermi function is working correclty."""
+        # The given network is just a placeholder
+        simulators = SimMartVaq(create_gt_network)
+        np.random.seed(0)
+        assert simulators.fermi_function(40, 3), "Should be True"
+        assert simulators.fermi_function(-40.1, 3) is False, "Should be False"
+
+    @pytest.mark.essential
+    def test_interchange_roles(self, create_gt_network: gt.Graph) -> None:
+        """Test if the interchanging role is working."""
+        simulators = SimMartVaq(create_gt_network, temperature=10)
+        # Seed 2 will trigger that the roles are interchanged
+        np.random.seed(2)
+        network = simulators.interchange_roles(
+            network=simulators.network, person_a=0, person_b=4
+        )
+        # Check if wolf turned criminal based on the criminal's fitness
+        assert (
+            network.vp.state[network.vertex(4)] == "c"
+        ), "Wolf didn't copied criminal...."
+        assert (
+            network.vp.state[network.vertex(0)] == "w"
+        ), "Criminal didn't copied wolf...."
+
+    @pytest.mark.essential
+    def test_mutation(self, create_gt_network: gt.Graph) -> None:
+        """Test if the mutation works correclty."""
+        simulators = SimMartVaq(create_gt_network, temperature=10)
+        # The seed should turn nodes into a criminal,honest or wolf
+        np.random.seed(0)
+        node = 4
+        network = simulators.mutation(simulators.network, person=node)
+        assert (
+            network.vp.state[network.vertex(node)] == "c"
+        ), "Mutation didn't work properly"
+        node = 0
+        network = simulators.mutation(simulators.network, person=node)
+        assert (
+            network.vp.state[network.vertex(node)] == "h"
+        ), "Mutation didn't work properly"
+        node = 3
+        network = simulators.mutation(simulators.network, person=node)
+        assert (
+            network.vp.state[network.vertex(node)] == "c"
+        ), "Mutation didn't work properly"
+
+    @pytest.mark.essential
+    def test_evolutionary_stage(self, gt_network: gt.Graph) -> None:
+        """Test if the evolutionary stage is working correctly."""
+        simulators = SimMartVaq(
+            gt_network, mutation_prob=0.3, temperature=10, ratio_honest=0.8
+        )
+        # Need to randomly change the fitness
+        np.random.seed(0)
+        network = simulators.initialise_network(simulators.network)
+        network = simulators.init_fitness(simulators.network)
+        np.random.seed(0)
+        for i in range(0, network.num_vertices()):
+            network.vp.fitness[network.vertex(i)] = np.random.randint(0, 200)
+
+        # To compare it to the other object
+        untouched_network = deepcopy(network)
+        min_grp = 5
+        max_grp = 10
+        dict_of_communities = simulators.select_multiple_communities(
+            network=network, radius=1, min_grp=min_grp, max_grp=max_grp
+        )
+        mbrs = dict_of_communities[min_grp]
+
+        # Check if the players changed status
+        # With seed 0, role interchange is triggered
+        np.random.seed(0)
+        network = simulators.evolutionary_stage(network, mbrs)
+
+        assert (
+            network.vp.state[network.vertex(419)]
+            == untouched_network.vp.state[untouched_network.vertex(419)]
+        ), "Interchange function didn't work properly"
+        assert (
+            network.vp.state[network.vertex(289)]
+            == untouched_network.vp.state[untouched_network.vertex(419)]
+        ), "Interchange function didn't work properly"
+
+        # Check if the players changed status
+        # With seed 5, mutation is triggered
+        np.random.seed(5)
+        network = simulators.evolutionary_stage(network, mbrs)
+        assert (
+            network.vp.state[network.vertex(2133)] == "h"
+        ), "Mutation function didn't work properly"
+
+    @pytest.mark.essential
+    def test_play(self, gt_network: gt.Graph) -> None:
+        """Test if the play function is working."""
+        # Play the simulation
+        simulator = SimMartVaq(gt_network, ratio_honest=0.7, ratio_wolf=0.05)
+        simulator.play(simulator.network, rounds=50)

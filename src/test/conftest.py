@@ -83,7 +83,7 @@ def random_network() -> nk.Graph:
     return NetworkGenerator.generate_random(n_nodes=5000)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def gt_network() -> gt.Graph:
     """Return the montagna_calls network as gt."""
     nx_network = NetworkReader().get_data("montagna_calls")
@@ -91,7 +91,7 @@ def gt_network() -> gt.Graph:
     return gt_network
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def bigger_gt_network(random_network: gt.Graph) -> gt.Graph:
     """Return a bigger gt network."""
     gt_network = NetworkConverter.nx_to_gt(random_network)

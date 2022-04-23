@@ -7,7 +7,7 @@ import pytest
 from network_utils.network_combiner import NetworkCombiner
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
-from src.network_utils.network_stats import NetworkStats
+from network_utils.network_stats import NetworkStats
 
 
 class TestNetworkCombiner:

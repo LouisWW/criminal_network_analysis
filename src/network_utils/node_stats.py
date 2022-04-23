@@ -8,7 +8,7 @@ from typing import Tuple
 
 import networkit as nk
 import numpy as np
-from network_converter import NetworkConverter
+from network_utils.network_converter import NetworkConverter
 
 
 class NodeStats:
@@ -66,8 +66,3 @@ class NodeStats:
     def get_average_path(self) -> None:
         """Get average path over a node."""
         raise NotImplementedError
-
-
-if __name__ == "__main__":
-
-    pass
