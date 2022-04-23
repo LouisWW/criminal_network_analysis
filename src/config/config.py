@@ -53,9 +53,4 @@ class ConfigParser:
         parser.add_argument("-verbose", action="store_true", help="Print extra info")
 
         # compile the flags
-        self.args = parser.parse_args()
-
-
-if __name__ == "__main__":
-
-    confiparser = ConfigParser()
+        self.args = parser.parse_known_args()[0]

@@ -8,7 +8,9 @@ __date__   = 11/04/2022
 """
 import itertools
 import logging
+import math
 import random
+from copy import deepcopy
 from typing import Any
 from typing import Dict
 from typing import FrozenSet
@@ -43,6 +45,8 @@ class SimMartVaq:
         c_c: int = 1,
         r_w: int = 1,
         r_c: int = 1,
+        temperature: int = 10,
+        mutation_prob: float = 0.3,
     ) -> None:
         """Init the network charaterisics."""
         # Define name of simulator
@@ -53,7 +57,7 @@ class SimMartVaq:
         assert isinstance(network, gt.Graph), "Network should be of type gt."
         assert 0 < ratio_honest < 1, "Ratio needs to be (0,1)"
         assert 0 < ratio_wolf < 1, "Ratio needs to be (0,1)"
-        assert 0 < ratio_wolf + ratio_honest < 1, "Togehter the ratio should be (0,1)"
+        assert 0 < ratio_wolf + ratio_honest < 1, "Together the ratio should be (0,1)"
         assert network.vp.state, "Network has no attribute state"
 
         self.ratio_honest = ratio_honest
@@ -84,6 +88,10 @@ class SimMartVaq:
         self.c_c = c_c
         self.r_w = r_w
         self.r_c = r_c
+
+        # Set the fermic temperature & mutation probability
+        self.temperature = temperature
+        self.mutation_prob = 0.3
 
     @property
     def name(self) -> str:
@@ -154,6 +162,8 @@ class SimMartVaq:
                 network = self.investigation_stage(
                     network, group_members, slct_pers, slct_status
                 )
+                # Evolutionary stage
+                network = self.evolutionary_stage(network, group_members)
 
         return network
 
@@ -330,6 +340,23 @@ class SimMartVaq:
         else:
             raise KeyError("Person status didn't correspond to c/w...")
 
+        return network
+
+    def evolutionary_stage(
+        self, network: gt.Graph, group_members: FrozenSet[int]
+    ) -> gt.Graph:
+        """Perform the evolutionary stage.
+
+        Randomly picks a two players and performs either mutation 
+        or a role switch with a certain probability.
+        """
+        person_a, person_b = np.random.choice(list(group_members), 2)
+        if np.random.rand() > self.mutation_prob:
+            # Based on the fermi function will check if an interaction will happen
+            network = self.interchange_roles(network, person_a, person_b)
+        else:
+            # Mutation will happen
+            network = self.mutation(network, person_a)
         return network
 
     def counting_status_proprotions(
@@ -522,3 +549,38 @@ class SimMartVaq:
             network.vertex_properties["fitness"] = fitness
 
         return network
+
+    def mutation(self, network: gt.Graph, person: int) -> gt.Graph:
+        """Perform mutation on a given individual."""
+        network.vp.state[network.vertex(person)] = np.random.choice(["c", "h", "w"], 1)[
+            0
+        ]
+        return network
+
+    def interchange_roles(
+        self, network: gt.Graph, person_a: int, person_b: int
+    ) -> gt.Graph:
+        """Interchange roles based on fermin function."""
+        fitness_a = network.vp.fitness[network.vertex(person_a)]
+        fitness_b = network.vp.fitness[network.vertex(person_b)]
+
+        value_a = deepcopy(network.vp.state[network.vertex(person_a)])
+        value_b = deepcopy(network.vp.state[network.vertex(person_b)])
+
+        # Probability that b copies a
+        if self.fermi_function(fitness_a, fitness_b):
+            network.vp.state[network.vertex(person_b)] = value_a
+        # Probability that a copies b
+        if self.fermi_function(fitness_b, fitness_a):
+            network.vp.state[network.vertex(person_a)] = value_b
+
+        return network
+
+    def fermi_function(self, w_j: float, w_i: float) -> bool:
+        """Return the probability of changing their role."""
+        prob = 1 / (math.exp(-(w_j - w_i) / self.temperature) + 1)
+        if np.random.rand() > prob:
+            return False
+        else:
+            return True
+        return None

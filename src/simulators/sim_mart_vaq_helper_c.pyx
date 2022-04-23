@@ -7,6 +7,9 @@ __date__ = 18/04/2022
 
 import numpy as np
 import random
+import logging
+
+logger = logging.getLogger("logger")
 
 
 cpdef dict divide_network_fast_loop(dict network_dict, int n_groups, int network_size):
@@ -44,9 +47,11 @@ cpdef dict divide_network_fast_loop(dict network_dict, int n_groups, int network
                 key_to_del.append(node)
 
         if len(key_to_del) == 0 :
+            logger.warning("Some isolated components might be unassigned...")
             break
         else:
             for k in key_to_del:
                 del network_dict[k]
 
     return nodes_status
+
