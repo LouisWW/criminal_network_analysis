@@ -1,4 +1,11 @@
 
+
+.PHONY: compile_cython
+compile_cython:
+	@echo Compiling cython code
+	python3 setup.py build_ext --inplace
+
+
 .PHONY: test
 test:
 	@echo Running the tests with pytest
@@ -16,7 +23,7 @@ docs_view:
 ## Delete all compiled Python files
 .PHONY: clean
 clean:
-	@echo Deleting all chache files as well as *.so & *.c
+	@echo Deleting all compiled files
 	find . -type f -name "*.py[co]" -delete
 	find . -type f -name "*.c" -delete
 	find . -type f -name "*.so" -delete
@@ -24,3 +31,4 @@ clean:
 	rm -rf .pytest_cache
 	rm -rf .build
 	rm -rf ../.myp_cache
+	rm -rf rce

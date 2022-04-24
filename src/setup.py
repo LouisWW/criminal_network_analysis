@@ -13,7 +13,9 @@ from distutils.core import setup
 from distutils.extension import Extension
 
 ext_modules = [
-    Extension("sim_mart_vaq_helper_c", ["simulators/sim_mart_vaq_helper_c.pyx"])
+    Extension(
+        "simulators.sim_mart_vaq_helper_c", ["simulators/sim_mart_vaq_helper_c.pyx"]
+    )
 ]
 
 extensions = cythonize(ext_modules, compiler_directives={"language_level": "3"})

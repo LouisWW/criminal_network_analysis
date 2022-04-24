@@ -22,7 +22,7 @@ from typing import Tuple
 import graph_tool.all as gt
 import numpy as np
 from network_utils.network_combiner import NetworkCombiner
-from sim_mart_vaq_helper_c import divide_network_fast_loop
+from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
 
 logger = logging.getLogger("logger")
