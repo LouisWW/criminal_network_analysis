@@ -6,6 +6,8 @@ More specifically, generated data is visualized.
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
+from typing import Any
+from typing import DefaultDict
 from typing import List
 
 import graph_tool.all as gt
@@ -33,7 +35,9 @@ class Plotter(ConfigParser):
         mpl.rcParams["savefig.dpi"] = 300
 
     def draw_network(
-        self, network: gt.Graph, color_vertex_property: str = None
+        self,
+        network: gt.Graph,
+        color_vertex_property: str = None,
     ) -> None:
         """Visualizes the Network.
 
@@ -123,5 +127,43 @@ class Plotter(ConfigParser):
             for v in network.vertices():
                 color_code[v] = color_map[network.vertex_properties["state"][v]]
             return network, color_code
+
+        elif color_vertex_property == "group_color":
+            # For now this color map is create outside
+            return network, None
         else:
             return None
+
+    def plot_lines(
+        self,
+        dict_data: DefaultDict[str, List[Any]],
+        data_to_plot: List[str],
+        *args: str,
+        **kwargs: Any,
+    ) -> plt.Axes:
+        """Plot line graph from data  points.
+
+        Args:
+            dict_data (DefaultDict[str, List[Any]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+
+        Returns:
+            plt.Axes: matplotlib axes object
+        """
+        _, ax = plt.subplots()
+
+        for data in data_to_plot:
+            if data not in dict_data.keys():
+                raise KeyError(f"Given key doens't exist,{dict_data.keys()=}")
+            ax.plot(dict_data[data], label=data)
+
+        if "title" in kwargs:
+            ax.set_title(kwargs["title"])
+        if "xlabel" in kwargs:
+            ax.set_xlabel(kwargs["xlabel"])
+        if "ylabel" in kwargs:
+            ax.set_ylabel(kwargs["ylabel"])
+
+        # set legend
+        ax.legend()
+        return ax
