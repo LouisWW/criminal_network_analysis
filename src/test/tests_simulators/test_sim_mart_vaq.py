@@ -4,6 +4,9 @@ from copy import deepcopy
 import graph_tool.all as gt
 import numpy as np
 import pytest
+from hypothesis import assume
+from hypothesis import given
+from hypothesis import strategies as st
 from simulators.sim_mart_vaq import SimMartVaq
 
 
@@ -568,6 +571,29 @@ class TestSimMartVaq:
         np.random.seed(0)
         assert simulators.fermi_function(40, 3), "Should be True"
         assert simulators.fermi_function(-40.1, 3) is False, "Should be False"
+
+    @pytest.mark.essential
+    @given(
+        x=st.floats(allow_nan=False, allow_infinity=False),
+        y=st.floats(allow_nan=False, allow_infinity=False),
+        t=st.floats(allow_nan=False, allow_infinity=False),
+    )
+    def test_fermi_function_for_overflow(
+        self, x: float, y: float, t: float, create_gt_network_session: gt.Graph
+    ) -> None:
+        """Test for fermi function if overflow still occurs.
+
+        Hypothesis package is used to test random numbers
+        """
+        assume(t != 0)
+        simulators = SimMartVaq(create_gt_network_session, temperature=t)
+
+        # Since it returns a bool anyway it will trigger the assert statements
+        # But her the goal is to trigger an overflow in the equation
+        try:
+            simulators.fermi_function(x, y)
+        except RuntimeError as e:
+            raise Exception(f"An error occurred with value {x},{y},{t}") from e
 
     @pytest.mark.essential
     def test_interchange_roles(self, create_gt_network: gt.Graph) -> None:

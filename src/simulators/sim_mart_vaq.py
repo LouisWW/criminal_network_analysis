@@ -8,7 +8,6 @@ __date__   = 11/04/2022
 """
 import itertools
 import logging
-import math
 import random
 from collections import defaultdict
 from copy import deepcopy
@@ -384,7 +383,6 @@ class SimMartVaq:
         or a role switch with a certain probability.
         """
         person_a, person_b = np.random.choice(list(group_members), 2)
-        print(person_a)
         if np.random.rand() > self.mutation_prob:
             # Based on the fermi function will check if an interaction will happen
             network = self.interchange_roles(network, person_a, person_b)
@@ -636,7 +634,7 @@ class SimMartVaq:
 
     def fermi_function(self, w_j: float, w_i: float) -> bool:
         """Return the probability of changing their role."""
-        prob = 1 / (math.exp(-(w_j - w_i) / self.temperature) + 1)
+        prob = 1 / (np.exp(-(w_j - w_i) / self.temperature) + 1)
         if np.random.rand() > prob:
             return False
         else:

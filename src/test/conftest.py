@@ -102,3 +102,14 @@ def bigger_gt_network(random_network: gt.Graph) -> gt.Graph:
 def create_gt_network(create_networkx: nx.Graph) -> gt.Graph:
     """Return the known networkx graph."""
     return NetworkConverter.nx_to_gt(create_networkx)
+
+
+@pytest.fixture(scope="session")
+def create_gt_network_session(create_networkx: nx.Graph) -> gt.Graph:
+    """Return the known networkx graph.
+
+    This function is run once. Thus the returned object might
+    be manipulated when used in other functions since it refers
+    to the same address.
+    """
+    return NetworkConverter.nx_to_gt(create_networkx)
