@@ -35,7 +35,6 @@ class SimMartVaq:
         network: gt.Graph,
         ratio_honest: float = 0.7,
         ratio_wolf: float = 0.1,
-        n_new_edges: int = 2,
         delta: int = 0,
         tau: int = 0,
         gamma: float = 0.5,
@@ -49,7 +48,27 @@ class SimMartVaq:
         temperature: int = 10,
         mutation_prob: float = 0.3,
     ) -> None:
-        """Init the network charaterisics."""
+        """Init the network charateristics.
+
+        Args:
+            network (gt.Graph): Initial criminal network
+            ratio_honest (float, optional): Honest ratio. Defaults to 0.7.
+            ratio_wolf (float, optional): Wolf ratio. Defaults to 0.1.
+            delta (int, optional): Influence of criminals on the acting of the wolf. Defaults to 0.
+            tau (int, optional):Influence of the wolf's action on criminals. Defaults to 0.
+            gamma (float, optional): Punishment ratio for the other members of the criminal
+                                                                    organization. Defaults to 0.5.
+            beta_s (int, optional): State punishment value. Defaults to 0.
+            beta_h (int, optional): Civil punishment value. Defaults to 10.
+            beta_c (int, optional): Criminal punishment value. Defaults to 400.
+            c_w (int, optional): Damage caused by wolf. Defaults to 1.
+            c_c (int, optional): Damage caused by criminal. Defaults to 1.
+            r_w (int, optional): Damage ratio for wolf. Defaults to 1.
+            r_c (int, optional): Damage ratio for criminal. Defaults to 1.
+            temperature (int, optional): Temperature used in the fermi function. Defaults to 10.
+            mutation_prob (float, optional): Mutation probability to either randomly pick a
+                                new state or switch state with an other agent. Defaults to 0.3.
+        """
         # Define name of simulator
         self._name = "sim_mart_vaq"
         self.network = network
@@ -92,7 +111,7 @@ class SimMartVaq:
 
         # Set the fermic temperature & mutation probability
         self.temperature = temperature
-        self.mutation_prob = 0.3
+        self.mutation_prob = mutation_prob
 
     @property
     def name(self) -> str:
@@ -106,8 +125,8 @@ class SimMartVaq:
         Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
         """
         logger.info(
-            f"Given the ratio param, {self.new_nodes} \
-                    nodes are added, total = {self.total_number_nodes} nodes!"
+            f"Given the ratio param, {self.new_nodes}\
+            nodes are added, total = {self.total_number_nodes} nodes!"
         )
         new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
             network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
