@@ -28,3 +28,4 @@ dependencies:
     - pyintergraph
     - tqdm
     - pdoc3
+    - hypothesis
