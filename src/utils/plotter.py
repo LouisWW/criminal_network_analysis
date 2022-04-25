@@ -41,9 +41,6 @@ class Plotter(ConfigParser):
         property
         """
         assert isinstance(network, gt.Graph), "network type is not from graph-tool"
-        # Add a color map corresponding to the chosen vertex_property
-        if color_vertex_property is not None:
-            network = self.get_color_map(network, color_vertex_property)
 
         # Define pos to circumvent error produced by graph_tool
         pos = gt.sfdp_layout(network)
@@ -73,10 +70,15 @@ class Plotter(ConfigParser):
             gt.graph_draw(network, pos=pos)
 
         elif self.args.draw_network == "n" and color_vertex_property is not None:
+            # Add a color map corresponding to the chosen vertex_property
+            # if color_vertex_property is not None:
+            network, _ = self.get_color_map(
+                network, color_vertex_property=color_vertex_property
+            )
             gt.graph_draw(
                 network,
                 pos=pos,
-                vertex_fill_color=network.vertex_properties["state_color"],
+                vertex_fill_color=network.vertex_properties[color_vertex_property],
             )
 
     def plot_log_log(self, data: List[float], x_label: str, y_label: str) -> plt.Axes:
@@ -113,13 +115,13 @@ class Plotter(ConfigParser):
         self, network: gt.Graph, color_vertex_property: str = None
     ) -> gt.PropertyMap:
         """Define the color of the vertex based on the vertex property."""
-        if color_vertex_property == "state":
+        if color_vertex_property == "state_color":
             # c = red, h = blue, w = green
             color_map = {"c": (1, 0, 0, 1), "h": (0, 0, 1, 1), "w": (0, 1, 0, 1)}
             color_code = network.new_vertex_property("vector<double>")
             network.vertex_properties["state_color"] = color_code
             for v in network.vertices():
                 color_code[v] = color_map[network.vertex_properties["state"][v]]
-            return network
+            return network, color_code
         else:
             return None
