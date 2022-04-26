@@ -21,6 +21,7 @@ pyintergraph = "*"
 tqdm = "*"
 pdoc3 = "*"
 hypothesis = "*"
+rise = "*"
 
 [dev-packages]
 ipykernel = "*"
