@@ -26,7 +26,7 @@ class Plotter(ConfigParser):
         super().__init__()
 
         # Making sure all the plots have the same parameters
-        plt.rcParams["figure.figsize"] = (10, 7)
+        plt.rcParams["figure.figsize"] = (5, 4)
         plt.rcParams["figure.autolayout"] = True
 
         # Change the default color list
@@ -151,11 +151,49 @@ class Plotter(ConfigParser):
             plt.Axes: matplotlib axes object
         """
         _, ax = plt.subplots()
+        if ax is None:
+            ax = plt.gca()
 
         for data in data_to_plot:
             if data not in dict_data.keys():
                 raise KeyError(f"Given key doens't exist,{dict_data.keys()=}")
             ax.plot(dict_data[data], label=data)
+
+        if "title" in kwargs:
+            ax.set_title(kwargs["title"])
+        if "xlabel" in kwargs:
+            ax.set_xlabel(kwargs["xlabel"])
+        if "ylabel" in kwargs:
+            ax.set_ylabel(kwargs["ylabel"])
+
+        # set legend
+        ax.legend()
+        return ax
+
+    def plot_hist(
+        self,
+        dict_data: DefaultDict[str, List[Any]],
+        data_to_plot: List[str],
+        *args: str,
+        **kwargs: Any,
+    ) -> plt.Axes:
+        """Plot a histogram from data points.
+
+        Args:
+            dict_data (DefaultDict[str, List[Any]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+
+        Returns:
+            plt.Axes: matplotlib axes object
+        """
+        _, ax = plt.subplots()
+        if ax is None:
+            ax = plt.gca()
+
+        for data in data_to_plot:
+            if data not in dict_data.keys():
+                raise KeyError(f"Given key doens't exist,{dict_data.keys()=}")
+            ax.hist(dict_data[data], label=data)
 
         if "title" in kwargs:
             ax.set_title(kwargs["title"])

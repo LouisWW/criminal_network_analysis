@@ -39,7 +39,6 @@ class TestPlotter:
         )
 
         assert isinstance(ax, plt.Axes)
-        assert plt.show(), "An error occurred with plt.show()"
 
     @pytest.mark.essential
     def test_plot_lines_wrong_key(self) -> None:
@@ -60,3 +59,24 @@ class TestPlotter:
                 ylabel="ratio (per)",
                 title="This is a test",
             )
+
+    @pytest.mark.essential
+    @patch("matplotlib.pyplot.show")
+    def test_plot_hist(self, mock_show: Mock) -> None:
+        """Test if the plot_hist function is working correctly."""
+        plotter = Plotter()
+
+        # create fake data
+        data_collector = defaultdict(list)
+        data_collector["honest_ratio"] = np.random.normal(size=1000)
+        data_collector["criminal_ratio"] = np.random.poisson(5, 1000)
+        data_collector["wolf_ratio"] = np.random.power(5, 1000)
+
+        ax = plotter.plot_hist(
+            dict_data=data_collector,
+            data_to_plot=["honest_ratio", "wolf_ratio", "criminal_ratio"],
+            xlabel="group size",
+            ylabel="count",
+            title="This is a test",
+        )
+        assert isinstance(ax, plt.Axes)
