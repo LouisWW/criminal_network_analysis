@@ -29,3 +29,4 @@ dependencies:
     - tqdm
     - pdoc3
     - hypothesis
+    - rise
