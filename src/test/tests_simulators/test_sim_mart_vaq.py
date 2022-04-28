@@ -517,6 +517,8 @@ class TestSimMartVaq:
         # activity above.
         np.random.seed(3)
         node = 3
+        # Wolf did act
+        simulators.wolf_acting = True
         network = simulators.investigation_stage(
             network,
             frozenset([0, 1, 2, 3, 4]),
@@ -534,6 +536,8 @@ class TestSimMartVaq:
         # activity above.
         np.random.seed(6)
         node = 3
+        # Wolf did act
+        simulators.wolf_acting = True
         network = simulators.investigation_stage(
             network,
             frozenset([0, 1, 2, 3, 4]),

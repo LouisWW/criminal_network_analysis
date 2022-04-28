@@ -267,13 +267,15 @@ class SimMartVaq:
                     ] - self.gamma * (state_penalty + civil_penalty)
 
         elif slct_status == "w":
-            # Punish the victimizer
-            network.vp.fitness[network.vertex(slct_pers)] = (
-                network.vp.fitness[network.vertex(slct_pers)]
-                - state_penalty
-                - civil_penalty
-                - criminal_penalty
-            )
+            # only punish a wolf if he dared to act
+            if self.wolf_acting is True:
+                # Punish the victimizer
+                network.vp.fitness[network.vertex(slct_pers)] = (
+                    network.vp.fitness[network.vertex(slct_pers)]
+                    - state_penalty
+                    - civil_penalty
+                    - criminal_penalty
+                )
 
         else:
             raise KeyError("sclt_status should be either h/w/c...")
@@ -354,11 +356,11 @@ class SimMartVaq:
 
         elif slct_pers_status == "w":
             # Decide if lone wolf dares to act
-            acting = False
+            self.wolf_acting = False
             if np.random.uniform() >= 1 - self.delta * (1 - p_c):
-                acting = True
+                self.wolf_acting = True
             # Inflicting damage to everyone but himself
-            if acting is True:
+            if self.wolf_acting is True:
                 for member in group_members:
                     if member != slct_pers and network.vp.state[
                         network.vertex(member)
