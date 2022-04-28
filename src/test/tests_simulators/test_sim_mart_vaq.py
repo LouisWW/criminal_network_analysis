@@ -29,7 +29,7 @@ class TestSimMartVaq:
             simulators, SimMartVaq
         ), "Simulator hasn't been init correctly"
 
-        # Test if the ration is caluclated correctly
+        # Test if the ratio is caluclated correctly
         assert simulators.ratio_criminal == 0.6, "Ratio is wrong."
         assert (
             simulators.n_criminal == org_size
@@ -75,7 +75,7 @@ class TestSimMartVaq:
         network = simulators.initialise_network(simulators.network)
 
         # Criminal network size should be 95
-        # Honest and Wolf ration should be within a range given the init is stochastic
+        # Honest and Wolf ratio should be within a range given the init is stochastic
         assert (
             len(gt.find_vertex(network, network.vp.state, "c")) == 95
         ), "Criminal ratio not correct"
@@ -429,7 +429,7 @@ class TestSimMartVaq:
             assert 0 <= p_w <= 1, "Proportion is not calculated correctly"
             assert (
                 pytest.approx(p_h + p_c + p_w, 0.1) == 1
-            ), "Total ration should sum up to 1"
+            ), "Total ratio should sum up to 1"
 
             assert isinstance(n_h, int), "Number should be an int"
             assert isinstance(n_c, int), "Number should be an int"
@@ -695,7 +695,7 @@ class TestSimMartVaq:
             len(data_collector["ratio_wolf"]) == rounds
         ), "Length of the collected data is not correct..."
         assert (
-            len(data_collector["ration_criminal"]) == rounds
+            len(data_collector["ratio_criminal"]) == rounds
         ), "Length of the collected data is not correct..."
         assert (
             len(data_collector["fitness_honest"]) == rounds
@@ -715,7 +715,7 @@ class TestSimMartVaq:
             len(set(data_collector["ratio_wolf"])) > 1
         ), "Collectors keep collecting same value..."
         assert (
-            len(set(data_collector["ration_criminal"])) > 1
+            len(set(data_collector["ratio_criminal"])) > 1
         ), "Collectors keep collecting same value..."
         assert (
             len(set(data_collector["fitness_honest"])) > 1

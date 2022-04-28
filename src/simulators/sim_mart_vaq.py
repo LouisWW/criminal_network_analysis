@@ -159,7 +159,7 @@ class SimMartVaq:
         If selected person is a wolf or criminal,
         damage is inflicted on others.
         """
-        # collectors which collects the ration and fitness over each iteration
+        # collectors which collects the ratio and fitness over each iteration
         data_collector = defaultdict(
             list,
             {
@@ -211,7 +211,7 @@ class SimMartVaq:
             )
             data_collector["ratio_honest"].append(p_h)
             data_collector["ratio_wolf"].append(p_w)
-            data_collector["ration_criminal"].append(p_c)
+            data_collector["ratio_criminal"].append(p_c)
             data_collector["fitness_honest"].append(mean_h_fit)
             data_collector["fitness_criminal"].append(mean_c_fit)
             data_collector["fitness_wolf"].append(mean_w_fit)
