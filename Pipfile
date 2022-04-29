@@ -23,6 +23,7 @@ pdoc3 = "*"
 hypothesis = "*"
 rise = "*"
 nbmake = "*"
+fitter = "*"
 
 [dev-packages]
 ipykernel = "*"
