@@ -174,6 +174,7 @@ class Plotter(ConfigParser):
         self,
         dict_data: DefaultDict[str, List[Any]],
         data_to_plot: List[str],
+        n_bins: int = None,
         *args: str,
         **kwargs: Any,
     ) -> plt.Axes:
@@ -193,7 +194,7 @@ class Plotter(ConfigParser):
         for data in data_to_plot:
             if data not in dict_data.keys():
                 raise KeyError(f"Given key doens't exist,{dict_data.keys()=}")
-            ax.hist(dict_data[data], label=data)
+            ax.hist(dict_data[data], label=data, bins=n_bins)
 
         if "title" in kwargs:
             ax.set_title(kwargs["title"])

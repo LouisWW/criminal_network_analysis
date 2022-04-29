@@ -75,8 +75,10 @@ class TestPlotter:
         ax = plotter.plot_hist(
             dict_data=data_collector,
             data_to_plot=["honest_ratio", "wolf_ratio", "criminal_ratio"],
+            n_bins=100,
             xlabel="group size",
             ylabel="count",
             title="This is a test",
         )
         assert isinstance(ax, plt.Axes)
+        plt.show()
