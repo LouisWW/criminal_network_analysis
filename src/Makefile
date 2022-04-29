@@ -1,3 +1,5 @@
+.EXPORT_ALL_VARIABLES:
+notebooks_dir = $(shell find . -type f -name \*.ipynb ! -name '*checkpoint*')
 
 
 .PHONY: compile_cython
@@ -10,6 +12,12 @@ compile_cython:
 test:
 	@echo Running the tests with pytest
 	python3 -m pytest
+
+.PHONY: test_notebooks
+test_notebooks:
+	@echo Testing notebooks with pytest
+	python3 -m pytest --nbmake $(notebooks)
+
 
 .PHONY: docs_view
 docs_view:
