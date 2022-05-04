@@ -8,6 +8,7 @@ __date__   = 11/04/2022
 """
 import itertools
 import logging
+import math
 import random
 from collections import defaultdict
 from copy import deepcopy
@@ -21,7 +22,7 @@ from typing import Tuple
 import graph_tool.all as gt
 import numpy as np
 from network_utils.network_combiner import NetworkCombiner
-from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
+from src.simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
 
 logger = logging.getLogger("logger")
@@ -308,7 +309,7 @@ class SimMartVaq:
         Given an group, select on person and proceed to the acting.
         """
         # Select one person
-        slct_pers = np.random.choice(list(group_members), 1)
+        slct_pers = np.random.choice(list(group_members), 1)[0]
         # Check the person status
         slct_pers_status = network.vp.state[network.vertex(slct_pers)]
 
@@ -661,3 +662,126 @@ class SimMartVaq:
         else:
             return True
         return None
+
+    def mean_group_size(self, radius: int, min_grp: int, max_grp: int) -> int:
+        """Compute the mean average groupe size."""
+        group_size_data_collector = defaultdict(
+            list
+        )  # type: DefaultDict[str, List[Any]]
+        group_size_data_collector["group_size"]
+        for _ in range(0, 100):
+            group_dict = self.select_multiple_communities(
+                self.network, radius=radius, min_grp=min_grp, max_grp=max_grp
+            )
+            for _, v in group_dict.items():
+                group_size_data_collector["group_size"].append(len(v))
+        return int(np.mean(group_size_data_collector["group_size"]))
+
+    def get_analytical_solution(
+        self, radius: int = 3, min_grp: int = 5, max_grp: int = 10
+    ) -> Dict[str, float]:
+        """Compute the analytical solution.
+
+        It has to be noted that the analytical solution offers limited insight.
+        First of all, it doesn't take into account the mutation factor. Second
+        it assumes that it is possible to have a sub-population that is filled
+        with criminals and wolfs. However, in case there is only one criminal in
+        the whole population. The in a sub-population of N players, there can never
+        be more than 1 criminal.
+        """
+        mean_fitness_dict = {"h": 0.0, "c": 0.0, "w": 0.0}
+
+        # Mean group size
+        N = self.mean_group_size(radius, min_grp, max_grp)
+        Z = self.network.num_vertices()
+        Z_c = int(self.ratio_criminal * Z)
+        Z_h = int(self.ratio_honest * Z)
+        Z_w = int(self.ratio_wolf * Z)
+
+        for k in mean_fitness_dict.keys():
+            for N_c_prime in range(0, N):
+                for N_w_prime in range(0, N - N_c_prime - 1):
+                    # Number of honest is N-n_c-n_w
+                    N_h_prime = N - N_c_prime - N_w_prime
+
+                    mean_field_approx = self.mean_field_approx(
+                        p_h=N_h_prime / N, p_c=N_c_prime / N, N=N, N_w=N_w_prime
+                    )
+
+                    mean_fitness_dict[k] += self.hypergeometric_dist(
+                        N_h_prime, N_c_prime, N_w_prime, Z_h, Z_c, Z_w, Z, N, k
+                    ) * (mean_field_approx[k]["a"] + mean_field_approx[k]["a"])
+
+        return mean_fitness_dict
+
+    def hypergeometric_dist(
+        self,
+        N_h: int,
+        N_c: int,
+        N_w: int,
+        Z_h: int,
+        Z_c: int,
+        Z_w: int,
+        Z: int,
+        N: int,
+        indv: str,
+    ) -> float:
+        """Compute the hypergeometric distatnce."""
+        if indv == "h":
+            if N_h != 0:
+                N_h = N_h - 1
+                Z_h = Z_h - 1
+        elif indv == "c":
+            if N_c != 0:
+                N_c = N_c - 1
+                Z_c = Z_c - 1
+        elif indv == "w":
+            if N_w != 0:
+                N_w = N_w - 1
+                Z_w = Z_w - 1
+
+        h = (math.comb(Z_h, N_h) * math.comb(Z_c, N_c) * math.comb(Z_w, N_w)) / (
+            math.comb(Z - 1, N - 1)
+        )
+        return h
+
+    def mean_field_approx(
+        self, p_h: float, p_c: float, N: int, N_w: int
+    ) -> Dict[str, Dict[str, float]]:
+        """Compute the mean field approximation based on the formula of the paper."""
+        # compute damage and benefits made by a criminal
+        d_c = self.c_c * p_c
+        b_c = self.r_c * self.c_c * (1 - p_c)
+
+        # compute the damage and benefits made by a wolf
+        p_w_prime = 1 - self.delta * (1 - p_c)
+        d_w = self.c_w * p_w_prime * (N_w) / N
+        d_w_prime = self.c_w * p_w_prime * (N_w - 1) / N
+        b_w = self.r_w * self.c_w * (N - 1) * (1 / N) * p_w_prime
+
+        # Fitness for honest,wolfs and criminals
+        # after acting stage
+        w_h_a = -d_c - d_w
+        w_c_a = b_c + self.tau * b_w - d_w
+        w_w_a = (1 - self.tau) * b_w - d_c - d_w_prime
+
+        # Fitness after investigation stage
+        w_h_i = 0
+        w_c_i = (
+            -(self.beta_s + self.beta_h * p_h)
+            * p_c
+            * (self.gamma * p_c + (1 - self.gamma) * (1 / N))
+        )
+        w_w_i = (
+            -(self.beta_s + self.beta_h * p_h + self.beta_c * p_c)
+            * (1 / N)
+            * (1 / N)
+            * p_w_prime
+        )
+
+        mean_field_approx = {
+            "h": {"a": w_h_a, "i": w_h_i},
+            "c": {"a": w_c_a, "i": w_c_i},
+            "w": {"a": w_w_a, "i": w_w_i},
+        }
+        return mean_field_approx

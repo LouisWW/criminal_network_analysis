@@ -730,3 +730,76 @@ class TestSimMartVaq:
         assert (
             len(set(data_collector["fitness_wolf"])) > 1
         ), "Collectors keep collecting same value..."
+
+    @pytest.mark.essential
+    def test_hypergeometric_dist(self, create_gt_network_session: gt.Graph) -> None:
+        """Test if the hypergeometric_dict function is working."""
+        simulators = SimMartVaq(create_gt_network_session)
+        assert (
+            simulators.hypergeometric_dist(10, 5, 5, 15, 10, 10, 35, 20, "x")
+            == 0.10275099641829939
+        )
+
+    @pytest.mark.essential
+    def test_mean_field_approx(self, create_gt_network_session: gt.Graph) -> None:
+        """Test if the mean_field_approx func works correctly using arbitrary arg."""
+        simulators = SimMartVaq(
+            create_gt_network_session,
+            c_c=2,
+            r_c=4,
+            c_w=5,
+            r_w=7,
+            delta=0.5,
+            tau=4,
+            gamma=2,
+            beta_h=20,
+            beta_s=32,
+            beta_c=40,
+        )
+
+        mean_filed_approx = simulators.mean_field_approx(p_h=0.5, p_c=0.3, N=40, N_w=9)
+
+        assert (
+            pytest.approx(mean_filed_approx["h"]["a"]) == -1.33125
+        ), "Value is not correct"
+        assert (
+            pytest.approx(mean_filed_approx["c"]["a"]) == 93.59375
+        ), "Value is not correct"
+        assert (
+            pytest.approx(mean_filed_approx["w"]["a"]) == -67.79375
+        ), "Value is not correct"
+        assert pytest.approx(mean_filed_approx["h"]["i"]) == 0, "Value is not correct"
+        assert (
+            pytest.approx(mean_filed_approx["c"]["i"]) == -7.245
+        ), "Value is not correct"
+        assert (
+            pytest.approx(mean_filed_approx["w"]["i"]) == -0.0219375
+        ), "Value is not correct"
+
+    @pytest.mark.essential
+    def test_get_analytical_solution(self, gt_network: gt.Graph) -> None:
+        """Test if get_analytical_solution works correctly."""
+        simulators = SimMartVaq(
+            gt_network,
+            ratio_honest=0.5,
+            ratio_wolf=0.2,
+            c_c=2,
+            r_c=4,
+            c_w=5,
+            r_w=7,
+            delta=0.5,
+            tau=4,
+            gamma=2,
+            beta_h=20,
+            beta_s=32,
+            beta_c=40,
+        )
+        mean_fitness_dict = simulators.get_analytical_solution()
+
+        assert mean_fitness_dict["h"] != 0
+        assert mean_fitness_dict["c"] != 0
+        assert mean_fitness_dict["w"] != 0
+
+        assert isinstance(mean_fitness_dict["h"], float)
+        assert isinstance(mean_fitness_dict["c"], float)
+        assert isinstance(mean_fitness_dict["w"], float)
