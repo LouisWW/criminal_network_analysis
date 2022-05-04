@@ -22,11 +22,12 @@ test_notebooks:
 .PHONY: docs_view
 docs_view:
 	@echo Creating API documentation
-	pdoc3 --html config -o ./docs --force
-	pdoc3 --html network_utils -o ./docs --force
-	pdoc3 --html simulators -o ./docs -force
-	pdoc3 --html test -o ./docs --force
-	pdoc3 --html utils -o ./docs --force
+	# pdoc3 --html config -o ./docs --force
+	# pdoc3 --html network_utils -o ./docs --force
+	# pdoc3 --html simulators -o ./docs -force
+	# pdoc3 --html test -o ./docs --force
+	# pdoc3 --html utils -o ./docs --force
+	pdo3 --html . -o ./docs --force
 
 ## Delete all compiled Python files
 .PHONY: clean

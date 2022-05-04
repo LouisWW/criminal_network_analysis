@@ -4,10 +4,10 @@ import warnings
 import graph_tool.all as gt
 import networkx as nx
 import pytest
-from network_utils.network_combiner import NetworkCombiner
-from network_utils.network_converter import NetworkConverter
-from network_utils.network_reader import NetworkReader
-from network_utils.network_stats import NetworkStats
+from src.network_utils.network_combiner import NetworkCombiner
+from src.network_utils.network_converter import NetworkConverter
+from src.network_utils.network_reader import NetworkReader
+from src.network_utils.network_stats import NetworkStats
 
 
 class TestNetworkCombiner:

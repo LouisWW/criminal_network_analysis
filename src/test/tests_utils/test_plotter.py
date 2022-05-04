@@ -1,12 +1,15 @@
 """Test if the plotting function is working correctly."""
 from collections import defaultdict
+from typing import Any
+from typing import DefaultDict
+from typing import List
 from unittest.mock import Mock
 from unittest.mock import patch
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from utils.plotter import Plotter
+from src.utils.plotter import Plotter
 
 
 class TestPlotter:
@@ -25,10 +28,10 @@ class TestPlotter:
         plotter = Plotter()
 
         # create fake data
-        data_collector = defaultdict(list)
-        data_collector["honest_ratio"] = np.random.rand(200)
-        data_collector["criminal_ratio"] = np.random.rand(200)
-        data_collector["wolf_ratio"] = np.random.rand(200)
+        data_collector = defaultdict(list)  # type: DefaultDict[str, List[Any]]
+        data_collector["honest_ratio"] = list(np.random.rand(200))
+        data_collector["criminal_ratio"] = list(np.random.rand(200))
+        data_collector["wolf_ratio"] = list(np.random.rand(200))
 
         ax = plotter.plot_lines(
             dict_data=data_collector,
@@ -46,10 +49,10 @@ class TestPlotter:
         plotter = Plotter()
 
         # create fake data
-        data_collector = defaultdict(list)
-        data_collector["honest_ratio"] = np.random.rand(200)
-        data_collector["criminal_ratio"] = np.random.rand(200)
-        data_collector["wolf_ratio"] = np.random.rand(200)
+        data_collector = defaultdict(list)  # type: DefaultDict[str, List[Any]]
+        data_collector["honest_ratio"] = list(np.random.rand(200))
+        data_collector["criminal_ratio"] = list(np.random.rand(200))
+        data_collector["wolf_ratio"] = list(np.random.rand(200))
 
         with pytest.raises(Exception):
             plotter.plot_lines(
@@ -67,10 +70,10 @@ class TestPlotter:
         plotter = Plotter()
 
         # create fake data
-        data_collector = defaultdict(list)
-        data_collector["honest_ratio"] = np.random.normal(size=1000)
-        data_collector["criminal_ratio"] = np.random.poisson(5, 1000)
-        data_collector["wolf_ratio"] = np.random.power(5, 1000)
+        data_collector = defaultdict(list)  # type: DefaultDict[str, List[Any]]
+        data_collector["honest_ratio"] = list(np.random.normal(size=1000))
+        data_collector["criminal_ratio"] = list(np.random.poisson(5, 1000))
+        data_collector["wolf_ratio"] = list(np.random.power(5, 1000))
 
         ax = plotter.plot_hist(
             dict_data=data_collector,

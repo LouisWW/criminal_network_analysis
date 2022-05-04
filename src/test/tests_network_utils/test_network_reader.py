@@ -1,7 +1,7 @@
 """Test if the reading of the data is done correctly."""
 import networkx as nx
 import pytest
-from network_utils.network_reader import NetworkReader
+from src.network_utils.network_reader import NetworkReader
 
 
 class TestNetworkReader:

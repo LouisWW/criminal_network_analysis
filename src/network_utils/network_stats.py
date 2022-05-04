@@ -10,8 +10,8 @@ from typing import Tuple
 import networkit as nk
 import numpy as np
 import powerlaw
+from src.utils.suppress_stdout_stderr import suppress_stdout_stderr
 from tqdm import tqdm
-from utils.suppress_stdout_stderr import suppress_stdout_stderr
 
 logger = logging.getLogger("logger")
 

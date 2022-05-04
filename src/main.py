@@ -6,12 +6,12 @@ __date__   = 22/02/2022
 """
 import logging
 
-from config.config import ConfigParser
-from network_utils.network_converter import NetworkConverter
-from network_utils.network_reader import NetworkReader
-from network_utils.network_stats import NetworkStats
-from simulators.sim_mart_vaq import SimMartVaq
-from utils.plotter import Plotter
+from src.config.config import ConfigParser
+from src.network_utils.network_converter import NetworkConverter
+from src.network_utils.network_reader import NetworkReader
+from src.network_utils.network_stats import NetworkStats
+from src.simulators.sim_mart_vaq import SimMartVaq
+from src.utils.plotter import Plotter
 
 # Catch the flags
 args = ConfigParser().args

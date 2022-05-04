@@ -21,7 +21,7 @@ from typing import Tuple
 
 import graph_tool.all as gt
 import numpy as np
-from network_utils.network_combiner import NetworkCombiner
+from src.network_utils.network_combiner import NetworkCombiner
 from src.simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
 
@@ -36,8 +36,8 @@ class SimMartVaq:
         network: gt.Graph,
         ratio_honest: float = 0.7,
         ratio_wolf: float = 0.1,
-        delta: int = 0,
-        tau: int = 0,
+        delta: float = 0.0,
+        tau: float = 0.0,
         gamma: float = 0.5,
         beta_s: int = 0,
         beta_h: int = 10,
@@ -46,7 +46,7 @@ class SimMartVaq:
         c_c: int = 1,
         r_w: int = 1,
         r_c: int = 1,
-        temperature: int = 10,
+        temperature: float = 10,
         mutation_prob: float = 0.3,
     ) -> None:
         """Init the network charateristics.

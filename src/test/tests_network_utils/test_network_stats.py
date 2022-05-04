@@ -4,7 +4,7 @@ import warnings
 import networkit as nk
 import networkx as nx
 import pytest
-from network_utils.network_stats import NetworkStats
+from src.network_utils.network_stats import NetworkStats
 
 
 class TestNetworkStats:

@@ -7,7 +7,7 @@ import pytest
 from hypothesis import assume
 from hypothesis import given
 from hypothesis import strategies as st
-from simulators.sim_mart_vaq import SimMartVaq
+from src.simulators.sim_mart_vaq import SimMartVaq
 
 
 class TestSimMartVaq:
@@ -583,7 +583,7 @@ class TestSimMartVaq:
         t=st.floats(allow_nan=False, allow_infinity=False),
     )
     def test_fermi_function_for_overflow(
-        self, x: float, y: float, t: float, create_gt_network_session: gt.Graph
+        self, x: float, y: float, t: int, create_gt_network_session: gt.Graph
     ) -> None:
         """Test for fermi function if overflow still occurs.
 
