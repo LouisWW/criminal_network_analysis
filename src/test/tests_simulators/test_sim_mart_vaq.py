@@ -731,6 +731,41 @@ class TestSimMartVaq:
             len(set(data_collector["fitness_wolf"])) > 1
         ), "Collectors keep collecting same value..."
 
+
+    @pytest.mark.essential
+    def test_scenario_1(self, gt_network: gt.Graph) -> None:
+        """Test specific scenario.
+        
+        Test the scenario where no mutation happens and criminals
+        have no benefits by acting but they act. Also wolfs do not act.
+        Also no punish is conduced.
+        So no change in the fitness is expected.
+        """
+        simulators = SimMartVaq(
+        network=gt_network,
+        ratio_honest=0.45,
+        ratio_wolf=0.45,
+        delta=-10,  # no acting for wolfs
+        gamma=0.5,
+        tau=0,  # no fintess sharing between wolf to criminal
+        beta_s=0,
+        beta_h=0,
+        beta_c=0,
+        c_c=0,  # no benefits from criminals/ they still act
+        r_c=10,
+        c_w=10,
+        r_w=10,
+        mutation_prob=-0.1  # only fermi function
+        )
+        _, data_collector = simulators.play(
+            network=simulators.network, rounds=100, radius=3
+        )
+        
+        # not any returns True if all element are False/0 
+        assert not any(data_collector['fitness_honest']) , "Fitness should be zero all the time"
+        assert not any(data_collector['fitness_wolf']) , "Fitness should be zero all the time"
+        assert not any(data_collector['fitness_criminal']) , "Fitness should be zero all the time"
+
     @pytest.mark.essential
     def test_hypergeometric_dist(self, create_gt_network_session: gt.Graph) -> None:
         """Test if the hypergeometric_dict function is working."""
@@ -776,6 +811,34 @@ class TestSimMartVaq:
             pytest.approx(mean_filed_approx["w"]["i"]) == -0.0219375
         ), "Value is not correct"
 
+
+    @pytest.mark.essential
+    def test_mean_field_approx_1(self, create_gt_network_session: gt.Graph) -> None:
+        """Test if the mean_field_approx func works correctly using arbitrary arg.
+        
+        The return value should be zero
+        """
+        simulators = SimMartVaq(
+            create_gt_network_session,
+            c_c=0,
+            r_c=4,
+            c_w=0,
+            r_w=7,
+            delta=0.5,
+            tau=4,
+            gamma=2,
+            beta_h=0,
+            beta_s=0,
+            beta_c=0,
+        )
+        mean_filed_approx = simulators.mean_field_approx(p_h=0.5, p_c=0.3, N=40, N_w=9)
+        assert pytest.approx(mean_filed_approx["h"]["a"]) == 0, "Value is not correct"
+        assert pytest.approx(mean_filed_approx["c"]["a"]) == 0, "Value is not correct"
+        assert pytest.approx(mean_filed_approx["w"]["a"]) == 0, "Value is not correct"
+        assert pytest.approx(mean_filed_approx["h"]["i"]) == 0, "Value is not correct"
+        assert pytest.approx(mean_filed_approx["c"]["i"]) == 0, "Value is not correct"
+        assert pytest.approx(mean_filed_approx["w"]["i"]) == 0, "Value is not correct"
+        
     @pytest.mark.essential
     def test_get_analytical_solution(self, gt_network: gt.Graph) -> None:
         """Test if get_analytical_solution works correctly."""
@@ -803,3 +866,35 @@ class TestSimMartVaq:
         assert isinstance(mean_fitness_dict["h"], float)
         assert isinstance(mean_fitness_dict["c"], float)
         assert isinstance(mean_fitness_dict["w"], float)
+        
+    @pytest.mark.essential
+    def test_get_analytical_solution_1(self, gt_network: gt.Graph) -> None:
+        """Test if get_analytical_solution works correctly.
+        
+        The results should return a value of zero!
+        """
+        simulators = SimMartVaq(
+            gt_network,
+            ratio_honest=0.5,
+            ratio_wolf=0.2,
+            c_c=0,
+            r_c=4,
+            c_w=0,
+            r_w=7,
+            delta=0.5,
+            tau=4,
+            gamma=2,
+            beta_h=0,
+            beta_s=0,
+            beta_c=0,
+        )
+        mean_fitness_dict = simulators.get_analytical_solution()
+
+        assert mean_fitness_dict["h"] == 0
+        assert mean_fitness_dict["c"] == 0
+        assert mean_fitness_dict["w"] == 0
+
+        assert isinstance(mean_fitness_dict["h"], float)
+        assert isinstance(mean_fitness_dict["c"], float)
+        assert isinstance(mean_fitness_dict["w"], float)
+
