@@ -5,13 +5,21 @@ __author__ = Louis Weyland
 __date__   = 22/02/2022
 """
 import logging
+import os
+import sys
 
-from src.config.config import ConfigParser
-from src.network_utils.network_converter import NetworkConverter
-from src.network_utils.network_reader import NetworkReader
-from src.network_utils.network_stats import NetworkStats
-from src.simulators.sim_mart_vaq import SimMartVaq
-from src.utils.plotter import Plotter
+# Get directory first
+path = os.getcwd()
+par_dir = os.path.abspath(os.path.join(path, "../"))
+# Import own module
+sys.path.append(par_dir)
+if True:
+    from src.config.config import ConfigParser
+    from src.network_utils.network_converter import NetworkConverter
+    from src.network_utils.network_reader import NetworkReader
+    from src.network_utils.network_stats import NetworkStats
+    from src.simulators.sim_mart_vaq import SimMartVaq
+    from src.utils.plotter import Plotter
 
 # Catch the flags
 args = ConfigParser().args
