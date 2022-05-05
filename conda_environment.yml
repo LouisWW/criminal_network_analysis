@@ -32,3 +32,4 @@ dependencies:
     - rise
     - nbmake
     - fitter
+    - SALib

@@ -24,6 +24,7 @@ hypothesis = "*"
 rise = "*"
 nbmake = "*"
 fitter = "*"
+SALib = "*"
 
 [dev-packages]
 ipykernel = "*"
