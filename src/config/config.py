@@ -50,6 +50,37 @@ class ConfigParser:
             help="""Defines if the simulation based on Martiez-Vaquero is run.""",
         )
 
+        parser.add_argument(
+            "-sa",
+            "--sensitivity-analysis",
+            type=str,
+            default=None,
+            nargs="?",
+            const="sim-mart-vaq",
+            choices=["sim-mart-vaq"],
+            help="""Defines to run a sensitivity analysis on one of the choices.""",
+        )
+
+        parser.add_argument(
+            "-n-samples",
+            type=int,
+            default=15,
+            help="""Defines the sampling number for the saltelli method.(default: %(default)s) """,
+        )
+
+        parser.add_argument(
+            "-output-value",
+            type=str,
+            default=None,
+            help="""Defines on which output value to focus for the sensitivity analysis.""",
+        )
+
+        parser.add_argument(
+            "-save",
+            action="store_true",
+            help="""Defines if the results should be saved.""",
+        )
+
         parser.add_argument("-verbose", action="store_true", help="Print extra info")
 
         # compile the flags
