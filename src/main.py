@@ -20,6 +20,7 @@ if True:
     from src.network_utils.network_stats import NetworkStats
     from src.simulators.sim_mart_vaq import SimMartVaq
     from src.utils.plotter import Plotter
+    from src.utils.sensitivity_analysis import SensitivityAnalyser
 
 # Catch the flags
 args = ConfigParser().args
@@ -38,18 +39,6 @@ logger.addHandler(logger_handler)
 logger.propagate = False
 logger.setLevel(logging.INFO)
 
-"""
-if args.draw_network:
-
-    Visualize the network.
-
-    Default is circular representation
-
-    network = NetworkReader().read_montagna_phone_calls()
-    # convert graph_obj
-    network = NetworkConverter.nx_to_gt(network)
-    Plotter().draw_network(network)
-"""
 
 if args.sim_mart_vaq:
     """Simulate the simulation form
@@ -76,3 +65,22 @@ if args.sim_mart_vaq:
     network_stats.get_overview()
 
     Plotter().draw_network(new_gt_network, color_vertex_property="state")
+
+
+if args.sensitivity_analysis:
+    """Runs a sensitivity analysis on the given choice."""
+
+    if args.sensitivity_analysis == "sim-mart-vaq":
+        problem = {
+            "num_vars": 2,
+            "names": ["tau", "ratio_wolf"],
+            "bounds": [[0, 1], [0.1, 0.28]],
+        }
+
+        sa = SensitivityAnalyser()
+        sobol_indices = sa.sim_mart_vaq_sa(
+            output_value=args.output_value,
+            problem=problem,
+            n_samples=args.n_samples,
+            rounds=args.rounds,
+        )
