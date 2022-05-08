@@ -120,7 +120,7 @@ class SimMartVaq:
         return self._name
 
     def initialise_network(self, network: gt.Graph, n_new_edges: int = 2) -> gt.Graph:
-        """Add to the existing criminal network honests and lone wolfs.
+        """Add to the existing criminal network honest and lone wolfs.
 
         Thereby, the nodes are added based on the preferential attachment principle.
         Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
@@ -236,7 +236,7 @@ class SimMartVaq:
             # No victimizer ->  No punishment
             return network
 
-        # If vicitmizer is found, penalties shouldn't 0.
+        # If victimizer is found, penalties shouldn't 0.
         # state investigation
         state_penalty = self.conducting_investigation(
             group_members, slct_pers, self.beta_s
@@ -279,7 +279,7 @@ class SimMartVaq:
                 )
 
         else:
-            raise KeyError("sclt_status should be either h/w/c...")
+            raise KeyError("slct_status should be either h/w/c...")
 
         return network
 
@@ -447,7 +447,7 @@ class SimMartVaq:
             elif state == "w":
                 w_fit.append(network.vp.fitness[network.vertex(member)])
             else:
-                raise KeyError("sclt_status should be either h/w/c...")
+                raise KeyError("slct_status should be either h/w/c...")
 
         mean_h_fit = np.mean(h_fit)
         mean_c_fit = np.mean(c_fit)
@@ -726,7 +726,7 @@ class SimMartVaq:
         N: int,
         indv: str,
     ) -> float:
-        """Compute the hypergeometric distatnce."""
+        """Compute the hypergeometric distance."""
         if indv == "h":
             if N_h != 0:
                 N_h = N_h - 1
