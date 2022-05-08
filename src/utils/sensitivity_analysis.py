@@ -20,14 +20,13 @@ from typing import TypeVar
 
 import numpy as np
 import pandas as pd
+from p_tqdm import p_map
 from SALib.analyze import sobol
 from SALib.sample import saltelli
 from src.config.config import ConfigParser
 from src.network_utils.network_converter import NetworkConverter
 from src.network_utils.network_reader import NetworkReader
 from src.simulators.sim_mart_vaq import SimMartVaq
-from tqdm import tqdm
-
 
 logger = logging.getLogger("logger")
 
@@ -72,7 +71,7 @@ class SensitivityAnalyser(ConfigParser):
                 # Get the saving directory
                 # Get directory first
                 path = os.getcwd()
-                par_dir = os.path.abspath(os.path.join(path, "../"))
+                par_dir = os.path.abspath(os.path.join(path))
                 # par_dir = ../src/
                 savig_dir = par_dir + "/results/data/sensitivity_analysis/"
                 file_name = (
@@ -80,9 +79,9 @@ class SensitivityAnalyser(ConfigParser):
                     + func.__name__
                     + "_"
                     + str(kwargs["output_value"])
-                    + "_"
+                    + "_r_"
                     + str(kwargs["rounds"])
-                    + "_"
+                    + "_n_s_"
                     + str(kwargs["n_samples"])
                     + "_"
                     + timestamp
@@ -103,6 +102,17 @@ class SensitivityAnalyser(ConfigParser):
     ) -> Dict[str, List[float]]:
         """Perform a sensitivity analysis on the Martinez-Vaquero model.
 
+        The analysis is limited on "delta","tau","gamma","beta_s","beta_h" and "beta_c".
+        For the sake of time, no sensitivity analysis is conducted on the ration of h/w/c.
+        Actually, h/w/c are correlated and would therefore return falsified Sobol results.
+        Furthermore, the importance of the two parameters, temperature or the probability
+        of random mutation is known. If the temperature is too high, the system will have
+        random chaotic switched between status. If the probability of random mutation is high,
+        the system with converge to a ration of 0.33 for h/w/c. What is interesting is to see the
+        importance of the investigation stage as well as the influence of criminals on lone wolfs.
+        Also it is interesting to see, what influence the penalty on the whole criminal organisation
+        can have.
+
         Args:
             network  (gt.graph): Criminal network
             output_value  (str): Name of the interested output value such as
@@ -116,9 +126,10 @@ class SensitivityAnalyser(ConfigParser):
         # Get the network of criminal first
         nx_network = NetworkReader().get_data(self.args.read_data)
         gt_network = NetworkConverter.nx_to_gt(nx_network)
+
         if problem is None:
             problem = {
-                "num_vars": 2,
+                "num_vars": 6,
                 "names": [
                     "delta",
                     "tau",
@@ -126,39 +137,33 @@ class SensitivityAnalyser(ConfigParser):
                     "beta_s",
                     "beta_h",
                     "beta_c",
-                    "c_w",
-                    "c_c",
-                    "r_w",
-                    "r_c",
-                    "temperature",
-                    "mutation_prob",
                 ],
-                "bounds": [[0, 1], [0.1, 0.28]],
+                "bounds": [[0, 1], [0, 1], [0, 1], [0, 200], [0, 200], [0, 200]],
             }
         # sample
         param_values = saltelli.sample(problem, n_samples)
 
+        # ((number of loops*rounds/average_time_per_round)/n_threads)/ convert_to_hours
+        approx_running_time = ((len(param_values) * rounds * (45 / 1000)) / 23) / 3600
+        logger.warning(
+            f"The sensitivity analysis will take approx {approx_running_time:.2f}h on\
+            24 cpus (~ 3.8 GHz))"
+        )
         # Running multiprocessing
-        num_core = multiprocessing.cpu_count() - 1
-        num_core = multiprocessing.cpu_count() - 1
-        pool = multiprocessing.Pool(num_core)
-        Y = []
-        for res in tqdm(
-            pool.map(
-                sim_mart_vaq_sa_helper,
-                (
+        num_cpus = multiprocessing.cpu_count() - 1
+        Y = p_map(
+            sim_mart_vaq_sa_helper,
+            (
+                [
                     (gt_network, problem, params, output_value, rounds)
                     for params in param_values
-                ),
+                ]
             ),
-            desc="Running sensitivity analysis...",
-            total=len(param_values),
-        ):
-            Y.append(res)
+            **{"num_cpus": num_cpus, "desc": "Running sensitivity analysis"},
+        )
 
         Y_array = np.asarray(Y)
-        pool.close()
-        pool.join()
+
         # analyse
         sobol_indices = sobol.analyze(problem, Y_array)
         return sobol_indices
