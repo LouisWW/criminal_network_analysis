@@ -1,0 +1,22 @@
+                        ST   ST_conf        S1   S1_conf        S2   S2_conf
+delta             0.982116  0.501333 -0.011102  0.414396       NaN       NaN
+tau               0.997761  0.343145 -0.253978  0.462904       NaN       NaN
+gamma             0.715842  0.325770  0.095898  0.394065       NaN       NaN
+beta_s            0.834522  0.328990 -0.058518  0.457930       NaN       NaN
+beta_h            0.735119  0.347120 -0.271276  0.438162       NaN       NaN
+beta_c            0.610772  0.280869 -0.105652  0.346483       NaN       NaN
+(delta, tau)           NaN       NaN       NaN       NaN  0.040512  0.533790
+(delta, gamma)         NaN       NaN       NaN       NaN  0.039833  0.566568
+(delta, beta_s)        NaN       NaN       NaN       NaN -0.041956  0.558222
+(delta, beta_h)        NaN       NaN       NaN       NaN  0.215900  0.641786
+(delta, beta_c)        NaN       NaN       NaN       NaN -0.313999  0.483534
+(tau, gamma)           NaN       NaN       NaN       NaN  0.365109  0.551683
+(tau, beta_s)          NaN       NaN       NaN       NaN  0.479410  0.521453
+(tau, beta_h)          NaN       NaN       NaN       NaN  0.280265  0.516426
+(tau, beta_c)          NaN       NaN       NaN       NaN  0.239133  0.540662
+(gamma, beta_s)        NaN       NaN       NaN       NaN  0.057936  0.609968
+(gamma, beta_h)        NaN       NaN       NaN       NaN  0.314571  0.589083
+(gamma, beta_c)        NaN       NaN       NaN       NaN -0.120982  0.503581
+(beta_s, beta_h)       NaN       NaN       NaN       NaN  0.052719  0.560466
+(beta_s, beta_c)       NaN       NaN       NaN       NaN  0.178492  0.451583
+(beta_h, beta_c)       NaN       NaN       NaN       NaN -0.080684  0.567011

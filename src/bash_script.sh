@@ -10,4 +10,4 @@
 
 
 # Run the sensitivity analysis
-python3 main.py -read-data montagna_meetings -sa sim-mart-vaq -n-samples 32 -r 2500 -output-value ratio_criminal -save
+python3 main.py -read-data montagna_meetings -sa sim-mart-vaq -n-samples 32 -r 3000 -output-value ratio_criminal -save

@@ -41,7 +41,6 @@ def sim_mart_vaq_sa_helper(tuple_of_variable: Any) -> float:
     variable_dict = OrderedDict().fromkeys(problem["names"], 0)
     variable_dict = dict(zip(variable_dict.keys(), params))
 
-    np.random.seed(0)
     simulator = SimMartVaq(network=gt_network, **variable_dict)
     _, data_collector = simulator.play(network=simulator.network, rounds=rounds)
     return data_collector[output_value][-1]
