@@ -37,7 +37,9 @@ logger_handler.setFormatter(
 )
 logger.addHandler(logger_handler)
 logger.propagate = False
-logger.setLevel(logging.INFO)
+
+if args.verbose:
+    logger.setLevel(logging.INFO)
 
 
 if args.sim_mart_vaq:
@@ -71,16 +73,11 @@ if args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
 
     if args.sensitivity_analysis == "sim-mart-vaq":
-        problem = {
-            "num_vars": 2,
-            "names": ["tau", "ratio_wolf"],
-            "bounds": [[0, 1], [0.1, 0.28]],
-        }
 
         sa = SensitivityAnalyser()
         sobol_indices = sa.sim_mart_vaq_sa(
             output_value=args.output_value,
-            problem=problem,
+            problem=None,
             n_samples=args.n_samples,
             rounds=args.rounds,
         )
