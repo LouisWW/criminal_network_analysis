@@ -16,6 +16,7 @@ from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Tuple
+from typing import TypeVar
 
 import numpy as np
 import pandas as pd
@@ -29,6 +30,8 @@ from tqdm import tqdm
 
 
 logger = logging.getLogger("logger")
+
+SA = TypeVar("SA", bound="SensitivityAnalyser")
 
 
 def sim_mart_vaq_sa_helper(tuple_of_variable: Any) -> float:
@@ -59,9 +62,7 @@ class SensitivityAnalyser(ConfigParser):
         """
 
         @functools.wraps(func)
-        def wrapper_decorator(
-            self: SensitivityAnalyser, *args: Tuple, **kwargs: Dict[str, Any]
-        ) -> Any:
+        def wrapper_decorator(self: SA, *args: Tuple, **kwargs: Dict[str, Any]) -> Any:
             value = func(self, *args, **kwargs)
             # Save results
             if self.args.save:
@@ -79,6 +80,10 @@ class SensitivityAnalyser(ConfigParser):
                     + func.__name__
                     + "_"
                     + str(kwargs["output_value"])
+                    + "_"
+                    + str(kwargs["rounds"])
+                    + "_"
+                    + str(kwargs["n_samples"])
                     + "_"
                     + timestamp
                 )
