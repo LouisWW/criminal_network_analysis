@@ -25,6 +25,7 @@ rise = "*"
 nbmake = "*"
 fitter = "*"
 SALib = "*"
+p-tqdm = "*"
 
 [dev-packages]
 ipykernel = "*"

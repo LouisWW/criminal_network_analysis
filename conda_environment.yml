@@ -27,6 +27,7 @@ dependencies:
     - ipykernel
     - pyintergraph
     - tqdm
+    - p-tqdm
     - pdoc3
     - hypothesis
     - rise
