@@ -508,7 +508,7 @@ class SimMartVaq:
         ):
             network.vp.grp_nbr[network.vertex(v)] = group_number
 
-        # Loop through the dict and assinging same value to its neigbours
+        # Loop through the dict and assinging same value to its neighbours
         pbar = tqdm(total=len(dict_nodes_and_neighbour))
         while len(dict_nodes_and_neighbour) > 0:
             key_to_del = []
@@ -607,7 +607,7 @@ class SimMartVaq:
 
         Args:
             network (gt.Graph): graph-tool network
-            radius (int): how many neigbours to select(neighbours of neighbours of...)
+            radius (int): how many neighbours to select(neighbours of neighbours of...)
             seed (int):  starting node
         """
         nbrs = {seed}
