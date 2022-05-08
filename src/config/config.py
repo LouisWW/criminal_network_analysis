@@ -81,6 +81,16 @@ class ConfigParser:
             help="""Defines if the results should be saved.""",
         )
 
+        parser.add_argument(
+            "-r",
+            "--rounds",
+            type=int,
+            default=10,
+            help="""Defines the numbers of rounds played. Can be applied to  SimMartVaq.play and
+            SensitivityAnalyser.sim_mart_vaq_sa
+            """,
+        )
+
         parser.add_argument("-verbose", action="store_true", help="Print extra info")
 
         # compile the flags
