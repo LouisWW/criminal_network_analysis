@@ -135,9 +135,10 @@ class SimMartVaq:
 
         # Get all the agents with no states
         nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, "")
-        for i in tqdm(
+        tq = tqdm(
             nodes_no_states, desc="Adding attributes to nodes", total=self.new_nodes
-        ):
+        )
+        for i in tq:
             new_network.vp.state[new_network.vertex(i)] = np.random.choice(
                 ["h", "w"], 1, p=[self.relative_ratio_honest, self.relative_ratio_wolf]
             )[0]

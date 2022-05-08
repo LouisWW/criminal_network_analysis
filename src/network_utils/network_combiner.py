@@ -27,10 +27,11 @@ class NetworkCombiner:
         # Get the number of nodes of the existing network
         existing_nodes = network.number_of_nodes()
 
-        for new_node in tqdm(
+        tq = tqdm(
             range(existing_nodes + 1, existing_nodes + new_nodes + 1),
             desc="Adding nodes to existing network using preferential attachment...",
-        ):
+        )
+        for new_node in tq:
             # Get the attachment prob distribution before adding the node
             nodes_probs = []
             n_edges = len(network.edges())
