@@ -40,7 +40,32 @@ class TestPlotter:
             ylabel="ratio (per)",
             title="This is a test",
         )
+        assert isinstance(ax, plt.Axes)
 
+    @pytest.mark.essential
+    @patch("matplotlib.pyplot.show")
+    def test_plot_lines_with_std(self, mock_show: Mock) -> None:
+        """Test if the plot_lines function is working correctly."""
+        plotter = Plotter()
+
+        # create fake data
+        data_collector = defaultdict(list)  # type: DefaultDict[str, List[Any]]
+        data_collector["mean_honest_ratio"] = list(np.random.rand(200))
+        data_collector["mean_criminal_ratio"] = list(np.random.rand(200))
+        data_collector["mean_wolf_ratio"] = list(np.random.rand(200))
+
+        data_collector["std_honest_ratio"] = list(np.random.normal(0.1, 5, size=200))
+        data_collector["std_criminal_ratio"] = list(np.random.normal(0.1, 5, size=200))
+        data_collector["std_wolf_ratio"] = list(np.random.normal(0.1, 5, size=200))
+
+        ax = plotter.plot_lines(
+            dict_data=data_collector,
+            data_to_plot=["mean_honest_ratio", "mean_criminal_ratio"],
+            xlabel="rounds",
+            ylabel="ratio (per)",
+            title="This is a test",
+            plot_std=True,
+        )
         assert isinstance(ax, plt.Axes)
 
     @pytest.mark.essential

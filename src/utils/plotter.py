@@ -136,7 +136,7 @@ class Plotter(ConfigParser):
 
     def plot_lines(
         self,
-        dict_data: DefaultDict[str, List[Any]],
+        dict_data: DefaultDict[str, List[int]],
         data_to_plot: List[str],
         *args: str,
         **kwargs: Any,
@@ -144,7 +144,7 @@ class Plotter(ConfigParser):
         """Plot line graph from data  points.
 
         Args:
-            dict_data (DefaultDict[str, List[Any]]): Contains all the data
+            dict_data (DefaultDict[str, List[int]]): Contains all the data
             data_to_plot (List[str]): Defines which data to choose from the dict_data
 
         Returns:
@@ -158,6 +158,14 @@ class Plotter(ConfigParser):
             if data not in dict_data.keys():
                 raise KeyError(f"Given key doens't exist,{dict_data.keys()=}")
             ax.plot(dict_data[data], label=data)
+            if "plot_std" in kwargs:
+                std = data.replace("mean", "std")
+                ax.fill_between(
+                    range(0, len(dict_data[data])),
+                    dict_data[data] - dict_data[std],
+                    dict_data[data] + dict_data[std],
+                    alpha=0.5,
+                )
 
         if "title" in kwargs:
             ax.set_title(kwargs["title"])
