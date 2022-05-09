@@ -251,7 +251,7 @@ class SimMartVaq:
             repetition (int, optional): number of repetition of the simulation. Defaults to 20.
 
         Returns:
-            DefaultDict[Union[int, str], Union[DefaultDict,List[Any]]]: 
+            DefaultDict[Union[int, str], Union[DefaultDict,List[Any]]]:
                                                             Returns network and collected data.
         """
         # Running multiprocessing
@@ -271,7 +271,7 @@ class SimMartVaq:
         # merge results in a dict
         results_dict = defaultdict(
             list
-        )  # type: DefaultDict[Union[int, str], Union[DefaultDict,List[Any]]]
+        )  # type: DefaultDict[Union[int, str], DefaultDict]
         for i, k in enumerate(results):
             results_dict[i] = k
         for key in results_dict[i].keys():
@@ -283,6 +283,7 @@ class SimMartVaq:
             # Get mean and std
             results_dict["mean_" + key] = np.mean(m, axis=0)
             results_dict["std_" + key] = np.std(m, axis=0)
+
         return results_dict
 
     def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
