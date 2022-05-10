@@ -27,19 +27,20 @@ def get_mean_std_over_list(
     """
     try:
         for k in data_collector.keys():
-            if k.isalpha:
+            if k.isalpha():
                 raise RuntimeError(
                     "Sorry, only numeric keys allowed, for example: round '0','1','2',..."
                 )
     except RuntimeError:
         print("Wrong keys were given to the function.")
+        raise
 
     repetition = len(data_collector.keys())
     for key in data_collector["0"].keys():
         m = np.zeros((repetition, len(data_collector["0"][key])))
         for i in range(0, repetition):
             # Matrix repetition x rounds
-            m[i, :] = data_collector[i][key]
+            m[i, :] = data_collector[str(i)][key]
 
         # Get mean and std
         data_collector["mean_" + key] = np.mean(m, axis=0)

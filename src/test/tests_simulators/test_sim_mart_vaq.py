@@ -746,6 +746,13 @@ class TestSimMartVaq:
         assert "std_ratio_honest" in data.keys(), "Key not found"
         assert "std_ratio_wolf" in data.keys(), "Key not found"
 
+        assert len(data["mean_ratio_criminal"]) != 0, "Key not found"
+        assert len(data["mean_ratio_honest"]) != 0, "Key not found"
+        assert len(data["mean_ratio_wolf"]) != 0, "Key not found"
+        assert len(data["std_ratio_criminal"]) != 0, "Key not found"
+        assert len(data["std_ratio_honest"]) != 0, "Key not found"
+        assert len(data["std_ratio_wolf"]) != 0, "Key not found"
+
     @pytest.mark.essential
     def test_scenario_1(self, gt_network: gt.Graph) -> None:
         """Test specific scenario.
