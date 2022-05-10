@@ -9,6 +9,7 @@ __date__   = 11/04/2022
 import itertools
 import logging
 import math
+import multiprocessing
 import random
 from collections import defaultdict
 from copy import deepcopy
@@ -18,9 +19,11 @@ from typing import Dict
 from typing import FrozenSet
 from typing import List
 from typing import Tuple
+from typing import Union
 
 import graph_tool.all as gt
 import numpy as np
+from p_tqdm import p_map
 from src.network_utils.network_combiner import NetworkCombiner
 from src.simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
@@ -136,7 +139,11 @@ class SimMartVaq:
         # Get all the agents with no states
         nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, "")
         tq = tqdm(
-            nodes_no_states, desc="Adding attributes to nodes", total=self.new_nodes
+            nodes_no_states,
+            desc="Adding attributes to nodes",
+            total=self.new_nodes,
+            leave=False,
+            disable=True,
         )
         for i in tq:
             new_network.vp.state[new_network.vertex(i)] = np.random.choice(
@@ -182,7 +189,9 @@ class SimMartVaq:
         network = self.init_fitness(network)
 
         # Run the simulation
-        for i in tqdm(range(0, rounds), desc="Playing the rounds...", total=rounds):
+        for i in tqdm(
+            range(0, rounds), desc="Playing the rounds...", total=rounds, leave=False
+        ):
             # Divide the network in random new groups
             dict_of_group = self.select_multiple_communities(
                 network=network, radius=radius, min_grp=min_grp, max_grp=max_grp
@@ -219,6 +228,71 @@ class SimMartVaq:
             data_collector["fitness_wolf"].append(mean_w_fit)
 
         return network, data_collector
+
+    def avg_play(
+        self,
+        network: gt.Graph,
+        rounds: int = 1,
+        n_new_edges: int = 2,
+        min_grp: int = 5,
+        max_grp: int = 20,
+        radius: int = 3,
+        repetition: int = 20,
+    ) -> DefaultDict[Union[int, str], Union[DefaultDict, List[Any]]]:
+        """Get the average results of the simulation given the parameters.
+
+        Args:
+            network (gt.Graph): criminal network
+            rounds (int, optional): Rounds to play in the simulation. Defaults to 1.
+            n_new_edges (int, optional): Attachment mode. Defaults to 2.
+            min_grp (int, optional): min group size. Defaults to 5.
+            max_grp (int, optional): max group size. Defaults to 20.
+            radius (int, optional): neighbourhood search. Defaults to 3.
+            repetition (int, optional): number of repetition of the simulation. Defaults to 20.
+
+        Returns:
+            DefaultDict[Union[int, str], Union[DefaultDict,List[Any]]]:
+                                                            Returns network and collected data.
+        """
+        # Running multiprocessing
+        num_cpus = multiprocessing.cpu_count() - 1
+        results = p_map(
+            self.avg_play_help,
+            (
+                [
+                    # arguments need to be in this order
+                    (network, rounds, n_new_edges, min_grp, max_grp, radius)
+                    for i in range(0, repetition)
+                ]
+            ),
+            **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
+        )
+
+        # merge results in a dict
+        results_dict = defaultdict(
+            list
+        )  # type: DefaultDict[Union[int, str], DefaultDict]
+        for i, k in enumerate(results):
+            results_dict[i] = k
+        for key in results_dict[i].keys():
+            m = np.zeros((repetition, rounds))
+            for i in range(0, repetition):
+                # Matrix repetition x rounds
+                m[i, :] = results_dict[i][key]
+
+            # Get mean and std
+            results_dict["mean_" + key] = np.mean(m, axis=0)
+            results_dict["std_" + key] = np.std(m, axis=0)
+
+        return results_dict
+
+    def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
+        """Help for the avg_play to return only the default dict."""
+        network, rounds, n_new_edges, min_grp, max_grp, radius = tuple_of_variable
+        _, data_collector = self.play(
+            network, rounds, n_new_edges, min_grp, max_grp, radius
+        )
+        return data_collector
 
     def investigation_stage(
         self,

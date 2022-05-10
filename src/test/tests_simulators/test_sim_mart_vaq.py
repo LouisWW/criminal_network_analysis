@@ -732,6 +732,21 @@ class TestSimMartVaq:
         ), "Collectors keep collecting same value..."
 
     @pytest.mark.essential
+    def test_avg_play(self, gt_network: gt.Graph) -> None:
+        """Test if the play function is working."""
+        # Play the simulation
+        rounds = 20
+        simulator = SimMartVaq(gt_network, ratio_honest=0.7, ratio_wolf=0.05)
+        data = simulator.avg_play(simulator.network, rounds=rounds, repetition=5)
+
+        assert "mean_ratio_criminal" in data.keys(), "Key not found"
+        assert "mean_ratio_honest" in data.keys(), "Key not found"
+        assert "mean_ratio_wolf" in data.keys(), "Key not found"
+        assert "std_ratio_criminal" in data.keys(), "Key not found"
+        assert "std_ratio_honest" in data.keys(), "Key not found"
+        assert "std_ratio_wolf" in data.keys(), "Key not found"
+
+    @pytest.mark.essential
     def test_scenario_1(self, gt_network: gt.Graph) -> None:
         """Test specific scenario.
 
