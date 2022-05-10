@@ -33,19 +33,6 @@ logger = logging.getLogger("logger")
 SA = TypeVar("SA", bound="SensitivityAnalyser")
 
 
-def sim_mart_vaq_sa_helper(tuple_of_variable: Any) -> float:
-    """Run the simulation Mart-Vaq given the parameter."""
-    # Unpack input variables
-    gt_network, problem, params, output_value, rounds = tuple_of_variable
-
-    variable_dict = OrderedDict().fromkeys(problem["names"], 0)
-    variable_dict = dict(zip(variable_dict.keys(), params))
-
-    simulator = SimMartVaq(network=gt_network, **variable_dict)
-    _, data_collector = simulator.play(network=simulator.network, rounds=rounds)
-    return data_collector[output_value][-1]
-
-
 class SensitivityAnalyser(ConfigParser):
     """Performs sensitivity analysis on different models."""
 
@@ -151,7 +138,7 @@ class SensitivityAnalyser(ConfigParser):
         # Running multiprocessing
         num_cpus = multiprocessing.cpu_count() - 1
         Y = p_map(
-            sim_mart_vaq_sa_helper,
+            self.sim_mart_vaq_sa_helper,
             (
                 [
                     (gt_network, problem, params, output_value, rounds)
@@ -166,3 +153,17 @@ class SensitivityAnalyser(ConfigParser):
         # analyse
         sobol_indices = sobol.analyze(problem, Y_array)
         return sobol_indices
+
+    def sim_mart_vaq_sa_helper(self, tuple_of_variable: Any) -> float:
+        """Run the simulation Mart-Vaq given the parameter."""
+        # Set the seed each time, otherwise the simulation will be exactly the same
+        np.random.seed()
+        gt_network, problem, params, output_value, rounds = tuple_of_variable
+
+        # Unpack input variables
+        variable_dict = OrderedDict().fromkeys(problem["names"], 0)
+        variable_dict = dict(zip(variable_dict.keys(), params))
+
+        simulator = SimMartVaq(network=gt_network, **variable_dict)
+        _, data_collector = simulator.play(network=simulator.network, rounds=rounds)
+        return data_collector[output_value][-1]
