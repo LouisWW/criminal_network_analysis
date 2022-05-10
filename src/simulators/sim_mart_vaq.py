@@ -26,6 +26,7 @@ import numpy as np
 from p_tqdm import p_map
 from src.network_utils.network_combiner import NetworkCombiner
 from src.simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
+from src.utils.stats import get_mean_std_over_list
 from tqdm import tqdm
 
 logger = logging.getLogger("logger")
@@ -238,7 +239,7 @@ class SimMartVaq:
         max_grp: int = 20,
         radius: int = 3,
         repetition: int = 20,
-    ) -> DefaultDict[Union[int, str], Union[DefaultDict, List[Any]]]:
+    ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
         Args:
@@ -269,22 +270,13 @@ class SimMartVaq:
         )
 
         # merge results in a dict
-        results_dict = defaultdict(
-            list
-        )  # type: DefaultDict[Union[int, str], DefaultDict]
+        data_collector = defaultdict(list)
         for i, k in enumerate(results):
-            results_dict[i] = k
-        for key in results_dict[i].keys():
-            m = np.zeros((repetition, rounds))
-            for i in range(0, repetition):
-                # Matrix repetition x rounds
-                m[i, :] = results_dict[i][key]
+            data_collector[str(i)] = k
 
-            # Get mean and std
-            results_dict["mean_" + key] = np.mean(m, axis=0)
-            results_dict["std_" + key] = np.std(m, axis=0)
-
-        return results_dict
+        # Data over the different rounds is averaged and std is computed
+        averaged_dict = get_mean_std_over_list(data_collector)
+        return averaged_dict
 
     def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
         """Help for the avg_play to return only the default dict."""

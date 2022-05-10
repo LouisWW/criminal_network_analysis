@@ -25,9 +25,18 @@ def get_mean_std_over_list(
         DefaultDict[Union[int, str], Union[DefaultDict, List[Any]]]:
                             Returns next to the data also the mean and float for each data
     """
+    try:
+        for k in data_collector.keys():
+            if k.isalpha:
+                raise RuntimeError(
+                    "Sorry, only numeric keys allowed, for example: round '0','1','2',..."
+                )
+    except RuntimeError:
+        print("Wrong keys were given to the function.")
+
     repetition = len(data_collector.keys())
-    for key in data_collector[0].keys():
-        m = np.zeros((repetition, len(data_collector[0][key])))
+    for key in data_collector["0"].keys():
+        m = np.zeros((repetition, len(data_collector["0"][key])))
         for i in range(0, repetition):
             # Matrix repetition x rounds
             m[i, :] = data_collector[i][key]

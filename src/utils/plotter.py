@@ -13,6 +13,7 @@ from typing import List
 import graph_tool.all as gt
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 import powerlaw
 from cycler import cycler
 from src.config.config import ConfigParser
@@ -162,8 +163,8 @@ class Plotter(ConfigParser):
                 std = data.replace("mean", "std")
                 ax.fill_between(
                     range(0, len(dict_data[data])),
-                    dict_data[data] - dict_data[std],
-                    dict_data[data] + dict_data[std],
+                    np.array(dict_data[data]) - np.array(dict_data[std]),
+                    np.array(dict_data[data]) + np.array(dict_data[std]),
                     alpha=0.5,
                 )
 
