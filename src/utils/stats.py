@@ -41,7 +41,6 @@ def get_mean_std_over_list(
         for i in range(0, repetition):
             # Matrix repetition x rounds
             m[i, :] = data_collector[str(i)][key]
-
         # Get mean and std
         data_collector["mean_" + key] = np.mean(m, axis=0)
         data_collector["std_" + key] = np.std(m, axis=0)

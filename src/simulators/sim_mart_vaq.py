@@ -23,7 +23,7 @@ from typing import Union
 
 import graph_tool.all as gt
 import numpy as np
-from p_tqdm import p_map
+from p_tqdm import p_umap
 from src.network_utils.network_combiner import NetworkCombiner
 from src.simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from src.utils.stats import get_mean_std_over_list
@@ -257,7 +257,7 @@ class SimMartVaq:
         """
         # Running multiprocessing
         num_cpus = multiprocessing.cpu_count() - 1
-        results = p_map(
+        results = p_umap(
             self.avg_play_help,
             (
                 [
@@ -280,6 +280,8 @@ class SimMartVaq:
 
     def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
         """Help for the avg_play to return only the default dict."""
+        # Set the seed each time, otherwise the simulation will be exactly the same
+        np.random.seed()
         network, rounds, n_new_edges, min_grp, max_grp, radius = tuple_of_variable
         _, data_collector = self.play(
             network, rounds, n_new_edges, min_grp, max_grp, radius
