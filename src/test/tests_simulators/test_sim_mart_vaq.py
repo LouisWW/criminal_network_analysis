@@ -8,7 +8,7 @@ import pytest
 from hypothesis import assume
 from hypothesis import given
 from hypothesis import strategies as st
-from src.simulators.sim_mart_vaq import SimMartVaq
+from simulators.sim_mart_vaq import SimMartVaq
 
 
 class TestSimMartVaq:

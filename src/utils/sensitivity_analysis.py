@@ -20,13 +20,13 @@ from typing import TypeVar
 
 import numpy as np
 import pandas as pd
+from config.config import ConfigParser
+from network_utils.network_converter import NetworkConverter
+from network_utils.network_reader import NetworkReader
 from p_tqdm import p_map
 from SALib.analyze import sobol
 from SALib.sample import saltelli
-from src.config.config import ConfigParser
-from src.network_utils.network_converter import NetworkConverter
-from src.network_utils.network_reader import NetworkReader
-from src.simulators.sim_mart_vaq import SimMartVaq
+from simulators.sim_mart_vaq import SimMartVaq
 
 logger = logging.getLogger("logger")
 

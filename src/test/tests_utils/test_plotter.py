@@ -10,7 +10,7 @@ from unittest.mock import patch
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from src.utils.plotter import Plotter
+from utils.plotter import Plotter
 
 
 class TestPlotter:

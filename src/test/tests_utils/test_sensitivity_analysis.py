@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
-from src.utils.sensitivity_analysis import SensitivityAnalyser
+from utils.sensitivity_analysis import SensitivityAnalyser
 
 
 class TestSensitivityAnalyser:

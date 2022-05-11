@@ -8,7 +8,7 @@ from unittest import main
 
 import numpy as np
 import pytest
-from src.utils.stats import get_mean_std_over_list
+from utils.stats import get_mean_std_over_list
 
 
 class TestStats:

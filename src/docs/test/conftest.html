@@ -137,6 +137,17 @@ def bigger_gt_network(random_network: gt.Graph) -&gt; gt.Graph:
 @pytest.fixture(scope=&#34;function&#34;)
 def create_gt_network(create_networkx: nx.Graph) -&gt; gt.Graph:
     &#34;&#34;&#34;Return the known networkx graph.&#34;&#34;&#34;
+    return NetworkConverter.nx_to_gt(create_networkx)
+
+
+@pytest.fixture(scope=&#34;session&#34;)
+def create_gt_network_session(create_networkx: nx.Graph) -&gt; gt.Graph:
+    &#34;&#34;&#34;Return the known networkx graph.
+
+    This function is run once. Thus the returned object might
+    be manipulated when used in other functions since it refers
+    to the same address.
+    &#34;&#34;&#34;
     return NetworkConverter.nx_to_gt(create_networkx)</code></pre>
 </details>
 </section>
@@ -175,6 +186,29 @@ def bigger_gt_network(random_network: gt.Graph) -&gt; gt.Graph:
 <pre><code class="python">@pytest.fixture(scope=&#34;function&#34;)
 def create_gt_network(create_networkx: nx.Graph) -&gt; gt.Graph:
     &#34;&#34;&#34;Return the known networkx graph.&#34;&#34;&#34;
+    return NetworkConverter.nx_to_gt(create_networkx)</code></pre>
+</details>
+</dd>
+<dt id="test.conftest.create_gt_network_session"><code class="name flex">
+<span>def <span class="ident">create_gt_network_session</span></span>(<span>create_networkx: networkx.classes.graph.Graph) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the known networkx graph.</p>
+<p>This function is run once. Thus the returned object might
+be manipulated when used in other functions since it refers
+to the same address.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture(scope=&#34;session&#34;)
+def create_gt_network_session(create_networkx: nx.Graph) -&gt; gt.Graph:
+    &#34;&#34;&#34;Return the known networkx graph.
+
+    This function is run once. Thus the returned object might
+    be manipulated when used in other functions since it refers
+    to the same address.
+    &#34;&#34;&#34;
     return NetworkConverter.nx_to_gt(create_networkx)</code></pre>
 </details>
 </dd>
@@ -314,9 +348,10 @@ def scale_free_network() -&gt; nk.Graph:
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="test.conftest.bigger_gt_network" href="#test.conftest.bigger_gt_network">bigger_gt_network</a></code></li>
 <li><code><a title="test.conftest.create_gt_network" href="#test.conftest.create_gt_network">create_gt_network</a></code></li>
+<li><code><a title="test.conftest.create_gt_network_session" href="#test.conftest.create_gt_network_session">create_gt_network_session</a></code></li>
 <li><code><a title="test.conftest.create_networkx" href="#test.conftest.create_networkx">create_networkx</a></code></li>
 <li><code><a title="test.conftest.gt_network" href="#test.conftest.gt_network">gt_network</a></code></li>
 <li><code><a title="test.conftest.network_stats_obj" href="#test.conftest.network_stats_obj">network_stats_obj</a></code></li>

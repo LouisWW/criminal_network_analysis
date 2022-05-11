@@ -28,6 +28,8 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Test if the conversions between graph types are right.&#34;&#34;&#34;
+from unittest import main
+
 import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
@@ -244,7 +246,11 @@ class TestNetworkConverter:
         gt_adj_matrix.data -= 1
         assert (
             nk_adj_matrix != gt_adj_matrix
-        ).nnz == 0, &#34;Nk to Gt conversion didn&#39;t work properly&#34;</code></pre>
+        ).nnz == 0, &#34;Nk to Gt conversion didn&#39;t work properly&#34;
+
+
+if __name__ == &#34;__main__&#34;:
+    main()</code></pre>
 </details>
 </section>
 <section>

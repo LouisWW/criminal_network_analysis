@@ -15,8 +15,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import powerlaw
+from config.config import ConfigParser
 from cycler import cycler
-from src.config.config import ConfigParser
 
 
 class Plotter(ConfigParser):

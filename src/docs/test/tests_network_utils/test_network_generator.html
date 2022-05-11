@@ -28,6 +28,8 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Test if the generating of network is done correctly.&#34;&#34;&#34;
+from unittest import main
+
 import networkit as nk
 import pytest
 from network_utils.network_generator import NetworkGenerator
@@ -48,7 +50,11 @@ class TestNetworkGenerator:
         &#34;&#34;&#34;Test if network is created properly.&#34;&#34;&#34;
         network_obj = NetworkGenerator.generate_random(n_nodes=60)
         assert isinstance(network_obj, nk.Graph), &#34;network not created properly&#34;
-        assert network_obj.numberOfNodes() == 60, &#34;Number of nodes is not correct!&#34;</code></pre>
+        assert network_obj.numberOfNodes() == 60, &#34;Number of nodes is not correct!&#34;
+
+
+if __name__ == &#34;__main__&#34;:
+    main()</code></pre>
 </details>
 </section>
 <section>

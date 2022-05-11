@@ -29,6 +29,7 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Test if the combination between graphs works well.&#34;&#34;&#34;
 import warnings
+from unittest import main
 
 import graph_tool.all as gt
 import networkx as nx
@@ -93,7 +94,11 @@ class TestNetworkCombiner:
 
         node_degree_dist = network_stats.get_degree_distribution(normalized=False)
         if network_stats.check_if_powerlaw(node_degree_dist)[0] is False:
-            warnings.warn(&#34;Network should be scale-free&#34;)</code></pre>
+            warnings.warn(&#34;Network should be scale-free&#34;)
+
+
+if __name__ == &#34;__main__&#34;:
+    main()</code></pre>
 </details>
 </section>
 <section>

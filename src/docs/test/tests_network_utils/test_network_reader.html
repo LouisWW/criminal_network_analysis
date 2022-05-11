@@ -28,6 +28,8 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Test if the reading of the data is done correctly.&#34;&#34;&#34;
+from unittest import main
+
 import networkx as nx
 import pytest
 from network_utils.network_reader import NetworkReader
@@ -78,7 +80,11 @@ class TestNetworkReader:
         assert network_obj.nodes[&#34;N100&#34;][&#34;state&#34;] == &#34;c&#34;, &#34;Attributes are set wrong&#34;
         assert network_obj.nodes[&#34;N80&#34;][&#34;state&#34;] == &#34;c&#34;, &#34;Attributes are set wrong&#34;
 
-        assert network_obj.name == &#34;montagna_phone_calls&#34;, &#34;Network name is not correct&#34;</code></pre>
+        assert network_obj.name == &#34;montagna_phone_calls&#34;, &#34;Network name is not correct&#34;
+
+
+if __name__ == &#34;__main__&#34;:
+    main()</code></pre>
 </details>
 </section>
 <section>

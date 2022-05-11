@@ -3,7 +3,7 @@ from unittest import main
 
 import networkit as nk
 import pytest
-from src.network_utils.network_generator import NetworkGenerator
+from network_utils.network_generator import NetworkGenerator
 
 
 class TestNetworkGenerator:

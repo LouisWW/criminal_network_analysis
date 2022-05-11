@@ -62,6 +62,8 @@ class NetworkCombiner:
         for new_node in tqdm(
             range(existing_nodes + 1, existing_nodes + new_nodes + 1),
             desc=&#34;Adding nodes to existing network using preferential attachment...&#34;,
+            leave=False,
+            disable=True,
         ):
             # Get the attachment prob distribution before adding the node
             nodes_probs = []
@@ -90,6 +92,8 @@ class NetworkCombiner:
         for _ in tqdm(
             range(0, new_nodes),
             desc=&#34;Adding nodes to existing network using preferential attachment...&#34;,
+            leave=False,
+            disable=True,
         ):
             # Get the attachment prob distribution before adding the node
             nodes_probs = []
@@ -150,6 +154,8 @@ class NetworkCombiner:
         for new_node in tqdm(
             range(existing_nodes + 1, existing_nodes + new_nodes + 1),
             desc=&#34;Adding nodes to existing network using preferential attachment...&#34;,
+            leave=False,
+            disable=True,
         ):
             # Get the attachment prob distribution before adding the node
             nodes_probs = []
@@ -178,6 +184,8 @@ class NetworkCombiner:
         for _ in tqdm(
             range(0, new_nodes),
             desc=&#34;Adding nodes to existing network using preferential attachment...&#34;,
+            leave=False,
+            disable=True,
         ):
             # Get the attachment prob distribution before adding the node
             nodes_probs = []
@@ -218,6 +226,8 @@ def combine_by_preferential_attachment(
     for new_node in tqdm(
         range(existing_nodes + 1, existing_nodes + new_nodes + 1),
         desc=&#34;Adding nodes to existing network using preferential attachment...&#34;,
+        leave=False,
+        disable=True,
     ):
         # Get the attachment prob distribution before adding the node
         nodes_probs = []
@@ -256,6 +266,8 @@ def combine_by_preferential_attachment_faster(
     for _ in tqdm(
         range(0, new_nodes),
         desc=&#34;Adding nodes to existing network using preferential attachment...&#34;,
+        leave=False,
+        disable=True,
     ):
         # Get the attachment prob distribution before adding the node
         nodes_probs = []

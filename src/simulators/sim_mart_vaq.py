@@ -23,11 +23,11 @@ from typing import Union
 
 import graph_tool.all as gt
 import numpy as np
+from network_utils.network_combiner import NetworkCombiner
 from p_tqdm import p_umap
-from src.network_utils.network_combiner import NetworkCombiner
-from src.simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
-from src.utils.stats import get_mean_std_over_list
+from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
+from utils.stats import get_mean_std_over_list
 
 logger = logging.getLogger("logger")
 

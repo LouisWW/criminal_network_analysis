@@ -29,6 +29,7 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Test if all the function from NetworkStats work correctly.&#34;&#34;&#34;
 import warnings
+from unittest import main
 
 import networkit as nk
 import networkx as nx
@@ -117,7 +118,11 @@ class TestNetworkStats:
         network_stats_rdm = NetworkStats(random_network)
         nodes_degree_dist = network_stats_rdm.get_degree_distribution()
         if network_stats_rdm.check_if_powerlaw(nodes_degree_dist)[0] is True:
-            warnings.warn(&#34;Network should not be scale-free&#34;)</code></pre>
+            warnings.warn(&#34;Network should not be scale-free&#34;)
+
+
+if __name__ == &#34;__main__&#34;:
+    main()</code></pre>
 </details>
 </section>
 <section>

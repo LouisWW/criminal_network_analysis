@@ -84,10 +84,51 @@ class ConfigParser:
             help=&#34;&#34;&#34;Defines if the simulation based on Martiez-Vaquero is run.&#34;&#34;&#34;,
         )
 
+        parser.add_argument(
+            &#34;-sa&#34;,
+            &#34;--sensitivity-analysis&#34;,
+            type=str,
+            default=None,
+            nargs=&#34;?&#34;,
+            const=&#34;sim-mart-vaq&#34;,
+            choices=[&#34;sim-mart-vaq&#34;],
+            help=&#34;&#34;&#34;Defines to run a sensitivity analysis on one of the choices.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-n-samples&#34;,
+            type=int,
+            default=15,
+            help=&#34;&#34;&#34;Defines the sampling number for the saltelli method.(default: %(default)s) &#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-output-value&#34;,
+            type=str,
+            default=None,
+            help=&#34;&#34;&#34;Defines on which output value to focus for the sensitivity analysis.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-save&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Defines if the results should be saved.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-r&#34;,
+            &#34;--rounds&#34;,
+            type=int,
+            default=10,
+            help=&#34;&#34;&#34;Defines the numbers of rounds played. Can be applied to  SimMartVaq.play and
+            SensitivityAnalyser.sim_mart_vaq_sa
+            &#34;&#34;&#34;,
+        )
+
         parser.add_argument(&#34;-verbose&#34;, action=&#34;store_true&#34;, help=&#34;Print extra info&#34;)
 
         # compile the flags
-        self.args = parser.parse_args()</code></pre>
+        self.args = parser.parse_known_args()[0]</code></pre>
 </details>
 </section>
 <section>
@@ -149,10 +190,51 @@ class ConfigParser:
             help=&#34;&#34;&#34;Defines if the simulation based on Martiez-Vaquero is run.&#34;&#34;&#34;,
         )
 
+        parser.add_argument(
+            &#34;-sa&#34;,
+            &#34;--sensitivity-analysis&#34;,
+            type=str,
+            default=None,
+            nargs=&#34;?&#34;,
+            const=&#34;sim-mart-vaq&#34;,
+            choices=[&#34;sim-mart-vaq&#34;],
+            help=&#34;&#34;&#34;Defines to run a sensitivity analysis on one of the choices.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-n-samples&#34;,
+            type=int,
+            default=15,
+            help=&#34;&#34;&#34;Defines the sampling number for the saltelli method.(default: %(default)s) &#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-output-value&#34;,
+            type=str,
+            default=None,
+            help=&#34;&#34;&#34;Defines on which output value to focus for the sensitivity analysis.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-save&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Defines if the results should be saved.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-r&#34;,
+            &#34;--rounds&#34;,
+            type=int,
+            default=10,
+            help=&#34;&#34;&#34;Defines the numbers of rounds played. Can be applied to  SimMartVaq.play and
+            SensitivityAnalyser.sim_mart_vaq_sa
+            &#34;&#34;&#34;,
+        )
+
         parser.add_argument(&#34;-verbose&#34;, action=&#34;store_true&#34;, help=&#34;Print extra info&#34;)
 
         # compile the flags
-        self.args = parser.parse_args()</code></pre>
+        self.args = parser.parse_known_args()[0]</code></pre>
 </details>
 </dd>
 </dl>

@@ -3,7 +3,7 @@ from unittest import main
 
 import networkx as nx
 import pytest
-from src.network_utils.network_reader import NetworkReader
+from network_utils.network_reader import NetworkReader
 
 
 class TestNetworkReader:

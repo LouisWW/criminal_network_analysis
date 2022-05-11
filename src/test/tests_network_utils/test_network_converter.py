@@ -5,7 +5,7 @@ import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
 import pytest
-from src.network_utils.network_converter import NetworkConverter
+from network_utils.network_converter import NetworkConverter
 
 
 class TestNetworkConverter:

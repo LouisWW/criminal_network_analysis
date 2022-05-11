@@ -5,7 +5,7 @@ from unittest import main
 import networkit as nk
 import networkx as nx
 import pytest
-from src.network_utils.network_stats import NetworkStats
+from network_utils.network_stats import NetworkStats
 
 
 class TestNetworkStats:
