@@ -26,6 +26,7 @@ nbmake = "*"
 fitter = "*"
 SALib = "*"
 p-tqdm = "*"
+numpy = "*"
 
 [dev-packages]
 ipykernel = "*"
