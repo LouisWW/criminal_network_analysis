@@ -1,4 +1,6 @@
 """Test if the generating of network is done correctly."""
+from unittest import main
+
 import networkit as nk
 import pytest
 from src.network_utils.network_generator import NetworkGenerator
@@ -20,3 +22,7 @@ class TestNetworkGenerator:
         network_obj = NetworkGenerator.generate_random(n_nodes=60)
         assert isinstance(network_obj, nk.Graph), "network not created properly"
         assert network_obj.numberOfNodes() == 60, "Number of nodes is not correct!"
+
+
+if __name__ == "__main__":
+    main()

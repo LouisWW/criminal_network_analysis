@@ -4,6 +4,7 @@ __author__ = Louis
 __date__ = 10/05/2022
 """
 from collections import defaultdict
+from unittest import main
 
 import numpy as np
 import pytest
@@ -59,3 +60,7 @@ class TestStats:
                 atol=1e-03,
             )
         ).all(), "Mean is not computed correctly"
+
+
+if __name__ == "__main__":
+    main()

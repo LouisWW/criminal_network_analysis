@@ -1,5 +1,6 @@
 """Test if all the function from NetworkStats work correctly."""
 import warnings
+from unittest import main
 
 import networkit as nk
 import networkx as nx
@@ -89,3 +90,7 @@ class TestNetworkStats:
         nodes_degree_dist = network_stats_rdm.get_degree_distribution()
         if network_stats_rdm.check_if_powerlaw(nodes_degree_dist)[0] is True:
             warnings.warn("Network should not be scale-free")
+
+
+if __name__ == "__main__":
+    main()

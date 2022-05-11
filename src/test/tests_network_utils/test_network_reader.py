@@ -1,4 +1,6 @@
 """Test if the reading of the data is done correctly."""
+from unittest import main
+
 import networkx as nx
 import pytest
 from src.network_utils.network_reader import NetworkReader
@@ -50,3 +52,7 @@ class TestNetworkReader:
         assert network_obj.nodes["N80"]["state"] == "c", "Attributes are set wrong"
 
         assert network_obj.name == "montagna_phone_calls", "Network name is not correct"
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,6 @@
 """Test if the combination between graphs works well."""
 import warnings
+from unittest import main
 
 import graph_tool.all as gt
 import networkx as nx
@@ -65,3 +66,7 @@ class TestNetworkCombiner:
         node_degree_dist = network_stats.get_degree_distribution(normalized=False)
         if network_stats.check_if_powerlaw(node_degree_dist)[0] is False:
             warnings.warn("Network should be scale-free")
+
+
+if __name__ == "__main__":
+    main()

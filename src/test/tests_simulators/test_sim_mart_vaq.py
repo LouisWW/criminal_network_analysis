@@ -1,5 +1,6 @@
 """Test if the simulation from Martinez-Vaquero is running correctly."""
 from copy import deepcopy
+from unittest import main
 
 import graph_tool.all as gt
 import numpy as np
@@ -753,6 +754,12 @@ class TestSimMartVaq:
         assert len(data["std_ratio_honest"]) != 0, "Key not found"
         assert len(data["std_ratio_wolf"]) != 0, "Key not found"
 
+        sim_1 = data["0"]["ratio_criminal"]
+        sim_2 = data["2"]["ratio_criminal"]
+        assert not np.array_equal(
+            np.array(sim_1), np.array(sim_2)
+        ), "Two simulations were identical...."
+
     @pytest.mark.essential
     def test_scenario_1(self, gt_network: gt.Graph) -> None:
         """Test specific scenario.
@@ -923,3 +930,7 @@ class TestSimMartVaq:
         assert isinstance(mean_fitness_dict["h"], float)
         assert isinstance(mean_fitness_dict["c"], float)
         assert isinstance(mean_fitness_dict["w"], float)
+
+
+if __name__ == "__main__":
+    main()

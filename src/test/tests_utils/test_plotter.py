@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Any
 from typing import DefaultDict
 from typing import List
+from unittest import main
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -109,4 +110,7 @@ class TestPlotter:
             title="This is a test",
         )
         assert isinstance(ax, plt.Axes)
-        plt.show()
+
+
+if __name__ == "__main__":
+    main()

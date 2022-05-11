@@ -1,4 +1,5 @@
 """This file test if the SensitivityAnalyser works correctly."""
+from unittest import main
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -45,3 +46,7 @@ class TestSensitivityAnalyser:
             in mock_open_file.call_args[0][0]
         )
         assert "ST" in mock_open_file.return_value.mock_calls[1].args[0]
+
+
+if __name__ == "__main__":
+    main()

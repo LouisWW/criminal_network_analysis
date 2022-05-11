@@ -1,4 +1,6 @@
 """Test if the conversions between graph types are right."""
+from unittest import main
+
 import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
@@ -216,3 +218,7 @@ class TestNetworkConverter:
         assert (
             nk_adj_matrix != gt_adj_matrix
         ).nnz == 0, "Nk to Gt conversion didn't work properly"
+
+
+if __name__ == "__main__":
+    main()
