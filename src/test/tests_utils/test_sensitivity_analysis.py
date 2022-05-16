@@ -17,7 +17,7 @@ class TestSensitivityAnalyser:
         assert isinstance(sa, SensitivityAnalyser), "Init didn't work correctly"
 
     @pytest.mark.essential
-    @patch("src.utils.sensitivity_analysis.open")
+    @patch("utils.sensitivity_analysis.open")
     def test_sim_mart_vaq_sa(self, mock_open_file: Mock) -> None:
         """Test with a small sample the SA on the Mart-Vaq simulation."""
         # Define the search space

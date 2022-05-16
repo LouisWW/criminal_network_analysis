@@ -9,7 +9,7 @@ from network_utils.network_stats import NetworkStats
 
 
 class TestNetworkStats:
-    """Class for unit tests for  NetworkStats.
+    """Class for unit tests for NetworkStats.
 
     The network under study is one created in conftest.py
     """

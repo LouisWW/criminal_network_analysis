@@ -92,9 +92,9 @@ def gt_network() -> gt.Graph:
 
 
 @pytest.fixture(scope="function")
-def bigger_gt_network(random_network: gt.Graph) -> gt.Graph:
+def bigger_gt_network(random_network: nk.Graph) -> gt.Graph:
     """Return a bigger gt network."""
-    gt_network = NetworkConverter.nx_to_gt(random_network)
+    gt_network = NetworkConverter.nk_to_gt(random_network)
     return gt_network
 
 
