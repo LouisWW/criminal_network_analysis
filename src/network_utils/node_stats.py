@@ -6,9 +6,11 @@ __date__   = 13/02/2022
 from typing import Sequence
 from typing import Tuple
 
+import graph_tool.all as gt
 import networkit as nk
 import numpy as np
-from network_utils.network_converter import NetworkConverter
+from graph_tool import EdgePropertyMap
+from graph_tool import VertexPropertyMap
 
 
 class NodeStats:
@@ -17,39 +19,57 @@ class NodeStats:
     The properties are katz,betweeness,eccentricity
     """
 
-    def __init__(self, network: nk.Graph) -> None:
+    def __init__(self) -> None:
         """Initialize the network as an attribute."""
-        self.network = NetworkConverter.nx_to_nk(network)
+        pass
 
-    def get_katz(self) -> Sequence[Tuple[int, float]]:
+    @staticmethod
+    def get_katz(network: gt.Graph) -> VertexPropertyMap:
         """Get the katz score for each node."""
         # Initialize algorithm
-        katz = nk.centrality.KatzCentrality(self.network, 1e-3)
-        katz.run()
-        return katz.ranking()
+        katz = gt.katz(network)
+        return katz
 
-    def get_eccentricity(self) -> Sequence[Tuple[int, int]]:
-        """Return the eccentricity of the nodes."""
-        eccentricity = np.zeros(self.network.numberOfNodes())
-        # to append to the right idx in the list
-        iterator = iter(range(0, self.network.numberOfNodes()))
-
-        for node in self.network.iterNodes():
-            eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
-                self.network, node
-            )
-
-        return eccentricity
-
-    def get_betweenness(self) -> Sequence[Tuple[int, int]]:
+    @staticmethod
+    def get_betweenness(network: gt.Graph) -> Tuple[VertexPropertyMap, EdgePropertyMap]:
         """Return betweeness centrality."""
-        btwn = nk.centrality.Betweenness(self.network)
-        btwn.run()
-        return btwn.ranking()
+        btwn = gt.betweenness(network)
+        return btwn
 
-    def get_closeness(self) -> Sequence[Tuple[int, float]]:
+    @staticmethod
+    def get_closeness(network: gt.Graph) -> VertexPropertyMap:
         """Return the closeness of a node."""
-        raise NotImplementedError
+        closness = gt.closeness(network)
+        return closness
+
+    @staticmethod
+    def get_eigenvector_centrality(
+        network: gt.Graph,
+    ) -> Tuple[float, VertexPropertyMap]:
+        """Get the eigenvector centrality of a node."""
+        eigen_v = gt.eigenvector(network)
+        return eigen_v
+
+    @staticmethod
+    def get_central_dominance(
+        network: gt.GraphPropertyMap, betweenness: VertexPropertyMap
+    ) -> float:
+        """Get the central point dominace."""
+        vertex, _ = betweenness
+        central_dominace = gt.central_point_dominance(network, vertex)
+        return central_dominace
+
+    def get_eccentricity(network: nk.Graph) -> Sequence[Tuple[int, int]]:
+        """Return the eccentricity of the nodes."""
+        eccentricity = np.zeros(network.numberOfNodes())
+        # to append to the right idx in the list
+        iterator = iter(range(0, network.numberOfNodes()))
+
+        for node in network.iterNodes():
+            eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
+                network, node
+            )
+        return eccentricity
 
     def get_degree(self) -> Sequence[Tuple[int, int]]:
         """Count the number of neighbor a node has."""
@@ -57,10 +77,6 @@ class NodeStats:
 
     def get_local_clustering(self) -> Sequence[Tuple[int, float]]:
         """Get the local clustering of a node."""
-        raise NotImplementedError
-
-    def get_eigenvector_centrality(self) -> Sequence[Tuple[int, float]]:
-        """Get the eigenvector centrality of a node."""
         raise NotImplementedError
 
     def get_average_path(self) -> None:
