@@ -27,6 +27,8 @@ fitter = "*"
 SALib = "*"
 p-tqdm = "*"
 numpy = "*"
+pycallgraph = "*"
+graphviz = "*"
 
 [dev-packages]
 ipykernel = "*"

@@ -9,6 +9,7 @@ dependencies:
   - pip
   - ipython
   - ipykernel
+  - graphviz
 
   - pip:
     - networkx
@@ -34,3 +35,4 @@ dependencies:
     - nbmake
     - fitter
     - SALib
+    - pycallgraph

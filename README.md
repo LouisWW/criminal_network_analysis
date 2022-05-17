@@ -51,6 +51,9 @@ Additionally to the pipenv environment, a python package called **graph-tool** i
     $ ./configure --prefix=$HOME/.local
     $ make install
 
+To profile the code, the library pycallgraph is used. The package depends on graphviz, which has to be installed via the ubunut installing system
+
+    $ sudo apt install graphviz
 
 ### Mac OSX
 ##### Conda (preferred for Mac OSX)
