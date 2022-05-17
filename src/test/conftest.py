@@ -80,7 +80,7 @@ def scale_free_network() -> nk.Graph:
 @pytest.fixture(scope="session")
 def random_network() -> nk.Graph:
     """Return a nk random network."""
-    return NetworkGenerator.generate_random(n_nodes=5000)
+    return NetworkGenerator.generate_random(n_nodes=300)
 
 
 @pytest.fixture(scope="function")
