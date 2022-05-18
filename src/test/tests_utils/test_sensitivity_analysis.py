@@ -23,7 +23,7 @@ class TestSensitivityAnalyser:
         # Define the search space
         problem = {
             "num_vars": 2,
-            "names": ["tau", "ratio_wolf"],
+            "names": ["tau", "gamma"],
             "bounds": [[0, 1], [0.1, 0.28]],
         }
         sa = SensitivityAnalyser()

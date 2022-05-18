@@ -13,11 +13,13 @@ __date__   = 23/02/2022
 import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
+import numpy as np
 import pytest
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_generator import NetworkGenerator
 from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
+from simulators.meta_simulator import MetaSimulator
 
 
 @pytest.fixture(scope="session")
@@ -89,6 +91,18 @@ def gt_network() -> gt.Graph:
     nx_network = NetworkReader().get_data("montagna_calls")
     gt_network = NetworkConverter.nx_to_gt(nx_network)
     return gt_network
+
+
+@pytest.fixture(scope="function")
+def meta_simulator_network() -> gt.Graph:
+    """Return the graph from the MetaSimulator obj.
+
+    In comparison to the gt_network_function, it will return
+    the complete network with honest and wolf nodes
+    """
+    np.random.seed(0)
+    meta_sim = MetaSimulator("montagna_calls", ratio_honest=0.8)
+    return meta_sim.network
 
 
 @pytest.fixture(scope="function")

@@ -9,9 +9,7 @@ import logging
 from config.config import ConfigParser
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
-from network_utils.network_stats import NetworkStats
 from simulators.sim_mart_vaq import SimMartVaq
-from utils.plotter import Plotter
 from utils.sensitivity_analysis import SensitivityAnalyser
 
 # Catch the flags
@@ -42,28 +40,32 @@ if args.sim_mart_vaq:
     # Get actual criminal network
     nx_network = NetworkReader().get_data(args.read_data)
     logger.info(f"The data used is {nx_network.name}")
-    # Get stats about network_obj
-    nk_network = NetworkConverter.nx_to_nk(nx_network)
-    network_stats = NetworkStats(nk_network)
-    network_stats.get_overview()
 
     # Add nodes to network
     # First convert to gt
     gt_network = NetworkConverter.nx_to_gt(nx_network)
     simulator = SimMartVaq(gt_network, ratio_honest=0.4, ratio_wolf=0.05)
-    new_gt_network = simulator.initialise_network(gt_network)
-    combined_nk_network = NetworkConverter.gt_to_nk(new_gt_network)
 
-    # Get stats about network_obj
-    network_stats = NetworkStats(combined_nk_network)
-    network_stats.get_overview()
-
-    Plotter().draw_network(new_gt_network, color_vertex_property="state")
-
+    simulators = SimMartVaq(
+        network=gt_network,
+        ratio_honest=0.6,
+        ratio_wolf=0.1,
+        delta=0.8,  # no acting for wolfs
+        gamma=0.5,
+        tau=1,  # no fintess sharing between wolf to criminal
+        beta_s=5000,
+        beta_h=600,
+        beta_c=5000,
+        c_c=1,  # no benefits from criminals/ they still act
+        r_c=1,
+        c_w=1,
+        r_w=1,
+        mutation_prob=-0.1,
+    )
+    network, data_collector = simulators.play(network=simulators.network, rounds=300)
 
 if args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
-
     if args.sensitivity_analysis == "sim-mart-vaq":
 
         sa = SensitivityAnalyser()

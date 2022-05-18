@@ -15,85 +15,23 @@ class TestSimMartVaq:
     """Class for unit tests for  SimMartVaq."""
 
     @pytest.mark.essential
-    def test_sim_mart_vaq(self, gt_network: gt.Graph) -> None:
+    def test_sim_mart_vaq(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the initialization works."""
-        org_size = gt_network.num_vertices()
-        # Keep the ratio small so the test will be faster
-        # by adding less nodes
-        ratio_honest = 0.3
-        ratio_wolf = 0.1
-
-        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
+        simulators = SimMartVaq(meta_simulator_network)
 
         # Test if the obj is init correctly
         assert isinstance(
             simulators, SimMartVaq
         ), "Simulator hasn't been init correctly"
 
-        # Test if the ratio is caluclated correctly
-        assert simulators.ratio_criminal == 0.6, "Ratio is wrong."
-        assert (
-            simulators.n_criminal == org_size
-        ), "Determined number of criminals is wrong."
-        assert simulators.total_number_nodes == 158, "Ratio is wrong"
-        assert simulators.new_nodes == 63, "Number of nodes to add is wrong"
-        assert (
-            round(simulators.relative_ratio_honest, 2) == 0.75
-        ), "Relative ratio is wrong"
-        assert (
-            round(simulators.relative_ratio_wolf, 2) == 0.25
-        ), "Relative ratio is wrong"
-
         # Try to change its name
         with pytest.raises(Exception):
             simulators.name = "New name"
 
     @pytest.mark.essential
-    def test_sim_mart_vaq_wrong_init(self, gt_network: gt.Graph) -> None:
-        """Test if a wrong init triggers the assert statements."""
-        # With ratio_honest == 0
-        with pytest.raises(Exception):
-            assert SimMartVaq(gt_network, ratio_honest=0)
-
-        # With ratio_wolf == 1.1
-        with pytest.raises(Exception):
-            assert SimMartVaq(gt_network, ratio_wolf=1.1)
-
-        # With ratios not adding up more than 1
-        with pytest.raises(Exception):
-            assert SimMartVaq(gt_network, ratio_honest=0.8, ratio_wolf=0.3)
-            assert SimMartVaq(gt_network, ratio_honest=0.8, ratio_wolf=0.2)
-            assert SimMartVaq(gt_network, ratio_honest=-0.8, ratio_wolf=0.1)
-            assert SimMartVaq(gt_network, ratio_honest=-0.8, ratio_wolf=0.2)
-
-    @pytest.mark.essential
-    def test_initialise_network(self, gt_network: gt.Graph) -> None:
-        """Test if the init process is done corretly.
-
-        More precisely tests if the ratio of c/h/w is correct
-        """
-        simulators = SimMartVaq(gt_network, ratio_honest=0.2, ratio_wolf=0.3)
-        network = simulators.initialise_network(simulators.network)
-
-        # Criminal network size should be 95
-        # Honest and Wolf ratio should be within a range given the init is stochastic
-        assert (
-            len(gt.find_vertex(network, network.vp.state, "c")) == 95
-        ), "Criminal ratio not correct"
-        assert (
-            38 - 15 <= len(gt.find_vertex(network, network.vp.state, "h")) <= 38 + 15
-        ), "Honest ratio not correct"
-        assert (
-            57 - 15 <= len(gt.find_vertex(network, network.vp.state, "w")) <= 57 + 15
-        ), "Wolf ratio not correct"
-
-    @pytest.mark.essential
-    def test_divide_in_groups(self, gt_network: gt.Graph) -> None:
+    def test_divide_in_groups(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the division into groups works correctly."""
-        ratio_honest = np.random.uniform(0.1, 0.99)
-        ratio_wolf = np.random.uniform(0.1, (1 - 0.99))
-        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
-        simulators.network = simulators.initialise_network(simulators.network)
+        simulators = SimMartVaq(meta_simulator_network)
         groups, groups_label = simulators.divide_in_groups(
             simulators.network, min_group=3
         )
@@ -109,12 +47,11 @@ class TestSimMartVaq:
         ), "Items in Group label should be int"
 
     @pytest.mark.essential
-    def test_act_divide_in_groups_faster(self, gt_network: gt.Graph) -> None:
+    def test_act_divide_in_groups_faster(
+        self, meta_simulator_network: gt.Graph
+    ) -> None:
         """Test if the division into groups works correctly."""
-        ratio_honest = np.random.uniform(0.1, 0.80)
-        ratio_wolf = np.random.uniform(0.1, (1 - 0.80))
-        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
-        simulators.network = simulators.initialise_network(simulators.network)
+        simulators = SimMartVaq(meta_simulator_network)
         divided_network, n_groups = simulators.act_divide_in_groups_faster(
             simulators.network, min_grp=2, max_grp=2
         )
@@ -148,12 +85,9 @@ class TestSimMartVaq:
         assert x_group_1 != x_group_2, "Attributes are not reset correctly"
 
     @pytest.mark.essential
-    def test_act_divide_in_groups(self, gt_network: gt.Graph) -> None:
+    def test_act_divide_in_groups(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the division into groups works correctly."""
-        ratio_honest = np.random.uniform(0.1, 0.90)
-        ratio_wolf = np.random.uniform(0.1, (1 - ratio_honest - 0.1))
-        simulators = SimMartVaq(gt_network, ratio_honest, ratio_wolf)
-        simulators.network = simulators.initialise_network(simulators.network)
+        simulators = SimMartVaq(meta_simulator_network)
         divided_network, n_groups = simulators.act_divide_in_groups(
             simulators.network, min_grp=2, max_grp=2
         )
@@ -187,27 +121,19 @@ class TestSimMartVaq:
         assert x_group_1 != x_group_2, "Attributes are not reset correctly"
 
     @pytest.mark.essential
-    def test_init_fitness(self, gt_network: gt.Graph) -> None:
-        """Test if the init of the fitness attribute is done correctly."""
-        simulators = SimMartVaq(gt_network)
-        network = simulators.init_fitness(simulators.network)
-        assert network.vp.fitness, "Fitness attribute doesn't exists..."
-
-    @pytest.mark.essential
-    def test_acting_stage(self, gt_network: gt.Graph) -> None:
+    def test_acting_stage(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the acting stage process is working correctly."""
         # Set delta to 100 to make sure wolf will always act
-        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=100)
-        network = simulators.init_fitness(simulators.network)
-        network = simulators.initialise_network(network)
-        # Network and network_aft_dmge are same object
+        simulators = SimMartVaq(meta_simulator_network, delta=100)
+        network = simulators.network
+        # Network and network_aft_damage are same object
         # To compare network create an independent copy
         untouched_network = deepcopy(network)
         min_grp = 5
         max_grp = 10
 
         dict_of_communities = simulators.select_multiple_communities(
-            network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+            network=meta_simulator_network, radius=1, min_grp=min_grp, max_grp=max_grp
         )
         mbrs = dict_of_communities[min_grp]
         n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
@@ -290,15 +216,14 @@ class TestSimMartVaq:
             ], "Returned status should be either c/h/w"
 
     @pytest.mark.essential
-    def test_acting_stage_2(self, gt_network: gt.Graph) -> None:
+    def test_acting_stage_2(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the acting stage process is working correclty.
 
         This time, lone wolf never act!
         """
         # Set delta to 0 to make sure wolf will never act
-        simulators = SimMartVaq(gt_network, ratio_wolf=0.2, ratio_honest=0.4, delta=0)
-        network = simulators.init_fitness(simulators.network)
-        network = simulators.initialise_network(network)
+        simulators = SimMartVaq(meta_simulator_network, delta=0)
+        network = simulators.network
         # Network and network_aft_dmge are same object
         # To compare network create an independent copy
         untouched_network = deepcopy(network)
@@ -306,7 +231,7 @@ class TestSimMartVaq:
         max_grp = 10
 
         dict_of_communities = simulators.select_multiple_communities(
-            network=gt_network, radius=1, min_grp=min_grp, max_grp=max_grp
+            network=meta_simulator_network, radius=1, min_grp=min_grp, max_grp=max_grp
         )
         mbrs = dict_of_communities[min_grp]
         n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
@@ -352,19 +277,19 @@ class TestSimMartVaq:
             ], "Returned status should be either c/h/w"
 
     @pytest.mark.essential
-    def test_select_communities(self, gt_network: gt.Graph) -> None:
+    def test_select_communities(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the random select communites is working correctly."""
-        simulators = SimMartVaq(gt_network)
-        network = simulators.init_fitness(simulators.network)
+        simulators = SimMartVaq(meta_simulator_network)
+        network = simulators.network
 
         # Depth 1
-        seed = np.random.randint(0, gt_network.num_vertices())
+        seed = np.random.randint(0, meta_simulator_network.num_vertices())
         community = simulators.select_communities(network, radius=1, seed=seed)
         nbrs = network.iter_all_neighbors(seed)
         assert list(nbrs) != community
 
         # Depth 2
-        seed = np.random.randint(0, gt_network.num_vertices())
+        seed = np.random.randint(0, meta_simulator_network.num_vertices())
         community = simulators.select_communities(network, radius=2, seed=seed)
         nbrs = list(network.iter_all_neighbors(seed))
         scnd_degree_nbr: list = []
@@ -375,7 +300,7 @@ class TestSimMartVaq:
         assert set(nbrs) == community
 
         # Depth 3
-        seed = np.random.randint(0, gt_network.num_vertices())
+        seed = np.random.randint(0, meta_simulator_network.num_vertices())
         community = simulators.select_communities(network, radius=3, seed=seed)
         nbrs = list(network.iter_all_neighbors(seed))
         scnd_degree_nbr = []
@@ -390,10 +315,12 @@ class TestSimMartVaq:
         assert set(nbrs) == community
 
     @pytest.mark.essential
-    def test_select_multiple_communities(self, gt_network: gt.Graph) -> None:
+    def test_select_multiple_communities(
+        self, meta_simulator_network: gt.Graph
+    ) -> None:
         """Test if select_multiple_communities works correctly."""
-        simulators = SimMartVaq(gt_network)
-        network = simulators.init_fitness(simulators.network)
+        simulators = SimMartVaq(meta_simulator_network)
+        network = simulators.network
         min_grp = 5
         max_grp = 10
         dict_of_communities = simulators.select_multiple_communities(
@@ -410,10 +337,12 @@ class TestSimMartVaq:
             assert len(dict_of_communities[k]) >= 1, "Some communities are empty..."
 
     @pytest.mark.essential
-    def test_counting_status_proportions(self, gt_network: gt.Graph) -> None:
+    def test_counting_status_proportions(
+        self, meta_simulator_network: gt.Graph
+    ) -> None:
         """Test if the counting works correctly."""
-        simulators = SimMartVaq(gt_network)
-        network = simulators.init_fitness(simulators.network)
+        simulators = SimMartVaq(meta_simulator_network)
+        network = simulators.network
         min_grp = 5
         max_grp = 10
         dict_of_communities = simulators.select_multiple_communities(
@@ -458,7 +387,7 @@ class TestSimMartVaq:
         simulators = SimMartVaq(
             create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2, delta=100, tau=0.5
         )
-        network = simulators.init_fitness(simulators.network)
+        network = simulators.network
 
         # What if the criminal is chosen
         node = 0
@@ -495,7 +424,7 @@ class TestSimMartVaq:
         simulators = SimMartVaq(
             create_gt_network, gamma=0.5, beta_c=2, beta_s=3, beta_h=5
         )
-        network = simulators.init_fitness(simulators.network)
+        network = simulators.network
 
         # What if the criminal is chosen
         # Triggers state and civilian punishment
@@ -570,7 +499,7 @@ class TestSimMartVaq:
 
     @pytest.mark.essential
     def test_fermi_function(self, create_gt_network: gt.Graph) -> None:
-        """Test if the fermi function is working correclty."""
+        """Test if the fermi function is working correctly."""
         # The given network is just a placeholder
         simulators = SimMartVaq(create_gt_network)
         np.random.seed(0)
@@ -619,7 +548,7 @@ class TestSimMartVaq:
 
     @pytest.mark.essential
     def test_mutation(self, create_gt_network: gt.Graph) -> None:
-        """Test if the mutation works correclty."""
+        """Test if the mutation works correctly."""
         simulators = SimMartVaq(create_gt_network, temperature=10)
         # The seed should turn nodes into a criminal,honest or wolf
         np.random.seed(0)
@@ -640,15 +569,13 @@ class TestSimMartVaq:
         ), "Mutation didn't work properly"
 
     @pytest.mark.essential
-    def test_evolutionary_stage(self, gt_network: gt.Graph) -> None:
+    def test_evolutionary_stage(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the evolutionary stage is working correctly."""
         simulators = SimMartVaq(
-            gt_network, mutation_prob=0.3, temperature=10, ratio_honest=0.8
+            meta_simulator_network, mutation_prob=0.3, temperature=10
         )
+        network = simulators.network
         # Need to randomly change the fitness
-        np.random.seed(0)
-        network = simulators.initialise_network(simulators.network)
-        network = simulators.init_fitness(simulators.network)
         np.random.seed(0)
         for i in range(0, network.num_vertices()):
             network.vp.fitness[network.vertex(i)] = np.random.randint(0, 200)
@@ -685,11 +612,11 @@ class TestSimMartVaq:
         ), "Mutation function didn't work properly"
 
     @pytest.mark.essential
-    def test_play(self, gt_network: gt.Graph) -> None:
+    def test_play(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the play function is working."""
         # Play the simulation
         rounds = 50
-        simulator = SimMartVaq(gt_network, ratio_honest=0.7, ratio_wolf=0.05)
+        simulator = SimMartVaq(meta_simulator_network)
         network, data_collector = simulator.play(simulator.network, rounds=rounds)
 
         # Check if the data_collectors collect at each round data
@@ -733,11 +660,11 @@ class TestSimMartVaq:
         ), "Collectors keep collecting same value..."
 
     @pytest.mark.essential
-    def test_avg_play(self, gt_network: gt.Graph) -> None:
+    def test_avg_play(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the play function is working."""
         # Play the simulation
         rounds = 20
-        simulator = SimMartVaq(gt_network, ratio_honest=0.7, ratio_wolf=0.05)
+        simulator = SimMartVaq(meta_simulator_network)
         data = simulator.avg_play(simulator.network, rounds=rounds, repetition=5)
 
         assert "mean_ratio_criminal" in data.keys(), "Key not found"
@@ -761,7 +688,7 @@ class TestSimMartVaq:
         ), "Two simulations were identical...."
 
     @pytest.mark.essential
-    def test_scenario_1(self, gt_network: gt.Graph) -> None:
+    def test_scenario_1(self, meta_simulator_network: gt.Graph) -> None:
         """Test specific scenario.
 
         Test the scenario where no mutation happens and criminals
@@ -770,9 +697,7 @@ class TestSimMartVaq:
         So no change in the fitness is expected.
         """
         simulators = SimMartVaq(
-            network=gt_network,
-            ratio_honest=0.45,
-            ratio_wolf=0.45,
+            network=meta_simulator_network,
             delta=-10,  # no acting for wolfs
             gamma=0.5,
             tau=0,  # no fintess sharing between wolf to criminal
@@ -873,12 +798,10 @@ class TestSimMartVaq:
         assert pytest.approx(mean_filed_approx["w"]["i"]) == 0, "Value is not correct"
 
     @pytest.mark.essential
-    def test_get_analytical_solution(self, gt_network: gt.Graph) -> None:
+    def test_get_analytical_solution(self, meta_simulator_network: gt.Graph) -> None:
         """Test if get_analytical_solution works correctly."""
         simulators = SimMartVaq(
-            gt_network,
-            ratio_honest=0.5,
-            ratio_wolf=0.2,
+            meta_simulator_network,
             c_c=2,
             r_c=4,
             c_w=5,
@@ -901,15 +824,13 @@ class TestSimMartVaq:
         assert isinstance(mean_fitness_dict["w"], float)
 
     @pytest.mark.essential
-    def test_get_analytical_solution_1(self, gt_network: gt.Graph) -> None:
+    def test_get_analytical_solution_1(self, meta_simulator_network: gt.Graph) -> None:
         """Test if get_analytical_solution works correctly.
 
         The results should return a value of zero!
         """
         simulators = SimMartVaq(
-            gt_network,
-            ratio_honest=0.5,
-            ratio_wolf=0.2,
+            meta_simulator_network,
             c_c=0,
             r_c=4,
             c_w=0,

@@ -21,11 +21,10 @@ from typing import TypeVar
 import numpy as np
 import pandas as pd
 from config.config import ConfigParser
-from network_utils.network_converter import NetworkConverter
-from network_utils.network_reader import NetworkReader
 from p_tqdm import p_map
 from SALib.analyze import sobol
 from SALib.sample import saltelli
+from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 
 logger = logging.getLogger("logger")
@@ -110,8 +109,8 @@ class SensitivityAnalyser(ConfigParser):
             rounds        (int); Define the number of rounds played in the Simulation
         """
         # Get the network of criminal first
-        nx_network = NetworkReader().get_data(self.args.read_data)
-        gt_network = NetworkConverter.nx_to_gt(nx_network)
+        meta_sim = MetaSimulator(network_name=self.args.read_data)
+        gt_network = meta_sim.network
 
         if problem is None:
             problem = {

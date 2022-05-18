@@ -23,7 +23,6 @@ from typing import Union
 
 import graph_tool.all as gt
 import numpy as np
-from network_utils.network_combiner import NetworkCombiner
 from p_tqdm import p_umap
 from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
@@ -38,8 +37,6 @@ class SimMartVaq:
     def __init__(
         self,
         network: gt.Graph,
-        ratio_honest: float = 0.7,
-        ratio_wolf: float = 0.1,
         delta: float = 0.0,
         tau: float = 0.0,
         gamma: float = 0.5,
@@ -80,27 +77,21 @@ class SimMartVaq:
 
         # Check if data is coherent
         assert isinstance(network, gt.Graph), "Network should be of type gt."
-        assert 0 < ratio_honest < 1, "Ratio needs to be (0,1)"
-        assert 0 < ratio_wolf < 1, "Ratio needs to be (0,1)"
-        assert 0 < ratio_wolf + ratio_honest < 1, "Together the ratio should be (0,1)"
         assert network.vp.state, "Network has no attribute state"
-
-        self.ratio_honest = ratio_honest
-        self.ratio_wolf = ratio_wolf
-        self.ratio_criminal = 1 - self.ratio_honest - self.ratio_wolf
-
-        # Network needs to have a base criminal network
-        self.n_criminal = len(gt.find_vertex(network, network.vp.state, "c"))
-        assert self.n_criminal >= 1, "The given network contains no criminals..."
-
-        self.total_number_nodes = int(self.n_criminal / self.ratio_criminal)
-        self.new_nodes = self.total_number_nodes - self.n_criminal
-
-        # Init either honest or lone wolf
-        self.relative_ratio_honest = self.ratio_honest / (
-            self.ratio_honest + self.ratio_wolf
+        self.ratio_honest = (
+            len(gt.find_vertex(network, network.vp.state, "h"))
+            / self.network.num_vertices()
         )
-        self.relative_ratio_wolf = 1 - self.relative_ratio_honest
+        self.ratio_wolf = (
+            len(gt.find_vertex(network, network.vp.state, "w"))
+            / self.network.num_vertices()
+        )
+        self.ratio_criminal = (
+            len(gt.find_vertex(network, network.vp.state, "c"))
+            / self.network.num_vertices()
+        )
+
+        assert np.isclose(self.ratio_honest + self.ratio_wolf + self.ratio_criminal, 1)
 
         # Set damaging and punishing parameters
         self.delta = delta
@@ -122,36 +113,6 @@ class SimMartVaq:
     def name(self) -> str:
         """Return the name of the simulator."""
         return self._name
-
-    def initialise_network(self, network: gt.Graph, n_new_edges: int = 2) -> gt.Graph:
-        """Add to the existing criminal network honest and lone wolfs.
-
-        Thereby, the nodes are added based on the preferential attachment principle.
-        Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
-        """
-        logger.info(
-            f"Given the ratio param, {self.new_nodes}\
-            nodes are added, total = {self.total_number_nodes} nodes!"
-        )
-        new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
-            network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
-        )
-
-        # Get all the agents with no states
-        nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, "")
-        tq = tqdm(
-            nodes_no_states,
-            desc="Adding attributes to nodes",
-            total=self.new_nodes,
-            leave=False,
-            disable=True,
-        )
-        for i in tq:
-            new_network.vp.state[new_network.vertex(i)] = np.random.choice(
-                ["h", "w"], 1, p=[self.relative_ratio_honest, self.relative_ratio_wolf]
-            )[0]
-
-        return new_network
 
     def play(
         self,
@@ -184,10 +145,6 @@ class SimMartVaq:
                 )
             },
         )  # type: DefaultDict[str, List[Any]]
-        # Init a population
-        network = self.initialise_network(network, n_new_edges)
-        # Init fitness attribute
-        network = self.init_fitness(network)
 
         # Run the simulation
         for i in tqdm(
@@ -686,16 +643,6 @@ class SimMartVaq:
             all_neighbours.append(list(nbrs))
         all_neighbours_list = list(itertools.chain.from_iterable(all_neighbours))
         return frozenset(all_neighbours_list)
-
-    def init_fitness(self, network: gt.Graph) -> gt.Graph:
-        """Add the attribute fitness to the network."""
-        if "fitness" in network.vp:
-            return network
-        else:
-            fitness = network.new_vertex_property("double")
-            network.vertex_properties["fitness"] = fitness
-
-        return network
 
     def mutation(self, network: gt.Graph, person: int) -> gt.Graph:
         """Perform mutation on a given individual."""
