@@ -20,6 +20,7 @@ from typing import FrozenSet
 from typing import List
 from typing import Tuple
 from typing import Union
+import pandas as pd
 
 import graph_tool.all as gt
 import numpy as np
@@ -452,9 +453,8 @@ class SimMartVaq:
         # First get proportions of h/c/w within the group
         statuses = []
         size_group = len(group_members)
-        for member in group_members:
-            statuses.append(network.vp.state[network.vertex(member)])
-
+        vertex_number = [network.vertex(member) for member in group_members]
+        statuses = list(map(network.vp.state.__getitem__, vertex_number))
         n_h = statuses.count("h")
         n_c = statuses.count("c")
         n_w = statuses.count("w")
@@ -466,26 +466,21 @@ class SimMartVaq:
     def get_overall_fitness_distribution(
         self, network: gt.Graph, group_members: List[int]
     ) -> Tuple[float, float, float]:
-        """Get the mean fintess for the different states in a group."""
-        h_fit = []
-        c_fit = []
-        w_fit = []
-        for member in group_members:
-            state = network.vp.state[network.vertex(member)]
-            if state == "h":
-                h_fit.append(network.vp.fitness[network.vertex(member)])
-            elif state == "c":
-                c_fit.append(network.vp.fitness[network.vertex(member)])
-            elif state == "w":
-                w_fit.append(network.vp.fitness[network.vertex(member)])
-            else:
-                raise KeyError("slct_status should be either h/w/c...")
-
-        mean_h_fit = np.mean(h_fit)
-        mean_c_fit = np.mean(c_fit)
-        mean_w_fit = np.mean(w_fit)
+        """Get the mean fitness for the different states in a group."""
+        vertex_number = [network.vertex(member) for member in group_members]
+        statuses = list(map(network.vp.state.__getitem__, vertex_number))
+        fitness =  list(map(network.vp.fitness.__getitem__, vertex_number))
+        
+        df = pd.DataFrame(list(zip(statuses,fitness)),
+                                columns =['statuses', 'fitness'])
+        
+        df_grouped = df.groupby('statuses', as_index=False)['fitness'].mean()
+        mean_h_fit = df_grouped.loc[df_grouped['statuses'] == 'h', 'fitness'].values[0]
+        mean_c_fit = df_grouped.loc[df_grouped['statuses'] == 'c', 'fitness'].values[0]
+        mean_w_fit = df_grouped.loc[df_grouped['statuses'] == 'w', 'fitness'].values[0]
 
         return mean_h_fit, mean_c_fit, mean_w_fit
+
 
     def divide_in_groups(
         self, network: gt.Graph, min_group: int

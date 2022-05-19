@@ -50,8 +50,6 @@ if args.sim_mart_vaq:
 
     simulators = SimMartVaq(
         network=simulator.network,
-        ratio_honest=0.6,
-        ratio_wolf=0.1,
         delta=0.8,  # no acting for wolfs
         gamma=0.5,
         tau=1,  # no fintess sharing between wolf to criminal

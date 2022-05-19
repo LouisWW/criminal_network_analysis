@@ -82,4 +82,6 @@ class NetworkReader:
         elif data_type == "montagna_meetings":
             return self.read_montagna_meetings()
         else:
-            raise RuntimeError("No criminal network data has been defined!")
+            raise RuntimeError
+        ("Define a network please :'cunha','montagan_calls','montagana_meetings'"
+        )

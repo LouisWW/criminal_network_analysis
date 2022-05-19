@@ -379,6 +379,19 @@ class TestSimMartVaq:
         assert mean_h == 7, "Mean fitness is not correct..."
         assert mean_c == 10, "Mean fitness is not correct..."
         assert mean_w == 7, "Mean fitness is not correct..."
+        
+    def test_get_overall_fitness_distribution_1(
+        self, create_gt_network: gt.Graph
+    ) -> None:
+        """Test if the get overall fitness distribution works with exluding also a node."""
+        simulators = SimMartVaq(network=create_gt_network)
+        mean_h, mean_c, mean_w = simulators.get_overall_fitness_distribution(
+            simulators.network, list(range(0, 4))
+        )
+
+        assert mean_h == 7, "Mean fitness is not correct..."
+        assert mean_c == 10, "Mean fitness is not correct..."
+        assert mean_w == 11, "Mean fitness is not correct..."
 
     @pytest.mark.essential
     def test_inflicting_damage(self, create_gt_network: gt.Graph) -> None:
