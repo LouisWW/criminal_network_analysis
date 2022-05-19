@@ -29,6 +29,7 @@ p-tqdm = "*"
 numpy = "*"
 pycallgraph = "*"
 graphviz = "*"
+gprof2dot = "*"
 
 [dev-packages]
 ipykernel = "*"

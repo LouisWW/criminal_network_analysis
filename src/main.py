@@ -7,8 +7,8 @@ __date__   = 22/02/2022
 import logging
 
 from config.config import ConfigParser
-from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
+from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 from utils.sensitivity_analysis import SensitivityAnalyser
 
@@ -43,11 +43,13 @@ if args.sim_mart_vaq:
 
     # Add nodes to network
     # First convert to gt
-    gt_network = NetworkConverter.nx_to_gt(nx_network)
-    simulator = SimMartVaq(gt_network, ratio_honest=0.4, ratio_wolf=0.05)
+    meta_sim = MetaSimulator(
+        network_name=nx_network.name, ratio_honest=0.9, ratio_wolf=0.01
+    )
+    simulator = SimMartVaq(meta_sim.network)
 
     simulators = SimMartVaq(
-        network=gt_network,
+        network=simulator.network,
         ratio_honest=0.6,
         ratio_wolf=0.1,
         delta=0.8,  # no acting for wolfs

@@ -28,6 +28,14 @@ docs_view:
 	pdoc3 --html test -o ./docs --force
 	pdoc3 --html utils -o ./docs --force
 
+
+.PHONY: profiling_sim_mart
+profiling_sim_mart:
+	python3 -m profile -o output.pstats main.py -read-data -sim-mart-vaq
+	gprof2dot.py -f pstats output.pstats | dot -Tpng -o output.png
+
+
+
 ## Delete all compiled Python files
 .PHONY: clean
 clean:

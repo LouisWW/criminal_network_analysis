@@ -213,7 +213,13 @@ class SimMartVaq:
                                                             Returns network and collected data.
         """
         # Running multiprocessing
-        num_cpus = multiprocessing.cpu_count() - 1
+        # If repetition are less than number of cores
+        # then don't use all the cores
+        if repetition < multiprocessing.cpu_count() - 1:
+            num_cpus = repetition
+        else:
+            num_cpus = multiprocessing.cpu_count() - 1
+
         results = p_umap(
             self.avg_play_help,
             (
