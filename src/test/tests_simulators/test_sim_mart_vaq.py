@@ -129,20 +129,26 @@ class TestSimMartVaq:
         # Network and network_aft_damage are same object
         # To compare network create an independent copy
         untouched_network = deepcopy(network)
-        min_grp = 5
-        max_grp = 10
 
-        dict_of_communities = simulators.select_multiple_communities(
-            network=meta_simulator_network, radius=1, min_grp=min_grp, max_grp=max_grp
+        n_groups = 20
+        dict_of_communities = simulators.slct_pers_n_neighbours(
+            network=meta_simulator_network,
+            n_groups=n_groups,
+            network_size=meta_simulator_network.num_vertices(),
         )
-        mbrs = dict_of_communities[min_grp]
-        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+
+        slct_pers = list(dict_of_communities.keys())[0]
+        mbrs = dict_of_communities[slct_pers]
+        # Check the person status
+        slct_pers_status = network.vp.state[network.vertex(slct_pers)]
+
+        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proportions(
             network=network, group_members=mbrs
         )
 
         # Select one group number from the all the numbers
         network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
-            network, mbrs
+            network, slct_pers, slct_pers_status, mbrs
         )
 
         # select random node from group
@@ -217,7 +223,7 @@ class TestSimMartVaq:
 
     @pytest.mark.essential
     def test_acting_stage_2(self, meta_simulator_network: gt.Graph) -> None:
-        """Test if the acting stage process is working correclty.
+        """Test if the acting stage process is working correctly.
 
         This time, lone wolf never act!
         """
@@ -227,20 +233,26 @@ class TestSimMartVaq:
         # Network and network_aft_dmge are same object
         # To compare network create an independent copy
         untouched_network = deepcopy(network)
-        min_grp = 5
-        max_grp = 10
 
-        dict_of_communities = simulators.select_multiple_communities(
-            network=meta_simulator_network, radius=1, min_grp=min_grp, max_grp=max_grp
+        n_groups = 20
+        dict_of_communities = simulators.slct_pers_n_neighbours(
+            network=meta_simulator_network,
+            n_groups=n_groups,
+            network_size=meta_simulator_network.num_vertices(),
         )
-        mbrs = dict_of_communities[min_grp]
-        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+
+        slct_pers = list(dict_of_communities.keys())[0]
+        mbrs = dict_of_communities[slct_pers]
+        # Check the person status
+        slct_pers_status = network.vp.state[network.vertex(slct_pers)]
+
+        n_c, n_h, n_w, p_c, p_h, p_w = simulators.counting_status_proportions(
             network=network, group_members=mbrs
         )
 
         # Select one group number from the all the numbers
         network_aft_dmge, slct_pers, slct_pers_status = simulators.acting_stage(
-            network, mbrs
+            network, slct_pers, slct_pers_status, group_members=mbrs
         )
 
         # select random node from group
@@ -278,7 +290,7 @@ class TestSimMartVaq:
 
     @pytest.mark.essential
     def test_select_communities(self, meta_simulator_network: gt.Graph) -> None:
-        """Test if the random select communites is working correctly."""
+        """Test if the random select communities is working correctly."""
         simulators = SimMartVaq(meta_simulator_network)
         network = simulators.network
 
@@ -337,6 +349,21 @@ class TestSimMartVaq:
             assert len(dict_of_communities[k]) >= 1, "Some communities are empty..."
 
     @pytest.mark.essential
+    def test_slct_pers_n_neighbours(self, create_gt_network: gt.Graph) -> None:
+        """Test if the slct_pers_n_neighbours is working correctly."""
+        simulators = SimMartVaq(network=create_gt_network)
+        np.random.seed(0)
+        result = simulators.slct_pers_n_neighbours(
+            network=simulators.network,
+            n_groups=3,
+            network_size=simulators.network.num_vertices(),
+        )
+        assert list(result.keys())[0] == 4, "Key should be 4 otherwise nxt test fails."
+        assert result[4] == {4, 2, 3}, "Selected neighbours is wrong..."
+        assert result[0] == {0, 1, 2, 3}, "Selected neighbours is wrong..."
+        assert result[3] == {3, 4, 0}, "Selected neighbours is wrong..."
+
+    @pytest.mark.essential
     def test_counting_status_proportions(
         self, meta_simulator_network: gt.Graph
     ) -> None:
@@ -350,7 +377,7 @@ class TestSimMartVaq:
         )
 
         for k, v in dict_of_communities.items():
-            n_h, n_c, n_w, p_c, p_h, p_w = simulators.counting_status_proprotions(
+            n_h, n_c, n_w, p_c, p_h, p_w = simulators.counting_status_proportions(
                 network=network, group_members=v
             )
 
@@ -379,7 +406,7 @@ class TestSimMartVaq:
         assert mean_h == 7, "Mean fitness is not correct..."
         assert mean_c == 10, "Mean fitness is not correct..."
         assert mean_w == 7, "Mean fitness is not correct..."
-        
+
     def test_get_overall_fitness_distribution_1(
         self, create_gt_network: gt.Graph
     ) -> None:
@@ -443,6 +470,7 @@ class TestSimMartVaq:
         # Triggers state and civilian punishment
         np.random.seed(2)
         node = 0
+        simulators.criminal_acting = True
         network = simulators.investigation_stage(
             simulators.network,
             frozenset([0, 1, 2, 3, 4]),
@@ -498,6 +526,24 @@ class TestSimMartVaq:
         # Triggers state and civilian punishment
         np.random.seed(2)
         node = 0
+        network = simulators.investigation_stage(
+            simulators.network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 0
+        assert network.vp.fitness[network.vertex(1)] == 8
+        assert network.vp.fitness[network.vertex(2)] == 6
+        assert network.vp.fitness[network.vertex(3)] == 10.6
+        assert network.vp.fitness[network.vertex(4)] == 0.5
+
+        # What if the criminal is chosen
+        # But didn't act
+        # Triggers state and civilian punishment
+        np.random.seed(2)
+        node = 0
+        simulators.criminal_acting = False
         network = simulators.investigation_stage(
             simulators.network,
             frozenset([0, 1, 2, 3, 4]),
@@ -595,33 +641,33 @@ class TestSimMartVaq:
 
         # To compare it to the other object
         untouched_network = deepcopy(network)
-        min_grp = 5
-        max_grp = 10
-        dict_of_communities = simulators.select_multiple_communities(
-            network=network, radius=3, min_grp=min_grp, max_grp=max_grp
+        dict_of_communities = simulators.slct_pers_n_neighbours(
+            network=network, n_groups=20, network_size=network.num_vertices()
         )
-        mbrs = dict_of_communities[min_grp]
-
         # Check if the players changed status
         # With seed 0, role interchange is triggered
-        np.random.seed(0)
-        network = simulators.evolutionary_stage(network, mbrs)
+        np.random.seed(1)
+        protagonist = list(dict_of_communities.keys())[0]
+        mbrs = dict_of_communities[protagonist]
+        network = simulators.evolutionary_stage(network, protagonist, mbrs)
 
         assert (
-            network.vp.state[network.vertex(74)]
-            == untouched_network.vp.state[untouched_network.vertex(291)]
+            network.vp.state[network.vertex(158)]
+            == untouched_network.vp.state[untouched_network.vertex(34)]
         ), "Interchange function didn't work properly"
         assert (
-            network.vp.state[network.vertex(291)]
-            == untouched_network.vp.state[untouched_network.vertex(291)]
+            network.vp.state[network.vertex(34)]
+            == untouched_network.vp.state[untouched_network.vertex(34)]
         ), "Interchange function didn't work properly"
 
         # Check if the players changed status
         # With seed 5, mutation is triggered
         np.random.seed(10)
-        network = simulators.evolutionary_stage(network, mbrs)
+        protagonist = list(dict_of_communities.keys())[1]
+        mbrs = dict_of_communities[protagonist]
+        network = simulators.evolutionary_stage(network, protagonist, mbrs)
         assert (
-            network.vp.state[network.vertex(515)] == "c"
+            network.vp.state[network.vertex(758)] == "c"
         ), "Mutation function didn't work properly"
 
     @pytest.mark.essential
@@ -723,9 +769,7 @@ class TestSimMartVaq:
             r_w=10,
             mutation_prob=-0.1,  # only fermi function
         )
-        _, data_collector = simulators.play(
-            network=simulators.network, rounds=100, radius=3
-        )
+        _, data_collector = simulators.play(network=simulators.network, rounds=100)
 
         # not any returns True if all element are False/0
         assert not any(

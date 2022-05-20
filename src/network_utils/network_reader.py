@@ -70,7 +70,7 @@ class NetworkReader:
         nx.set_node_attributes(graph_obj, state, "state")
 
         # Set the name of the graph
-        graph_obj.name = "montagna_phone_calls"
+        graph_obj.name = "montagna_calls"
         return graph_obj
 
     def get_data(self, data_type: str) -> nx.Graph:
@@ -82,6 +82,6 @@ class NetworkReader:
         elif data_type == "montagna_meetings":
             return self.read_montagna_meetings()
         else:
-            raise RuntimeError
-        ("Define a network please :'cunha','montagan_calls','montagana_meetings'"
-        )
+            raise RuntimeError(
+                "Define a network please :'cunha','montagna_calls','montagana_meetings'"
+            )

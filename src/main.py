@@ -50,19 +50,21 @@ if args.sim_mart_vaq:
 
     simulators = SimMartVaq(
         network=simulator.network,
-        delta=0.8,  # no acting for wolfs
+        delta=-10,  # no acting for wolfs
         gamma=0.5,
-        tau=1,  # no fintess sharing between wolf to criminal
+        tau=0.4,  # no fitness sharing between wolf to criminal
         beta_s=5000,
-        beta_h=600,
-        beta_c=5000,
+        beta_h=300,
+        beta_c=600,
         c_c=1,  # no benefits from criminals/ they still act
         r_c=1,
-        c_w=1,
+        c_w=0.1,
         r_w=1,
-        mutation_prob=-0.1,
+        mutation_prob=-0.01,  # only fermi function
     )
-    network, data_collector = simulators.play(network=simulators.network, rounds=300)
+    network, data_collector = simulators.play(
+        network=simulators.network, rounds=1000, n_groups=200
+    )
 
 if args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
