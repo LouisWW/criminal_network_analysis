@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>network_utils.network_stats API documentation</title>
+<meta name="description" content="This script&#39;s intention is to get the properties of an given network …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>network_utils.network_stats</code></h1>
+</header>
+<section id="section-intro">
+<p>This script's intention is to get the properties of an given network.</p>
+<p><strong>author</strong> = Louis Weyland
+<strong>date</strong>
+= 5/02/2022</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;This script&#39;s intention is to get the properties of an given network.
+
+__author__ = Louis Weyland
+__date__   = 5/02/2022
+&#34;&#34;&#34;
+import logging
+from typing import List
+from typing import Tuple
+
+import networkit as nk
+import numpy as np
+import powerlaw
+from utils.suppress_stdout_stderr import suppress_stdout_stderr
+from tqdm import tqdm
+
+logger = logging.getLogger(&#34;logger&#34;)
+
+
+class NetworkStats:
+    &#34;&#34;&#34;Take an network as input and returns its properties.&#34;&#34;&#34;
+
+    def __init__(self, network: nk.Graph) -&gt; None:
+        &#34;&#34;&#34;Initialize the network as an attribute.&#34;&#34;&#34;
+        assert isinstance(network, nk.Graph), &#34;Given network type is not Networkit&#34;
+        self.network = network
+
+    def get_overview(self) -&gt; None:
+        &#34;&#34;&#34;Get an overview of the network.&#34;&#34;&#34;
+        print(&#34;----------------------------&#34;)
+        nk.overview(self.network)
+        nk.community.detectCommunities(self.network)
+        self.get_connected_components()
+        self.check_if_powerlaw()
+        self.get_density()
+        self.get_relative_density()
+        self.get_diameter()
+        self.get_radius()
+        self.get_degree_dispersion()
+        # self.get_efficiency()
+        print(&#34;----------------------------&#34;)
+
+    def get_connected_components(self) -&gt; int:
+        &#34;&#34;&#34;Return the number of connected components.&#34;&#34;&#34;
+        cc = nk.components.ConnectedComponents(self.network)
+        cc.run()
+        n_component = cc.numberOfComponents()
+        logger.info(f&#34;Number of components = {n_component}&#34;)
+        return n_component
+
+    def get_degree_distribution(self, normalized: bool = True) -&gt; List[float]:
+        &#34;&#34;&#34;Get the normalized degree distribution of a network.&#34;&#34;&#34;
+        return (
+            nk.centrality.DegreeCentrality(self.network, normalized=normalized)
+            .run()
+            .scores()
+        )
+
+    def check_if_powerlaw(self, data: List[float] = None) -&gt; Tuple[bool, float]:
+        &#34;&#34;&#34;Check if a given data follows a powerlaw distribution.
+
+        Data needs to be sorted first!
+        &#34;&#34;&#34;
+        if data is None:
+            data = self.get_degree_distribution()
+        data = sorted(data, reverse=True)
+        distributions = [&#34;exponential&#34;, &#34;lognormal&#34;]
+        # Suppress the powerlaw info
+        with suppress_stdout_stderr():
+            fit = powerlaw.Fit(data)
+
+        for distribution in distributions:
+            # if power_law value is negative than other distributions are preferred
+            res = fit.distribution_compare(&#34;power_law&#34;, distribution)
+            if res[0] &lt; 0:
+                logger.info(
+                    f&#34;{distribution.title()} is preferred over powerlaw, p_value = {res[1]:.4f}&#34;
+                )
+                is_powerlaw = False
+                break
+            else:
+                is_powerlaw = True
+
+        if is_powerlaw is True:
+            logger.info(
+                f&#34;Network degree distribution follows a powerlaw, p_value = {res[1]:.4f}&#34;
+            )
+        return is_powerlaw, fit.alpha
+
+    def get_community(self) -&gt; int:
+        &#34;&#34;&#34;Get the number of communities.&#34;&#34;&#34;
+        communities = nk.community.detectCommunities(self.network)
+        logger.warning(&#34;Additional work needed here!&#34;)
+        return communities
+
+    def get_diameter(self) -&gt; int:
+        &#34;&#34;&#34;Get the diameter, longest possible path of a network.&#34;&#34;&#34;
+        if self.get_connected_components() == 1:
+            diam = nk.distance.Diameter(self.network, algo=1)
+            diam.run()
+            diameter = diam.getDiameter()[0]
+            logger.info(f&#34;Diameter = {diameter}&#34;)
+            return int(diameter)
+        else:
+            logger.warning(&#34;Graph must be connected! Otherwise distance == inf&#34;)
+            return -1
+
+    def get_radius(self) -&gt; int:
+        &#34;&#34;&#34;Get the radius of a graph which is the minimum eccentricity.&#34;&#34;&#34;
+        # predefine the len of the list for speed
+        eccentricity = []
+
+        for node in tqdm(
+            self.network.iterNodes(),
+            total=self.network.numberOfNodes(),
+            desc=&#34;Getting the radius...&#34;,
+            leave=False,
+        ):
+            eccentricity.append(self.get_eccentricity(node))
+
+        radius = np.min(eccentricity)
+        logger.info(f&#34;Radius = {radius}&#34;)
+        return int(radius)
+
+    def get_eccentricity(self, node: int) -&gt; int:
+        &#34;&#34;&#34;Return the eccentricity of a node.&#34;&#34;&#34;
+        return nk.distance.Eccentricity.getValue(self.network, node)[1]
+
+    def get_scale_freeness(self) -&gt; None:
+        &#34;&#34;&#34;Scale freeness as defined in M. Graph Theory.&#34;&#34;&#34;
+        raise NotImplementedError
+
+    def get_density(self) -&gt; float:
+        &#34;&#34;&#34;Get the density of a network.&#34;&#34;&#34;
+        m = self.network.numberOfEdges()
+        n = self.network.numberOfNodes()
+        d = (2 * m) / (n * (n - 1))
+        logger.info(f&#34;Density = {d}&#34;)
+        return d
+
+    def get_relative_density(self) -&gt; float:
+        &#34;&#34;&#34;Get the relative density of a graph as defined in Scott J.&#34;&#34;&#34;
+        n = self.network.numberOfNodes()
+        mean_degree = np.mean(self.get_degree_distribution(normalized=False))
+        d = (n * mean_degree) / (n * (n - 1))
+        logger.info(f&#34;Relative Density = {d}&#34;)
+        return d
+
+    def get_degree_dispersion(self) -&gt; float:
+        &#34;&#34;&#34;Get the dipsersion coefficient &lt;k^2&gt;/&lt;k&gt;.
+
+        If the Molloy-Reed criterion is highter &gt; 2, an giant component exists.
+        &#34;&#34;&#34;
+        k = self.get_degree_distribution(normalized=False)
+        k_2 = list(map(lambda x: pow(x, 2), k))
+        dispersion = np.mean(k_2) / np.mean(k)
+
+        if dispersion &gt; 2:
+            logger.info(
+                f&#34;Dispersion criterion is {dispersion:.3f}&gt;2 -&gt; A giant component is present!&#34;
+            )
+        elif dispersion &lt;= 2:
+            logger.info(
+                f&#34;Dispersion criterion is {dispersion:3.f}&lt;=2 -&gt; A giant component isn&#39;t exist!&#34;
+            )
+        return float(dispersion)
+
+    def get_efficiency(self) -&gt; float:
+        &#34;&#34;&#34;Get the efficiency of a Network.
+
+        Corresponds to communication efficiency
+        &#34;&#34;&#34;
+        # Using the All-Pairs Shortest-Paths algorithm
+        apsp = nk.distance.APSP(self.network)
+        apsp.run()
+        # Vector of list for each node to each node
+        vector_of_dist = apsp.getDistances()
+        # Merge all the lists in one array
+        arr_dist = np.hstack(vector_of_dist)
+
+        # get ride of 0 elements since they represent distance to themself
+        # and get the inv
+        arr_dist = arr_dist[arr_dist != 0]
+        arr_inv_dist = np.reciprocal(arr_dist)
+
+        n = self.network.numberOfNodes()
+        efficiency = (1 / (n * (n - 1))) * np.sum(arr_inv_dist)
+
+        logger.info(f&#34;Efficiency = {efficiency}&#34;)
+        return efficiency</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="network_utils.network_stats.NetworkStats"><code class="flex name class">
+<span>class <span class="ident">NetworkStats</span></span>
+<span>(</span><span>network: networkit.graph.Graph)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Take an network as input and returns its properties.</p>
+<p>Initialize the network as an attribute.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NetworkStats:
+    &#34;&#34;&#34;Take an network as input and returns its properties.&#34;&#34;&#34;
+
+    def __init__(self, network: nk.Graph) -&gt; None:
+        &#34;&#34;&#34;Initialize the network as an attribute.&#34;&#34;&#34;
+        assert isinstance(network, nk.Graph), &#34;Given network type is not Networkit&#34;
+        self.network = network
+
+    def get_overview(self) -&gt; None:
+        &#34;&#34;&#34;Get an overview of the network.&#34;&#34;&#34;
+        print(&#34;----------------------------&#34;)
+        nk.overview(self.network)
+        nk.community.detectCommunities(self.network)
+        self.get_connected_components()
+        self.check_if_powerlaw()
+        self.get_density()
+        self.get_relative_density()
+        self.get_diameter()
+        self.get_radius()
+        self.get_degree_dispersion()
+        # self.get_efficiency()
+        print(&#34;----------------------------&#34;)
+
+    def get_connected_components(self) -&gt; int:
+        &#34;&#34;&#34;Return the number of connected components.&#34;&#34;&#34;
+        cc = nk.components.ConnectedComponents(self.network)
+        cc.run()
+        n_component = cc.numberOfComponents()
+        logger.info(f&#34;Number of components = {n_component}&#34;)
+        return n_component
+
+    def get_degree_distribution(self, normalized: bool = True) -&gt; List[float]:
+        &#34;&#34;&#34;Get the normalized degree distribution of a network.&#34;&#34;&#34;
+        return (
+            nk.centrality.DegreeCentrality(self.network, normalized=normalized)
+            .run()
+            .scores()
+        )
+
+    def check_if_powerlaw(self, data: List[float] = None) -&gt; Tuple[bool, float]:
+        &#34;&#34;&#34;Check if a given data follows a powerlaw distribution.
+
+        Data needs to be sorted first!
+        &#34;&#34;&#34;
+        if data is None:
+            data = self.get_degree_distribution()
+        data = sorted(data, reverse=True)
+        distributions = [&#34;exponential&#34;, &#34;lognormal&#34;]
+        # Suppress the powerlaw info
+        with suppress_stdout_stderr():
+            fit = powerlaw.Fit(data)
+
+        for distribution in distributions:
+            # if power_law value is negative than other distributions are preferred
+            res = fit.distribution_compare(&#34;power_law&#34;, distribution)
+            if res[0] &lt; 0:
+                logger.info(
+                    f&#34;{distribution.title()} is preferred over powerlaw, p_value = {res[1]:.4f}&#34;
+                )
+                is_powerlaw = False
+                break
+            else:
+                is_powerlaw = True
+
+        if is_powerlaw is True:
+            logger.info(
+                f&#34;Network degree distribution follows a powerlaw, p_value = {res[1]:.4f}&#34;
+            )
+        return is_powerlaw, fit.alpha
+
+    def get_community(self) -&gt; int:
+        &#34;&#34;&#34;Get the number of communities.&#34;&#34;&#34;
+        communities = nk.community.detectCommunities(self.network)
+        logger.warning(&#34;Additional work needed here!&#34;)
+        return communities
+
+    def get_diameter(self) -&gt; int:
+        &#34;&#34;&#34;Get the diameter, longest possible path of a network.&#34;&#34;&#34;
+        if self.get_connected_components() == 1:
+            diam = nk.distance.Diameter(self.network, algo=1)
+            diam.run()
+            diameter = diam.getDiameter()[0]
+            logger.info(f&#34;Diameter = {diameter}&#34;)
+            return int(diameter)
+        else:
+            logger.warning(&#34;Graph must be connected! Otherwise distance == inf&#34;)
+            return -1
+
+    def get_radius(self) -&gt; int:
+        &#34;&#34;&#34;Get the radius of a graph which is the minimum eccentricity.&#34;&#34;&#34;
+        # predefine the len of the list for speed
+        eccentricity = []
+
+        for node in tqdm(
+            self.network.iterNodes(),
+            total=self.network.numberOfNodes(),
+            desc=&#34;Getting the radius...&#34;,
+            leave=False,
+        ):
+            eccentricity.append(self.get_eccentricity(node))
+
+        radius = np.min(eccentricity)
+        logger.info(f&#34;Radius = {radius}&#34;)
+        return int(radius)
+
+    def get_eccentricity(self, node: int) -&gt; int:
+        &#34;&#34;&#34;Return the eccentricity of a node.&#34;&#34;&#34;
+        return nk.distance.Eccentricity.getValue(self.network, node)[1]
+
+    def get_scale_freeness(self) -&gt; None:
+        &#34;&#34;&#34;Scale freeness as defined in M. Graph Theory.&#34;&#34;&#34;
+        raise NotImplementedError
+
+    def get_density(self) -&gt; float:
+        &#34;&#34;&#34;Get the density of a network.&#34;&#34;&#34;
+        m = self.network.numberOfEdges()
+        n = self.network.numberOfNodes()
+        d = (2 * m) / (n * (n - 1))
+        logger.info(f&#34;Density = {d}&#34;)
+        return d
+
+    def get_relative_density(self) -&gt; float:
+        &#34;&#34;&#34;Get the relative density of a graph as defined in Scott J.&#34;&#34;&#34;
+        n = self.network.numberOfNodes()
+        mean_degree = np.mean(self.get_degree_distribution(normalized=False))
+        d = (n * mean_degree) / (n * (n - 1))
+        logger.info(f&#34;Relative Density = {d}&#34;)
+        return d
+
+    def get_degree_dispersion(self) -&gt; float:
+        &#34;&#34;&#34;Get the dipsersion coefficient &lt;k^2&gt;/&lt;k&gt;.
+
+        If the Molloy-Reed criterion is highter &gt; 2, an giant component exists.
+        &#34;&#34;&#34;
+        k = self.get_degree_distribution(normalized=False)
+        k_2 = list(map(lambda x: pow(x, 2), k))
+        dispersion = np.mean(k_2) / np.mean(k)
+
+        if dispersion &gt; 2:
+            logger.info(
+                f&#34;Dispersion criterion is {dispersion:.3f}&gt;2 -&gt; A giant component is present!&#34;
+            )
+        elif dispersion &lt;= 2:
+            logger.info(
+                f&#34;Dispersion criterion is {dispersion:3.f}&lt;=2 -&gt; A giant component isn&#39;t exist!&#34;
+            )
+        return float(dispersion)
+
+    def get_efficiency(self) -&gt; float:
+        &#34;&#34;&#34;Get the efficiency of a Network.
+
+        Corresponds to communication efficiency
+        &#34;&#34;&#34;
+        # Using the All-Pairs Shortest-Paths algorithm
+        apsp = nk.distance.APSP(self.network)
+        apsp.run()
+        # Vector of list for each node to each node
+        vector_of_dist = apsp.getDistances()
+        # Merge all the lists in one array
+        arr_dist = np.hstack(vector_of_dist)
+
+        # get ride of 0 elements since they represent distance to themself
+        # and get the inv
+        arr_dist = arr_dist[arr_dist != 0]
+        arr_inv_dist = np.reciprocal(arr_dist)
+
+        n = self.network.numberOfNodes()
+        efficiency = (1 / (n * (n - 1))) * np.sum(arr_inv_dist)
+
+        logger.info(f&#34;Efficiency = {efficiency}&#34;)
+        return efficiency</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="network_utils.network_stats.NetworkStats.check_if_powerlaw"><code class="name flex">
+<span>def <span class="ident">check_if_powerlaw</span></span>(<span>self, data: List[float] = None) ‑> Tuple[bool, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if a given data follows a powerlaw distribution.</p>
+<p>Data needs to be sorted first!</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_if_powerlaw(self, data: List[float] = None) -&gt; Tuple[bool, float]:
+    &#34;&#34;&#34;Check if a given data follows a powerlaw distribution.
+
+    Data needs to be sorted first!
+    &#34;&#34;&#34;
+    if data is None:
+        data = self.get_degree_distribution()
+    data = sorted(data, reverse=True)
+    distributions = [&#34;exponential&#34;, &#34;lognormal&#34;]
+    # Suppress the powerlaw info
+    with suppress_stdout_stderr():
+        fit = powerlaw.Fit(data)
+
+    for distribution in distributions:
+        # if power_law value is negative than other distributions are preferred
+        res = fit.distribution_compare(&#34;power_law&#34;, distribution)
+        if res[0] &lt; 0:
+            logger.info(
+                f&#34;{distribution.title()} is preferred over powerlaw, p_value = {res[1]:.4f}&#34;
+            )
+            is_powerlaw = False
+            break
+        else:
+            is_powerlaw = True
+
+    if is_powerlaw is True:
+        logger.info(
+            f&#34;Network degree distribution follows a powerlaw, p_value = {res[1]:.4f}&#34;
+        )
+    return is_powerlaw, fit.alpha</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_community"><code class="name flex">
+<span>def <span class="ident">get_community</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the number of communities.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_community(self) -&gt; int:
+    &#34;&#34;&#34;Get the number of communities.&#34;&#34;&#34;
+    communities = nk.community.detectCommunities(self.network)
+    logger.warning(&#34;Additional work needed here!&#34;)
+    return communities</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_connected_components"><code class="name flex">
+<span>def <span class="ident">get_connected_components</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the number of connected components.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_connected_components(self) -&gt; int:
+    &#34;&#34;&#34;Return the number of connected components.&#34;&#34;&#34;
+    cc = nk.components.ConnectedComponents(self.network)
+    cc.run()
+    n_component = cc.numberOfComponents()
+    logger.info(f&#34;Number of components = {n_component}&#34;)
+    return n_component</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_degree_dispersion"><code class="name flex">
+<span>def <span class="ident">get_degree_dispersion</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the dipsersion coefficient <k^2>/<k>.</p>
+<p>If the Molloy-Reed criterion is highter &gt; 2, an giant component exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_degree_dispersion(self) -&gt; float:
+    &#34;&#34;&#34;Get the dipsersion coefficient &lt;k^2&gt;/&lt;k&gt;.
+
+    If the Molloy-Reed criterion is highter &gt; 2, an giant component exists.
+    &#34;&#34;&#34;
+    k = self.get_degree_distribution(normalized=False)
+    k_2 = list(map(lambda x: pow(x, 2), k))
+    dispersion = np.mean(k_2) / np.mean(k)
+
+    if dispersion &gt; 2:
+        logger.info(
+            f&#34;Dispersion criterion is {dispersion:.3f}&gt;2 -&gt; A giant component is present!&#34;
+        )
+    elif dispersion &lt;= 2:
+        logger.info(
+            f&#34;Dispersion criterion is {dispersion:3.f}&lt;=2 -&gt; A giant component isn&#39;t exist!&#34;
+        )
+    return float(dispersion)</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_degree_distribution"><code class="name flex">
+<span>def <span class="ident">get_degree_distribution</span></span>(<span>self, normalized: bool = True) ‑> List[float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the normalized degree distribution of a network.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_degree_distribution(self, normalized: bool = True) -&gt; List[float]:
+    &#34;&#34;&#34;Get the normalized degree distribution of a network.&#34;&#34;&#34;
+    return (
+        nk.centrality.DegreeCentrality(self.network, normalized=normalized)
+        .run()
+        .scores()
+    )</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_density"><code class="name flex">
+<span>def <span class="ident">get_density</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the density of a network.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_density(self) -&gt; float:
+    &#34;&#34;&#34;Get the density of a network.&#34;&#34;&#34;
+    m = self.network.numberOfEdges()
+    n = self.network.numberOfNodes()
+    d = (2 * m) / (n * (n - 1))
+    logger.info(f&#34;Density = {d}&#34;)
+    return d</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_diameter"><code class="name flex">
+<span>def <span class="ident">get_diameter</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the diameter, longest possible path of a network.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_diameter(self) -&gt; int:
+    &#34;&#34;&#34;Get the diameter, longest possible path of a network.&#34;&#34;&#34;
+    if self.get_connected_components() == 1:
+        diam = nk.distance.Diameter(self.network, algo=1)
+        diam.run()
+        diameter = diam.getDiameter()[0]
+        logger.info(f&#34;Diameter = {diameter}&#34;)
+        return int(diameter)
+    else:
+        logger.warning(&#34;Graph must be connected! Otherwise distance == inf&#34;)
+        return -1</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_eccentricity"><code class="name flex">
+<span>def <span class="ident">get_eccentricity</span></span>(<span>self, node: int) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the eccentricity of a node.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_eccentricity(self, node: int) -&gt; int:
+    &#34;&#34;&#34;Return the eccentricity of a node.&#34;&#34;&#34;
+    return nk.distance.Eccentricity.getValue(self.network, node)[1]</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_efficiency"><code class="name flex">
+<span>def <span class="ident">get_efficiency</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the efficiency of a Network.</p>
+<p>Corresponds to communication efficiency</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_efficiency(self) -&gt; float:
+    &#34;&#34;&#34;Get the efficiency of a Network.
+
+    Corresponds to communication efficiency
+    &#34;&#34;&#34;
+    # Using the All-Pairs Shortest-Paths algorithm
+    apsp = nk.distance.APSP(self.network)
+    apsp.run()
+    # Vector of list for each node to each node
+    vector_of_dist = apsp.getDistances()
+    # Merge all the lists in one array
+    arr_dist = np.hstack(vector_of_dist)
+
+    # get ride of 0 elements since they represent distance to themself
+    # and get the inv
+    arr_dist = arr_dist[arr_dist != 0]
+    arr_inv_dist = np.reciprocal(arr_dist)
+
+    n = self.network.numberOfNodes()
+    efficiency = (1 / (n * (n - 1))) * np.sum(arr_inv_dist)
+
+    logger.info(f&#34;Efficiency = {efficiency}&#34;)
+    return efficiency</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_overview"><code class="name flex">
+<span>def <span class="ident">get_overview</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get an overview of the network.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_overview(self) -&gt; None:
+    &#34;&#34;&#34;Get an overview of the network.&#34;&#34;&#34;
+    print(&#34;----------------------------&#34;)
+    nk.overview(self.network)
+    nk.community.detectCommunities(self.network)
+    self.get_connected_components()
+    self.check_if_powerlaw()
+    self.get_density()
+    self.get_relative_density()
+    self.get_diameter()
+    self.get_radius()
+    self.get_degree_dispersion()
+    # self.get_efficiency()
+    print(&#34;----------------------------&#34;)</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_radius"><code class="name flex">
+<span>def <span class="ident">get_radius</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the radius of a graph which is the minimum eccentricity.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_radius(self) -&gt; int:
+    &#34;&#34;&#34;Get the radius of a graph which is the minimum eccentricity.&#34;&#34;&#34;
+    # predefine the len of the list for speed
+    eccentricity = []
+
+    for node in tqdm(
+        self.network.iterNodes(),
+        total=self.network.numberOfNodes(),
+        desc=&#34;Getting the radius...&#34;,
+        leave=False,
+    ):
+        eccentricity.append(self.get_eccentricity(node))
+
+    radius = np.min(eccentricity)
+    logger.info(f&#34;Radius = {radius}&#34;)
+    return int(radius)</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_relative_density"><code class="name flex">
+<span>def <span class="ident">get_relative_density</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the relative density of a graph as defined in Scott J.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_relative_density(self) -&gt; float:
+    &#34;&#34;&#34;Get the relative density of a graph as defined in Scott J.&#34;&#34;&#34;
+    n = self.network.numberOfNodes()
+    mean_degree = np.mean(self.get_degree_distribution(normalized=False))
+    d = (n * mean_degree) / (n * (n - 1))
+    logger.info(f&#34;Relative Density = {d}&#34;)
+    return d</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_scale_freeness"><code class="name flex">
+<span>def <span class="ident">get_scale_freeness</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Scale freeness as defined in M. Graph Theory.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_scale_freeness(self) -&gt; None:
+    &#34;&#34;&#34;Scale freeness as defined in M. Graph Theory.&#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="network_utils" href="index.html">network_utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="network_utils.network_stats.NetworkStats" href="#network_utils.network_stats.NetworkStats">NetworkStats</a></code></h4>
+<ul class="">
+<li><code><a title="network_utils.network_stats.NetworkStats.check_if_powerlaw" href="#network_utils.network_stats.NetworkStats.check_if_powerlaw">check_if_powerlaw</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_community" href="#network_utils.network_stats.NetworkStats.get_community">get_community</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_connected_components" href="#network_utils.network_stats.NetworkStats.get_connected_components">get_connected_components</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_degree_dispersion" href="#network_utils.network_stats.NetworkStats.get_degree_dispersion">get_degree_dispersion</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_degree_distribution" href="#network_utils.network_stats.NetworkStats.get_degree_distribution">get_degree_distribution</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_density" href="#network_utils.network_stats.NetworkStats.get_density">get_density</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_diameter" href="#network_utils.network_stats.NetworkStats.get_diameter">get_diameter</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_eccentricity" href="#network_utils.network_stats.NetworkStats.get_eccentricity">get_eccentricity</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_efficiency" href="#network_utils.network_stats.NetworkStats.get_efficiency">get_efficiency</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_overview" href="#network_utils.network_stats.NetworkStats.get_overview">get_overview</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_radius" href="#network_utils.network_stats.NetworkStats.get_radius">get_radius</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_relative_density" href="#network_utils.network_stats.NetworkStats.get_relative_density">get_relative_density</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_scale_freeness" href="#network_utils.network_stats.NetworkStats.get_scale_freeness">get_scale_freeness</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

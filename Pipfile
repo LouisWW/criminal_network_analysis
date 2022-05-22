@@ -17,10 +17,25 @@ pytest = "*"
 pytest-xdist = "*"
 pytest-subtests = "*"
 pytest-cov = "*"
+<<<<<<< HEAD
 vext = "*"
 "vext.gi" = "*"
 mypy = "*"
+=======
+>>>>>>> main
 pyintergraph = "*"
+tqdm = "*"
+pdoc3 = "*"
+hypothesis = "*"
+rise = "*"
+nbmake = "*"
+fitter = "*"
+SALib = "*"
+p-tqdm = "*"
+numpy = "*"
+pycallgraph = "*"
+graphviz = "*"
+gprof2dot = "*"
 
 [dev-packages]
 ipykernel = "*"

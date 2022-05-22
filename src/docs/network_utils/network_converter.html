@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>network_utils.network_converter API documentation</title>
+<meta name="description" content="This script&#39;s intention is to get the convert graphs between packages …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>network_utils.network_converter</code></h1>
+</header>
+<section id="section-intro">
+<p>This script's intention is to get the convert graphs between packages.</p>
+<p>It converts graph objects from networkx to networkit
+vice versa and networkx to graph-tool.
+So as for now to convert networkit graphs to graph-tool,
+the graphs need to be firstly converted to networkx.</p>
+<p><strong>author</strong> = Louis Weyland
+<strong>date</strong>
+= 14/02/2022</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+This script&#39;s intention is to get the convert graphs between packages.
+
+It converts graph objects from networkx to networkit
+vice versa and networkx to graph-tool.
+So as for now to convert networkit graphs to graph-tool,
+the graphs need to be firstly converted to networkx.
+
+__author__ = Louis Weyland
+__date__   = 14/02/2022
+&#34;&#34;&#34;
+import logging
+from typing import Optional
+from typing import Tuple
+from typing import Union
+
+import graph_tool.all as gt
+import networkit as nk
+import networkx as nx
+import numpy as np
+import pyintergraph
+
+
+logger = logging.getLogger(&#34;logger&#34;)
+
+
+def get_prop_type(
+    value: Union[int, str, float, bool, dict], key: Optional[str] = None
+) -&gt; Tuple[str, Union[float, str, dict], str]:
+    &#34;&#34;&#34;
+    Perform typing and value conversion for the graph_tool PropertyMap class.
+
+    If a key is provided, it also ensures the key is in a format that can be
+    used with the PropertyMap. Returns a tuple, (type name, value, key)
+    &#34;&#34;&#34;
+    if isinstance(key, str):
+        # Encode the key as ASCII
+        key = str(key)
+
+    # Deal with the value
+    if isinstance(value, bool):
+        tname = &#34;bool&#34;
+
+    elif isinstance(value, int):
+        tname = &#34;float&#34;
+        value = float(value)
+
+    elif isinstance(value, float):
+        tname = &#34;float&#34;
+
+    elif isinstance(value, str):
+        tname = &#34;string&#34;
+        value = str(value)
+
+    elif isinstance(value, dict):
+        tname = &#34;object&#34;
+
+    else:
+        tname = &#34;string&#34;
+        value = str(value)
+
+    return tname, value, key
+
+
+class NetworkConverter:
+    &#34;&#34;&#34;Converting graph object from one package to another.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;No specific info for now.&#34;&#34;&#34;
+        pass
+
+    @staticmethod
+    def nx_to_nk(network: nx.graph) -&gt; nk.Graph:
+        &#34;&#34;&#34;Convert graph from networkx to networkit.&#34;&#34;&#34;
+        return nk.nxadapter.nx2nk(network)
+
+    @staticmethod
+    def nk_to_nx(network: nk.graph) -&gt; nx.Graph:
+        &#34;&#34;&#34;Convert graph from networkx to networkit.&#34;&#34;&#34;
+        return nk.nxadapter.nk2nx(network)
+
+    @staticmethod
+    def nx_to_gt(network: nx.graph) -&gt; gt.Graph:
+        &#34;&#34;&#34;
+        Convert a networkx graph to a graph-tool graph.
+
+        Copied from
+        https://bbengfort.github.io/2016/06/graph-tool-from-networkx/
+
+        Important notice, nodes start at 1 in graph-tool in comparison
+        to networkit/x where node enumeration starts with 0.
+        &#34;&#34;&#34;
+        # Phase 0: Create a directed or undirected graph-tool Graph
+        gtG = gt.Graph(directed=network.is_directed())
+
+        # Add the Graph properties as &#34;internal properties&#34;
+        for key, value in network.graph.items():
+            # Convert the value and key into a type for graph-tool
+            tname, value, key = get_prop_type(value, key)
+
+            prop = gtG.new_graph_property(tname)  # Create the PropertyMap
+            gtG.graph_properties[key] = prop  # Set the PropertyMap
+            gtG.graph_properties[key] = value  # Set the actual value
+
+        # Phase 1: Add the vertex and edge property maps
+        # Go through all nodes and edges and add seen properties
+        # Add the node properties first
+        nprops = set()  # cache keys to only add properties once
+        for node, data in network.nodes(data=True):
+
+            # Go through all the properties if not seen and add them.
+            for key, val in data.items():
+                if key in nprops:
+                    continue  # Skip properties already added
+
+                # Convert the value and key into a type for graph-tool
+                tname, _, key = get_prop_type(val, key)
+
+                prop = gtG.new_vertex_property(tname)  # Create the PropertyMap
+                gtG.vertex_properties[key] = prop  # Set the PropertyMap
+
+                # Add the key to the already seen properties
+                nprops.add(key)
+
+        # Also add the node id: in NetworkX a node can be any hashable type, but
+        # in graph-tool node are defined as indices. So we capture any strings
+        # in a special PropertyMap called &#39;id&#39; -- modify as needed!
+        gtG.vertex_properties[&#34;id&#34;] = gtG.new_vertex_property(&#34;string&#34;)
+
+        # Add the edge properties second
+        eprops = set()  # cache keys to only add properties once
+        for src, dst, data in network.edges(data=True):
+
+            # Go through all the edge properties if not seen and add them.
+            for key, val in data.items():
+                if key in eprops:
+                    continue  # Skip properties already added
+
+                # Convert the value and key into a type for graph-tool
+                tname, _, key = get_prop_type(val, key)
+
+                prop = gtG.new_edge_property(tname)  # Create the PropertyMap
+                gtG.edge_properties[key] = prop  # Set the PropertyMap
+
+                # Add the key to the already seen properties
+                eprops.add(key)
+
+        # Phase 2: Actually add all the nodes and vertices with their properties
+        # Add the nodes
+        vertices = {}  # vertex mapping for tracking edges later
+        for node, data in network.nodes(data=True):
+
+            # Create the vertex and annotate for our edges later
+            v = gtG.add_vertex()
+            vertices[node] = v
+
+            # Set the vertex properties, not forgetting the id property
+            data[&#34;id&#34;] = str(node)
+            for key, value in data.items():
+                gtG.vp[key][v] = value  # vp is short for vertex_properties
+
+        # Add the edges
+        for src, dst, data in network.edges(data=True):
+
+            # Look up the vertex structs from our vertices mapping and add edge.
+            e = gtG.add_edge(vertices[src], vertices[dst])
+
+            # Add the edge properties
+            for key, value in data.items():
+                gtG.ep[key][e] = value  # ep is short for edge_properties
+
+        # Done, finally!
+        return gtG
+
+    @staticmethod
+    def gt_to_nx(network: gt.Graph, labelname: str = &#34;id&#34;) -&gt; nx.Graph:
+        &#34;&#34;&#34;Convert graph from graph_tool to networkx.&#34;&#34;&#34;
+        logger.warning(&#34;labelname should be set to &#39;id&#39;!&#34;)
+        return pyintergraph.gt2nx(network, labelname)
+
+    @staticmethod
+    def gt_to_nk(network: gt.Graph) -&gt; nk.Graph:
+        &#34;&#34;&#34;Convert graph from graph_tool to networkit.&#34;&#34;&#34;
+        adj_matrix = gt.adjacency(network)
+        col, row = adj_matrix.nonzero()
+
+        # create nk.Graph with number of vertices
+        graph = nk.Graph(len(network.get_vertices()))
+
+        for r, c in zip(row, col):
+            graph.addEdge(r, c)
+
+        return graph
+
+    @staticmethod
+    def nk_to_gt(network: nk.Graph, directed: bool = False) -&gt; gt.Graph:
+        &#34;&#34;&#34;Convert graph from networkit to graph_tool.&#34;&#34;&#34;
+        nk_adj_matrix = nk.algebraic.adjacencyMatrix(network, matrixType=&#34;sparse&#34;)
+        graph = gt.Graph(directed=directed)
+        graph.add_edge_list(np.transpose(nk_adj_matrix.nonzero()))
+
+        return graph</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="network_utils.network_converter.get_prop_type"><code class="name flex">
+<span>def <span class="ident">get_prop_type</span></span>(<span>value: Union[int, str, float, bool, dict], key: Optional[str] = None) ‑> Tuple[str, Union[float, str, dict], str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform typing and value conversion for the graph_tool PropertyMap class.</p>
+<p>If a key is provided, it also ensures the key is in a format that can be
+used with the PropertyMap. Returns a tuple, (type name, value, key)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_prop_type(
+    value: Union[int, str, float, bool, dict], key: Optional[str] = None
+) -&gt; Tuple[str, Union[float, str, dict], str]:
+    &#34;&#34;&#34;
+    Perform typing and value conversion for the graph_tool PropertyMap class.
+
+    If a key is provided, it also ensures the key is in a format that can be
+    used with the PropertyMap. Returns a tuple, (type name, value, key)
+    &#34;&#34;&#34;
+    if isinstance(key, str):
+        # Encode the key as ASCII
+        key = str(key)
+
+    # Deal with the value
+    if isinstance(value, bool):
+        tname = &#34;bool&#34;
+
+    elif isinstance(value, int):
+        tname = &#34;float&#34;
+        value = float(value)
+
+    elif isinstance(value, float):
+        tname = &#34;float&#34;
+
+    elif isinstance(value, str):
+        tname = &#34;string&#34;
+        value = str(value)
+
+    elif isinstance(value, dict):
+        tname = &#34;object&#34;
+
+    else:
+        tname = &#34;string&#34;
+        value = str(value)
+
+    return tname, value, key</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="network_utils.network_converter.NetworkConverter"><code class="flex name class">
+<span>class <span class="ident">NetworkConverter</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Converting graph object from one package to another.</p>
+<p>No specific info for now.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NetworkConverter:
+    &#34;&#34;&#34;Converting graph object from one package to another.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;No specific info for now.&#34;&#34;&#34;
+        pass
+
+    @staticmethod
+    def nx_to_nk(network: nx.graph) -&gt; nk.Graph:
+        &#34;&#34;&#34;Convert graph from networkx to networkit.&#34;&#34;&#34;
+        return nk.nxadapter.nx2nk(network)
+
+    @staticmethod
+    def nk_to_nx(network: nk.graph) -&gt; nx.Graph:
+        &#34;&#34;&#34;Convert graph from networkx to networkit.&#34;&#34;&#34;
+        return nk.nxadapter.nk2nx(network)
+
+    @staticmethod
+    def nx_to_gt(network: nx.graph) -&gt; gt.Graph:
+        &#34;&#34;&#34;
+        Convert a networkx graph to a graph-tool graph.
+
+        Copied from
+        https://bbengfort.github.io/2016/06/graph-tool-from-networkx/
+
+        Important notice, nodes start at 1 in graph-tool in comparison
+        to networkit/x where node enumeration starts with 0.
+        &#34;&#34;&#34;
+        # Phase 0: Create a directed or undirected graph-tool Graph
+        gtG = gt.Graph(directed=network.is_directed())
+
+        # Add the Graph properties as &#34;internal properties&#34;
+        for key, value in network.graph.items():
+            # Convert the value and key into a type for graph-tool
+            tname, value, key = get_prop_type(value, key)
+
+            prop = gtG.new_graph_property(tname)  # Create the PropertyMap
+            gtG.graph_properties[key] = prop  # Set the PropertyMap
+            gtG.graph_properties[key] = value  # Set the actual value
+
+        # Phase 1: Add the vertex and edge property maps
+        # Go through all nodes and edges and add seen properties
+        # Add the node properties first
+        nprops = set()  # cache keys to only add properties once
+        for node, data in network.nodes(data=True):
+
+            # Go through all the properties if not seen and add them.
+            for key, val in data.items():
+                if key in nprops:
+                    continue  # Skip properties already added
+
+                # Convert the value and key into a type for graph-tool
+                tname, _, key = get_prop_type(val, key)
+
+                prop = gtG.new_vertex_property(tname)  # Create the PropertyMap
+                gtG.vertex_properties[key] = prop  # Set the PropertyMap
+
+                # Add the key to the already seen properties
+                nprops.add(key)
+
+        # Also add the node id: in NetworkX a node can be any hashable type, but
+        # in graph-tool node are defined as indices. So we capture any strings
+        # in a special PropertyMap called &#39;id&#39; -- modify as needed!
+        gtG.vertex_properties[&#34;id&#34;] = gtG.new_vertex_property(&#34;string&#34;)
+
+        # Add the edge properties second
+        eprops = set()  # cache keys to only add properties once
+        for src, dst, data in network.edges(data=True):
+
+            # Go through all the edge properties if not seen and add them.
+            for key, val in data.items():
+                if key in eprops:
+                    continue  # Skip properties already added
+
+                # Convert the value and key into a type for graph-tool
+                tname, _, key = get_prop_type(val, key)
+
+                prop = gtG.new_edge_property(tname)  # Create the PropertyMap
+                gtG.edge_properties[key] = prop  # Set the PropertyMap
+
+                # Add the key to the already seen properties
+                eprops.add(key)
+
+        # Phase 2: Actually add all the nodes and vertices with their properties
+        # Add the nodes
+        vertices = {}  # vertex mapping for tracking edges later
+        for node, data in network.nodes(data=True):
+
+            # Create the vertex and annotate for our edges later
+            v = gtG.add_vertex()
+            vertices[node] = v
+
+            # Set the vertex properties, not forgetting the id property
+            data[&#34;id&#34;] = str(node)
+            for key, value in data.items():
+                gtG.vp[key][v] = value  # vp is short for vertex_properties
+
+        # Add the edges
+        for src, dst, data in network.edges(data=True):
+
+            # Look up the vertex structs from our vertices mapping and add edge.
+            e = gtG.add_edge(vertices[src], vertices[dst])
+
+            # Add the edge properties
+            for key, value in data.items():
+                gtG.ep[key][e] = value  # ep is short for edge_properties
+
+        # Done, finally!
+        return gtG
+
+    @staticmethod
+    def gt_to_nx(network: gt.Graph, labelname: str = &#34;id&#34;) -&gt; nx.Graph:
+        &#34;&#34;&#34;Convert graph from graph_tool to networkx.&#34;&#34;&#34;
+        logger.warning(&#34;labelname should be set to &#39;id&#39;!&#34;)
+        return pyintergraph.gt2nx(network, labelname)
+
+    @staticmethod
+    def gt_to_nk(network: gt.Graph) -&gt; nk.Graph:
+        &#34;&#34;&#34;Convert graph from graph_tool to networkit.&#34;&#34;&#34;
+        adj_matrix = gt.adjacency(network)
+        col, row = adj_matrix.nonzero()
+
+        # create nk.Graph with number of vertices
+        graph = nk.Graph(len(network.get_vertices()))
+
+        for r, c in zip(row, col):
+            graph.addEdge(r, c)
+
+        return graph
+
+    @staticmethod
+    def nk_to_gt(network: nk.Graph, directed: bool = False) -&gt; gt.Graph:
+        &#34;&#34;&#34;Convert graph from networkit to graph_tool.&#34;&#34;&#34;
+        nk_adj_matrix = nk.algebraic.adjacencyMatrix(network, matrixType=&#34;sparse&#34;)
+        graph = gt.Graph(directed=directed)
+        graph.add_edge_list(np.transpose(nk_adj_matrix.nonzero()))
+
+        return graph</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="network_utils.network_converter.NetworkConverter.gt_to_nk"><code class="name flex">
+<span>def <span class="ident">gt_to_nk</span></span>(<span>network: graph_tool.Graph) ‑> networkit.graph.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert graph from graph_tool to networkit.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def gt_to_nk(network: gt.Graph) -&gt; nk.Graph:
+    &#34;&#34;&#34;Convert graph from graph_tool to networkit.&#34;&#34;&#34;
+    adj_matrix = gt.adjacency(network)
+    col, row = adj_matrix.nonzero()
+
+    # create nk.Graph with number of vertices
+    graph = nk.Graph(len(network.get_vertices()))
+
+    for r, c in zip(row, col):
+        graph.addEdge(r, c)
+
+    return graph</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_converter.NetworkConverter.gt_to_nx"><code class="name flex">
+<span>def <span class="ident">gt_to_nx</span></span>(<span>network: graph_tool.Graph, labelname: str = 'id') ‑> networkx.classes.graph.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert graph from graph_tool to networkx.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def gt_to_nx(network: gt.Graph, labelname: str = &#34;id&#34;) -&gt; nx.Graph:
+    &#34;&#34;&#34;Convert graph from graph_tool to networkx.&#34;&#34;&#34;
+    logger.warning(&#34;labelname should be set to &#39;id&#39;!&#34;)
+    return pyintergraph.gt2nx(network, labelname)</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_converter.NetworkConverter.nk_to_gt"><code class="name flex">
+<span>def <span class="ident">nk_to_gt</span></span>(<span>network: networkit.graph.Graph, directed: bool = False) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert graph from networkit to graph_tool.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def nk_to_gt(network: nk.Graph, directed: bool = False) -&gt; gt.Graph:
+    &#34;&#34;&#34;Convert graph from networkit to graph_tool.&#34;&#34;&#34;
+    nk_adj_matrix = nk.algebraic.adjacencyMatrix(network, matrixType=&#34;sparse&#34;)
+    graph = gt.Graph(directed=directed)
+    graph.add_edge_list(np.transpose(nk_adj_matrix.nonzero()))
+
+    return graph</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_converter.NetworkConverter.nk_to_nx"><code class="name flex">
+<span>def <span class="ident">nk_to_nx</span></span>(<span>network: <module 'networkit.graph' from '/home/louis/.local/share/virtualenvs/criminal_network_analysis-7tqkjw2s/lib/python3.8/site-packages/networkit/graph.cpython-38-x86_64-linux-gnu.so'>) ‑> networkx.classes.graph.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert graph from networkx to networkit.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def nk_to_nx(network: nk.graph) -&gt; nx.Graph:
+    &#34;&#34;&#34;Convert graph from networkx to networkit.&#34;&#34;&#34;
+    return nk.nxadapter.nk2nx(network)</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_converter.NetworkConverter.nx_to_gt"><code class="name flex">
+<span>def <span class="ident">nx_to_gt</span></span>(<span>network: <module 'networkx.classes.graph' from '/home/louis/.local/share/virtualenvs/criminal_network_analysis-7tqkjw2s/lib/python3.8/site-packages/networkx/classes/graph.py'>) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert a networkx graph to a graph-tool graph.</p>
+<p>Copied from
+<a href="https://bbengfort.github.io/2016/06/graph-tool-from-networkx/">https://bbengfort.github.io/2016/06/graph-tool-from-networkx/</a></p>
+<p>Important notice, nodes start at 1 in graph-tool in comparison
+to networkit/x where node enumeration starts with 0.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def nx_to_gt(network: nx.graph) -&gt; gt.Graph:
+    &#34;&#34;&#34;
+    Convert a networkx graph to a graph-tool graph.
+
+    Copied from
+    https://bbengfort.github.io/2016/06/graph-tool-from-networkx/
+
+    Important notice, nodes start at 1 in graph-tool in comparison
+    to networkit/x where node enumeration starts with 0.
+    &#34;&#34;&#34;
+    # Phase 0: Create a directed or undirected graph-tool Graph
+    gtG = gt.Graph(directed=network.is_directed())
+
+    # Add the Graph properties as &#34;internal properties&#34;
+    for key, value in network.graph.items():
+        # Convert the value and key into a type for graph-tool
+        tname, value, key = get_prop_type(value, key)
+
+        prop = gtG.new_graph_property(tname)  # Create the PropertyMap
+        gtG.graph_properties[key] = prop  # Set the PropertyMap
+        gtG.graph_properties[key] = value  # Set the actual value
+
+    # Phase 1: Add the vertex and edge property maps
+    # Go through all nodes and edges and add seen properties
+    # Add the node properties first
+    nprops = set()  # cache keys to only add properties once
+    for node, data in network.nodes(data=True):
+
+        # Go through all the properties if not seen and add them.
+        for key, val in data.items():
+            if key in nprops:
+                continue  # Skip properties already added
+
+            # Convert the value and key into a type for graph-tool
+            tname, _, key = get_prop_type(val, key)
+
+            prop = gtG.new_vertex_property(tname)  # Create the PropertyMap
+            gtG.vertex_properties[key] = prop  # Set the PropertyMap
+
+            # Add the key to the already seen properties
+            nprops.add(key)
+
+    # Also add the node id: in NetworkX a node can be any hashable type, but
+    # in graph-tool node are defined as indices. So we capture any strings
+    # in a special PropertyMap called &#39;id&#39; -- modify as needed!
+    gtG.vertex_properties[&#34;id&#34;] = gtG.new_vertex_property(&#34;string&#34;)
+
+    # Add the edge properties second
+    eprops = set()  # cache keys to only add properties once
+    for src, dst, data in network.edges(data=True):
+
+        # Go through all the edge properties if not seen and add them.
+        for key, val in data.items():
+            if key in eprops:
+                continue  # Skip properties already added
+
+            # Convert the value and key into a type for graph-tool
+            tname, _, key = get_prop_type(val, key)
+
+            prop = gtG.new_edge_property(tname)  # Create the PropertyMap
+            gtG.edge_properties[key] = prop  # Set the PropertyMap
+
+            # Add the key to the already seen properties
+            eprops.add(key)
+
+    # Phase 2: Actually add all the nodes and vertices with their properties
+    # Add the nodes
+    vertices = {}  # vertex mapping for tracking edges later
+    for node, data in network.nodes(data=True):
+
+        # Create the vertex and annotate for our edges later
+        v = gtG.add_vertex()
+        vertices[node] = v
+
+        # Set the vertex properties, not forgetting the id property
+        data[&#34;id&#34;] = str(node)
+        for key, value in data.items():
+            gtG.vp[key][v] = value  # vp is short for vertex_properties
+
+    # Add the edges
+    for src, dst, data in network.edges(data=True):
+
+        # Look up the vertex structs from our vertices mapping and add edge.
+        e = gtG.add_edge(vertices[src], vertices[dst])
+
+        # Add the edge properties
+        for key, value in data.items():
+            gtG.ep[key][e] = value  # ep is short for edge_properties
+
+    # Done, finally!
+    return gtG</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_converter.NetworkConverter.nx_to_nk"><code class="name flex">
+<span>def <span class="ident">nx_to_nk</span></span>(<span>network: <module 'networkx.classes.graph' from '/home/louis/.local/share/virtualenvs/criminal_network_analysis-7tqkjw2s/lib/python3.8/site-packages/networkx/classes/graph.py'>) ‑> networkit.graph.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert graph from networkx to networkit.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def nx_to_nk(network: nx.graph) -&gt; nk.Graph:
+    &#34;&#34;&#34;Convert graph from networkx to networkit.&#34;&#34;&#34;
+    return nk.nxadapter.nx2nk(network)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="network_utils" href="index.html">network_utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="network_utils.network_converter.get_prop_type" href="#network_utils.network_converter.get_prop_type">get_prop_type</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="network_utils.network_converter.NetworkConverter" href="#network_utils.network_converter.NetworkConverter">NetworkConverter</a></code></h4>
+<ul class="two-column">
+<li><code><a title="network_utils.network_converter.NetworkConverter.gt_to_nk" href="#network_utils.network_converter.NetworkConverter.gt_to_nk">gt_to_nk</a></code></li>
+<li><code><a title="network_utils.network_converter.NetworkConverter.gt_to_nx" href="#network_utils.network_converter.NetworkConverter.gt_to_nx">gt_to_nx</a></code></li>
+<li><code><a title="network_utils.network_converter.NetworkConverter.nk_to_gt" href="#network_utils.network_converter.NetworkConverter.nk_to_gt">nk_to_gt</a></code></li>
+<li><code><a title="network_utils.network_converter.NetworkConverter.nk_to_nx" href="#network_utils.network_converter.NetworkConverter.nk_to_nx">nk_to_nx</a></code></li>
+<li><code><a title="network_utils.network_converter.NetworkConverter.nx_to_gt" href="#network_utils.network_converter.NetworkConverter.nx_to_gt">nx_to_gt</a></code></li>
+<li><code><a title="network_utils.network_converter.NetworkConverter.nx_to_nk" href="#network_utils.network_converter.NetworkConverter.nx_to_nk">nx_to_nk</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

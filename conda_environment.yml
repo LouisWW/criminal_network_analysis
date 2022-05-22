@@ -9,6 +9,7 @@ dependencies:
   - pip
   - ipython
   - ipykernel
+  - graphviz
 
   - pip:
     - networkx
@@ -25,3 +26,13 @@ dependencies:
     - pytest-subtests
     - pytest-cov
     - ipykernel
+    - pyintergraph
+    - tqdm
+    - p-tqdm
+    - pdoc3
+    - hypothesis
+    - rise
+    - nbmake
+    - fitter
+    - SALib
+    - pycallgraph

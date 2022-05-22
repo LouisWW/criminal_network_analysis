@@ -1,0 +1,1935 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>simulators.sim_mart_vaq API documentation</title>
+<meta name="description" content="This script&#39;s intention is to simulate the evolution of a criminal network …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>simulators.sim_mart_vaq</code></h1>
+</header>
+<section id="section-intro">
+<p>This script's intention is to simulate the evolution of a criminal network.</p>
+<p>Martinez-Vaquero, L. A., Dolci, V., &amp; Trianni, V. (2019).
+Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.</p>
+<p><strong>author</strong> = Louis Weyland
+<strong>date</strong>
+= 11/04/2022</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;This script&#39;s intention is to simulate the evolution of a criminal network.
+
+Martinez-Vaquero, L. A., Dolci, V., &amp; Trianni, V. (2019).
+Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
+
+__author__ = Louis Weyland
+__date__   = 11/04/2022
+&#34;&#34;&#34;
+import itertools
+import logging
+import random
+from typing import Any
+from typing import Dict
+from typing import FrozenSet
+from typing import List
+from typing import Tuple
+
+import graph_tool.all as gt
+import numpy as np
+from network_utils.network_combiner import NetworkCombiner
+from sim_mart_vaq_helper_c import divide_network_fast_loop
+from tqdm import tqdm
+import math
+from copy import deepcopy
+
+logger = logging.getLogger(&#34;logger&#34;)
+
+
+class SimMartVaq:
+    &#34;&#34;&#34;Contain the framework to simulate the process.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        network: gt.Graph,
+        ratio_honest: float = 0.7,
+        ratio_wolf: float = 0.1,
+        n_new_edges: int = 2,
+        delta: int = 0,
+        tau: int = 0,
+        gamma: float = 0.5,
+        beta_s: int = 0,
+        beta_h: int = 10,
+        beta_c: int = 400,
+        c_w: int = 1,
+        c_c: int = 1,
+        r_w: int = 1,
+        r_c: int = 1,
+        temperature: int = 10,
+        mutation_prob : float = 0.3
+    ) -&gt; None:
+        &#34;&#34;&#34;Init the network charaterisics.&#34;&#34;&#34;
+        # Define name of simulator
+        self._name = &#34;sim_mart_vaq&#34;
+        self.network = network
+
+        # Check if data is coherent
+        assert isinstance(network, gt.Graph), &#34;Network should be of type gt.&#34;
+        assert 0 &lt; ratio_honest &lt; 1, &#34;Ratio needs to be (0,1)&#34;
+        assert 0 &lt; ratio_wolf &lt; 1, &#34;Ratio needs to be (0,1)&#34;
+        assert 0 &lt; ratio_wolf + ratio_honest &lt; 1, &#34;Together the ratio should be (0,1)&#34;
+        assert network.vp.state, &#34;Network has no attribute state&#34;
+
+        self.ratio_honest = ratio_honest
+        self.ratio_wolf = ratio_wolf
+        self.ratio_criminal = 1 - self.ratio_honest - self.ratio_wolf
+
+        # Network needs to have a base criminal network
+        self.n_criminal = len(gt.find_vertex(network, network.vp.state, &#34;c&#34;))
+        assert self.n_criminal &gt;= 1, &#34;The given network contains no criminals...&#34;
+
+        self.total_number_nodes = int(self.n_criminal / self.ratio_criminal)
+        self.new_nodes = self.total_number_nodes - self.n_criminal
+
+        # Init either honest or lone wolf
+        self.relative_ratio_honest = self.ratio_honest / (
+            self.ratio_honest + self.ratio_wolf
+        )
+        self.relative_ratio_wolf = 1 - self.relative_ratio_honest
+
+        # Set damaging and punishing parameters
+        self.delta = delta
+        self.tau = tau
+        self.gamma = gamma
+        self.beta_s = beta_s
+        self.beta_h = beta_h
+        self.beta_c = beta_c
+        self.c_w = c_w
+        self.c_c = c_c
+        self.r_w = r_w
+        self.r_c = r_c
+
+        # Set the fermic temperature &amp; mutation probability
+        self.temperature = temperature
+        self.mutation_prob = 0.3
+
+    @property
+    def name(self) -&gt; str:
+        &#34;&#34;&#34;Return the name of the simulator.&#34;&#34;&#34;
+        return self._name
+
+    def initialise_network(self, network: gt.Graph, n_new_edges: int = 2) -&gt; gt.Graph:
+        &#34;&#34;&#34;Add to the existing criminal network honests and lone wolfs.
+
+        Thereby, the nodes are added based on the preferential attachment principle.
+        Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
+        &#34;&#34;&#34;
+        logger.info(
+            f&#34;Given the ratio param, {self.new_nodes} \
+                    nodes are added, total = {self.total_number_nodes} nodes!&#34;
+        )
+        new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
+            network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
+        )
+
+        # Get all the agents with no states
+        nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, &#34;&#34;)
+        for i in tqdm(
+            nodes_no_states, desc=&#34;Adding attributes to nodes&#34;, total=self.new_nodes
+        ):
+            new_network.vp.state[new_network.vertex(i)] = np.random.choice(
+                [&#34;h&#34;, &#34;w&#34;], 1, p=[self.relative_ratio_honest, self.relative_ratio_wolf]
+            )[0]
+
+        return new_network
+
+    def play(
+        self,
+        network: gt.Graph,
+        rounds: int = 1,
+        n_new_edges: int = 2,
+        min_grp: int = 5,
+        max_grp: int = 20,
+        radius: int = 3,
+    ) -&gt; None:
+        &#34;&#34;&#34;Run the simulation.
+
+        Network is subdivided in to n groups.
+        In each group, a person is selected.
+        If selected person is a wolf or criminal,
+        damage is inflicted on others.
+        &#34;&#34;&#34;
+        # Init a population
+        network = self.initialise_network(network, n_new_edges)
+        # Init fitness attribute
+        network = self.init_fitness(network)
+
+        # Run the simulation
+        for i in tqdm(range(0, rounds), desc=&#34;Playing the rounds...&#34;, total=rounds):
+            # Divide the network in random new groups
+            dict_of_group = self.select_multiple_communities(
+                network=network, radius=radius, min_grp=min_grp, max_grp=max_grp
+            )
+            logger.debug(f&#34;The Network is divided in {len(dict_of_group)} groups&#34;)
+
+            # Go through each group
+            for group_number, group_members in dict_of_group.items():
+                # Acting stage
+                network, slct_pers, slct_status = self.acting_stage(
+                    network, group_members
+                )
+                # Investigation stage
+                network = self.investigation_stage(
+                    network, group_members, slct_pers, slct_status
+                )
+                # Evolutionary stage
+                network = self.evolutionary_stage(network,group_members)
+
+        return network
+
+    def investigation_stage(
+        self,
+        network: gt.Graph,
+        group_members: FrozenSet[int],
+        slct_pers: int,
+        slct_status: str,
+    ) -&gt; Tuple[Any]:
+        &#34;&#34;&#34;Correspond to the investigation stage.
+
+        Given an group, if the victimizer is found, a punishment is conducted
+        &#34;&#34;&#34;
+        # Get the status proportions of the group
+        _, _, _, p_c, p_h, _ = self.counting_status_proprotions(network, group_members)
+        if slct_status == &#34;h&#34;:
+            # No victimizer -&gt;  No punishment
+            return network
+
+        # If vicitmizer is found, penalties shouldn&#39;t 0.
+        # state investigation
+        state_penalty = self.conducting_investigation(
+            group_members, slct_pers, self.beta_s
+        )
+        # civil investigation
+        civil_penalty = (
+            self.conducting_investigation(group_members, slct_pers, self.beta_h) * p_h
+        )
+        # criminal investigation
+        criminal_penalty = (
+            self.conducting_investigation(group_members, slct_pers, self.beta_c) * p_c
+        )
+
+        if slct_status == &#34;c&#34;:
+            # Punish the victimizer
+            network.vp.fitness[network.vertex(slct_pers)] = (
+                network.vp.fitness[network.vertex(slct_pers)]
+                - state_penalty
+                - civil_penalty
+            )
+            # Punish the partner in crime
+            for member in group_members:
+                if (
+                    network.vp.state[network.vertex(member)] == &#34;c&#34;
+                    and member != slct_pers
+                ):
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] - self.gamma * (state_penalty + civil_penalty)
+
+        elif slct_status == &#34;w&#34;:
+            # Punish the victimizer
+            network.vp.fitness[network.vertex(slct_pers)] = (
+                network.vp.fitness[network.vertex(slct_pers)]
+                - state_penalty
+                - civil_penalty
+                - criminal_penalty
+            )
+
+        else:
+            raise KeyError(&#34;sclt_status should be either h/w/c...&#34;)
+
+        return network
+
+    def conducting_investigation(
+        self, group_members: FrozenSet[int], slct_pers: int, penalty_score: int
+    ) -&gt; int:
+        &#34;&#34;&#34;Perform an state investigation.
+
+        Pick a random person, if victimizer is found, penalty is returned
+        &#34;&#34;&#34;
+        random_picked_person = np.random.choice(list(group_members), 1)
+        if random_picked_person == slct_pers:
+            # Found victimizer
+            return penalty_score
+        elif random_picked_person != slct_pers:
+            # Victimizer not found
+            return 0
+        return None
+
+    def acting_stage(
+        self,
+        network: gt.Graph,
+        group_members: FrozenSet[int],
+    ) -&gt; Tuple[Any, int, str]:
+        &#34;&#34;&#34;Correspond to the acting stage in the paper.
+
+        Given an group, select on person and proceed to the acting.
+        &#34;&#34;&#34;
+        # Select one person
+        slct_pers = np.random.choice(list(group_members), 1)
+        # Check the person status
+        slct_pers_status = network.vp.state[network.vertex(slct_pers)]
+
+        if slct_pers_status == &#34;h&#34;:
+            return network, slct_pers, slct_pers_status
+        elif slct_pers_status == &#34;c&#34;:
+            new_network = self.inflict_damage(
+                network, group_members, slct_pers, slct_pers_status
+            )
+            return new_network, slct_pers, slct_pers_status
+        elif slct_pers_status == &#34;w&#34;:
+            new_network = self.inflict_damage(
+                network, group_members, slct_pers, slct_pers_status
+            )
+            return new_network, slct_pers, slct_pers_status
+        else:
+            raise KeyError(&#34;Person status didn&#39;t correspond to h/c/w...&#34;)
+
+    def inflict_damage(
+        self,
+        network: gt.Graph,
+        group_members: FrozenSet[int],
+        slct_pers: int,
+        slct_pers_status: str,
+    ) -&gt; gt.Graph:
+        &#34;&#34;&#34;Perform criminal activity.
+
+        Rest of the group gets a damage inflicted
+        &#34;&#34;&#34;
+        n_c, n_h, n_w, p_c, p_h, p_w = self.counting_status_proprotions(
+            network=network, group_members=group_members
+        )
+
+        if slct_pers_status == &#34;c&#34;:
+            # Inflict damage to all the wolfs and honest
+            for member in group_members:
+                if network.vp.state[network.vertex(member)] in [&#34;h&#34;, &#34;w&#34;]:
+                    network.vp.fitness[network.vertex(member)] = (
+                        network.vp.fitness[network.vertex(member)] - self.r_c * self.c_c
+                    )
+                elif network.vp.state[network.vertex(member)] == &#34;c&#34;:
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] + (((n_h + n_w) * (self.r_c * self.c_c)) / n_c)
+
+        elif slct_pers_status == &#34;w&#34;:
+            # Decide if lone wolf dares to act
+            acting = False
+            if np.random.uniform() &gt;= 1 - self.delta * (1 - p_c):
+                acting = True
+            # Inflicting damage to everyone but himself
+            if acting is True:
+                for member in group_members:
+                    if member != slct_pers and network.vp.state[
+                        network.vertex(member)
+                    ] in [&#34;h&#34;, &#34;w&#34;]:
+                        network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                            network.vertex(member)
+                        ] - (self.r_w * self.c_w)
+
+                    elif (
+                        member != slct_pers
+                        and network.vp.state[network.vertex(member)] == &#34;c&#34;
+                    ):
+                        network.vp.fitness[network.vertex(member)] = (
+                            network.vp.fitness[network.vertex(member)]
+                            - (self.r_w * self.c_w)
+                            + (
+                                (
+                                    self.tau
+                                    * ((len(group_members) - 1) * (self.r_w * self.c_w))
+                                )
+                                / n_c
+                            )
+                        )
+
+                    elif member == slct_pers:
+                        network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                            network.vertex(member)
+                        ] + (len(group_members) - 1) * (self.r_w * self.c_w)
+
+        else:
+            raise KeyError(&#34;Person status didn&#39;t correspond to c/w...&#34;)
+
+        return network
+
+    def evolutionary_stage(self,network:gt.Graph,group_members:FrozenSet[int]) -&gt; gt.Graph:
+        &#34;&#34;&#34;Perform the evolutionary stage.
+
+        Randomly picks a two players and performs either mutation or a role switch with a certain probability.
+        &#34;&#34;&#34;
+        person_a,person_b = np.random.choice(list(group_members),2)
+        if np.random.rand()&gt;self.mutation_prob:
+            # Based on the fermi function will check if an interaction will happen
+            network = self.interchange_roles(network,person_a,person_b)
+        else:
+            # Mutation will happen
+            network = self.mutation(network,person_a)
+        return network
+
+    def counting_status_proprotions(
+        self, network: gt.Graph, group_members: FrozenSet[int]
+    ) -&gt; Tuple[int, int, int, float, float, float]:
+        &#34;&#34;&#34;Return the proportions of criminals,honest and wolfs.&#34;&#34;&#34;
+        # First get proportions of h/c/w within the group
+        statuses = []
+        size_group = len(group_members)
+        for member in group_members:
+            statuses.append(network.vp.state[network.vertex(member)])
+
+        n_h = statuses.count(&#34;h&#34;)
+        n_c = statuses.count(&#34;c&#34;)
+        n_w = statuses.count(&#34;w&#34;)
+        p_h = n_h / size_group
+        p_c = n_c / size_group
+        p_w = n_w / size_group
+        return n_c, n_h, n_w, p_c, p_h, p_w
+
+    def divide_in_groups(
+        self, network: gt.Graph, min_group: int
+    ) -&gt; Tuple[List[int], FrozenSet[int]]:
+        &#34;&#34;&#34;Divide the network in groups.
+
+        Making use of the  minimize_blockmodel_dl func.
+        For now, the number of groups can&#39;t be imposed.
+        Returns a list with the group number/label.
+        &#34;&#34;&#34;
+        logger.warning(&#34;This function is deprecated!&#34;)
+        partitions = gt.minimize_blockmodel_dl(
+            network, multilevel_mcmc_args={&#34;B_min&#34;: min_group}
+        )
+        mbr_list = partitions.get_blocks()
+        group_numbers = frozenset(mbr_list)
+        return list(mbr_list), group_numbers
+
+    def act_divide_in_groups(
+        self, network: gt.Graph, min_grp: int, max_grp: int
+    ) -&gt; gt.Graph:
+        &#34;&#34;&#34;Divide the network in groups.
+
+        Actually divides in n_groups of connected components
+        &#34;&#34;&#34;
+        logger.info(&#34;This function is deprecated&#34;)
+        assert (
+            2 &lt;= min_grp &lt;= max_grp
+        ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+        assert (
+            min_grp &lt;= max_grp &lt;= network.num_vertices()
+        ), &#34;Maximum group number can exceed network size&#34;
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+        logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+        # Define group_numbers attribute
+        # If it already exists it will overwrite it
+        gpr_nbr = network.new_vertex_property(&#34;int32_t&#34;)
+        network.vertex_properties[&#34;grp_nbr&#34;] = gpr_nbr
+
+        # Get a map of the nodes and its neighbours
+        dict_nodes_and_neighbour = {}
+        for v in network.iter_vertices():
+            dict_nodes_and_neighbour[v] = list(network.iter_all_neighbors(v))
+
+        # Set the seed, number needs to start from 1 because default is 0
+        for v, group_number in zip(
+            np.random.choice(
+                list(range(0, network.num_vertices())),
+                n_groups,
+            ),
+            range(1, n_groups + 1),
+        ):
+            network.vp.grp_nbr[network.vertex(v)] = group_number
+
+        # Loop through the dict and assinging same value to its neigbours
+        pbar = tqdm(total=len(dict_nodes_and_neighbour))
+        while len(dict_nodes_and_neighbour) &gt; 0:
+            key_to_del = []
+            # random order in order to avoid an group to grow too much
+            nodes = list(dict_nodes_and_neighbour.keys())
+            random.shuffle(nodes)
+            for i in nodes:
+                # if node has group number
+                if network.vp.grp_nbr[network.vertex(i)] != 0:
+                    neighbours = list(network.iter_all_neighbors(i))
+                    for neighbour in neighbours:
+                        if network.vp.grp_nbr[network.vertex(neighbour)] == 0:
+                            network.vp.grp_nbr[
+                                network.vertex(neighbour)
+                            ] = network.vp.grp_nbr[network.vertex(i)]
+                    # del key since all neighbours have a group number
+                    key_to_del.append(i)
+
+            # if key_to_del is empty
+            # means the seed can not reach some isolated components
+            if len(key_to_del) == 0:
+                break
+            else:
+                for k in key_to_del:
+                    dict_nodes_and_neighbour.pop(k, None)
+
+            pbar.update(1)
+
+        return network, n_groups
+
+    def act_divide_in_groups_faster(
+        self, network: gt.Graph, min_grp: int, max_grp: int
+    ) -&gt; gt.Graph:
+        &#34;&#34;&#34;Divide the network in groups.
+
+        Actually divides in n_groups of connected components
+        &#34;&#34;&#34;
+        assert (
+            2 &lt;= min_grp &lt;= max_grp
+        ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+        assert (
+            min_grp &lt;= max_grp &lt;= network.num_vertices()
+        ), &#34;Maximum group number can exceed network size&#34;
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+        logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+        # Define group_numbers attribute
+        # If it already exists it will overwrite it
+        gpr_nbr = network.new_vertex_property(&#34;int32_t&#34;)
+        network.vertex_properties[&#34;grp_nbr&#34;] = gpr_nbr
+
+        # Get a map of the nodes and its neighbours
+        dict_nodes_and_neighbour = {}
+        for v in network.iter_vertices():
+            dict_nodes_and_neighbour[v] = list(network.iter_all_neighbors(v))
+
+        nodes_group = divide_network_fast_loop(
+            dict_nodes_and_neighbour, n_groups, network.num_vertices()
+        )
+
+        for node, group_number in nodes_group.items():
+            if group_number is not None:
+                network.vp.grp_nbr[network.vertex(node)] = group_number
+            elif group_number is None:
+                # In order to make sure the result is the same as for the slower function
+                network.vp.grp_nbr[network.vertex(node)] = 0
+
+        return network, n_groups
+
+    def select_multiple_communities(
+        self, network: gt.Graph, radius: int, min_grp: int, max_grp: int
+    ) -&gt; Dict[int, FrozenSet[int]]:
+        &#34;&#34;&#34;Define the groups by randomly selecting one node and it&#39;s neighbours within radius r.
+
+        This is done in an iterative fashion.Thus some groups can overlapp.
+        &#34;&#34;&#34;
+        assert (
+            2 &lt;= min_grp &lt;= max_grp
+        ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+        assert (
+            min_grp &lt;= max_grp &lt;= network.num_vertices()
+        ), &#34;Maximum group number can exceed network size&#34;
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+        logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+
+        dict_of_groups = {}
+        for n in range(1, n_groups + 1):
+            seed = np.random.randint(0, network.num_vertices())
+            dict_of_groups[n] = self.select_communities(network, radius, seed)
+
+        return dict_of_groups
+
+    def select_communities(
+        self, network: gt.Graph, radius: int, seed: int
+    ) -&gt; FrozenSet[int]:
+        &#34;&#34;&#34;Select the neighbours and neighbours neighbours of a given node/seed.
+
+        Args:
+            network (gt.Graph): graph-tool network
+            radius (int): how many neigbours to select(neighbours of neighbours of...)
+            seed (int):  starting node
+        &#34;&#34;&#34;
+        nbrs = {seed}
+        all_neighbours = []
+        for _ in range(radius):
+            nbrs = {nbr for n in nbrs for nbr in network.iter_all_neighbors(n)}
+            all_neighbours.append(list(nbrs))
+        all_neighbours_list = list(itertools.chain.from_iterable(all_neighbours))
+        return frozenset(all_neighbours_list)
+
+    def init_fitness(self, network: gt.Graph) -&gt; gt.Graph:
+        &#34;&#34;&#34;Add the attribute fitness to the network.&#34;&#34;&#34;
+        if &#34;fitness&#34; in network.vp:
+            return network
+        else:
+            fitness = network.new_vertex_property(&#34;double&#34;)
+            network.vertex_properties[&#34;fitness&#34;] = fitness
+
+        return network
+
+    def mutation(self, network:gt.Graph, person:int) -&gt; gt.Graph:
+        &#34;&#34;&#34;Perform mutation on a given individual.&#34;&#34;&#34;
+        network.vp.state[network.vertex(person)] = np.random.choice([&#39;c&#39;,&#39;h&#39;,&#39;w&#39;],1)[0]
+        return network
+
+    def interchange_roles(self,network:gt.Graph,person_a:int,person_b:int) -&gt; gt.Graph:
+        &#34;&#34;&#34;Interchange roles based on fermin function.&#34;&#34;&#34;
+        fitness_a = network.vp.fitness[network.vertex(person_a)]
+        fitness_b = network.vp.fitness[network.vertex(person_b)]
+
+        value_a = deepcopy(network.vp.state[network.vertex(person_a)])
+        value_b = deepcopy(network.vp.state[network.vertex(person_b)])
+
+        # Probability that b copies a
+        if self.fermi_function(fitness_a,fitness_b):
+            network.vp.state[network.vertex(person_b)] = value_a
+        # Probability that a copies b
+        if self.fermi_function(fitness_b,fitness_a):
+            network.vp.state[network.vertex(person_a)] = value_b
+
+        return network
+
+    def fermi_function(self,w_j:float,w_i:float) -&gt; bool:
+        &#34;&#34;&#34;Return the probability of changing their role.&#34;&#34;&#34;
+        prob = 1 / (math.exp(-(w_j-w_i)/self.temperature) +1)
+        if np.random.rand() &gt; prob:
+            return False
+        else:
+            return True
+        return None
+
+        </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="simulators.sim_mart_vaq.SimMartVaq"><code class="flex name class">
+<span>class <span class="ident">SimMartVaq</span></span>
+<span>(</span><span>network: graph_tool.Graph, ratio_honest: float = 0.7, ratio_wolf: float = 0.1, n_new_edges: int = 2, delta: int = 0, tau: int = 0, gamma: float = 0.5, beta_s: int = 0, beta_h: int = 10, beta_c: int = 400, c_w: int = 1, c_c: int = 1, r_w: int = 1, r_c: int = 1, temperature: int = 10, mutation_prob: float = 0.3)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Contain the framework to simulate the process.</p>
+<p>Init the network charaterisics.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SimMartVaq:
+    &#34;&#34;&#34;Contain the framework to simulate the process.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        network: gt.Graph,
+        ratio_honest: float = 0.7,
+        ratio_wolf: float = 0.1,
+        n_new_edges: int = 2,
+        delta: int = 0,
+        tau: int = 0,
+        gamma: float = 0.5,
+        beta_s: int = 0,
+        beta_h: int = 10,
+        beta_c: int = 400,
+        c_w: int = 1,
+        c_c: int = 1,
+        r_w: int = 1,
+        r_c: int = 1,
+        temperature: int = 10,
+        mutation_prob : float = 0.3
+    ) -&gt; None:
+        &#34;&#34;&#34;Init the network charaterisics.&#34;&#34;&#34;
+        # Define name of simulator
+        self._name = &#34;sim_mart_vaq&#34;
+        self.network = network
+
+        # Check if data is coherent
+        assert isinstance(network, gt.Graph), &#34;Network should be of type gt.&#34;
+        assert 0 &lt; ratio_honest &lt; 1, &#34;Ratio needs to be (0,1)&#34;
+        assert 0 &lt; ratio_wolf &lt; 1, &#34;Ratio needs to be (0,1)&#34;
+        assert 0 &lt; ratio_wolf + ratio_honest &lt; 1, &#34;Together the ratio should be (0,1)&#34;
+        assert network.vp.state, &#34;Network has no attribute state&#34;
+
+        self.ratio_honest = ratio_honest
+        self.ratio_wolf = ratio_wolf
+        self.ratio_criminal = 1 - self.ratio_honest - self.ratio_wolf
+
+        # Network needs to have a base criminal network
+        self.n_criminal = len(gt.find_vertex(network, network.vp.state, &#34;c&#34;))
+        assert self.n_criminal &gt;= 1, &#34;The given network contains no criminals...&#34;
+
+        self.total_number_nodes = int(self.n_criminal / self.ratio_criminal)
+        self.new_nodes = self.total_number_nodes - self.n_criminal
+
+        # Init either honest or lone wolf
+        self.relative_ratio_honest = self.ratio_honest / (
+            self.ratio_honest + self.ratio_wolf
+        )
+        self.relative_ratio_wolf = 1 - self.relative_ratio_honest
+
+        # Set damaging and punishing parameters
+        self.delta = delta
+        self.tau = tau
+        self.gamma = gamma
+        self.beta_s = beta_s
+        self.beta_h = beta_h
+        self.beta_c = beta_c
+        self.c_w = c_w
+        self.c_c = c_c
+        self.r_w = r_w
+        self.r_c = r_c
+
+        # Set the fermic temperature &amp; mutation probability
+        self.temperature = temperature
+        self.mutation_prob = 0.3
+
+    @property
+    def name(self) -&gt; str:
+        &#34;&#34;&#34;Return the name of the simulator.&#34;&#34;&#34;
+        return self._name
+
+    def initialise_network(self, network: gt.Graph, n_new_edges: int = 2) -&gt; gt.Graph:
+        &#34;&#34;&#34;Add to the existing criminal network honests and lone wolfs.
+
+        Thereby, the nodes are added based on the preferential attachment principle.
+        Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
+        &#34;&#34;&#34;
+        logger.info(
+            f&#34;Given the ratio param, {self.new_nodes} \
+                    nodes are added, total = {self.total_number_nodes} nodes!&#34;
+        )
+        new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
+            network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
+        )
+
+        # Get all the agents with no states
+        nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, &#34;&#34;)
+        for i in tqdm(
+            nodes_no_states, desc=&#34;Adding attributes to nodes&#34;, total=self.new_nodes
+        ):
+            new_network.vp.state[new_network.vertex(i)] = np.random.choice(
+                [&#34;h&#34;, &#34;w&#34;], 1, p=[self.relative_ratio_honest, self.relative_ratio_wolf]
+            )[0]
+
+        return new_network
+
+    def play(
+        self,
+        network: gt.Graph,
+        rounds: int = 1,
+        n_new_edges: int = 2,
+        min_grp: int = 5,
+        max_grp: int = 20,
+        radius: int = 3,
+    ) -&gt; None:
+        &#34;&#34;&#34;Run the simulation.
+
+        Network is subdivided in to n groups.
+        In each group, a person is selected.
+        If selected person is a wolf or criminal,
+        damage is inflicted on others.
+        &#34;&#34;&#34;
+        # Init a population
+        network = self.initialise_network(network, n_new_edges)
+        # Init fitness attribute
+        network = self.init_fitness(network)
+
+        # Run the simulation
+        for i in tqdm(range(0, rounds), desc=&#34;Playing the rounds...&#34;, total=rounds):
+            # Divide the network in random new groups
+            dict_of_group = self.select_multiple_communities(
+                network=network, radius=radius, min_grp=min_grp, max_grp=max_grp
+            )
+            logger.debug(f&#34;The Network is divided in {len(dict_of_group)} groups&#34;)
+
+            # Go through each group
+            for group_number, group_members in dict_of_group.items():
+                # Acting stage
+                network, slct_pers, slct_status = self.acting_stage(
+                    network, group_members
+                )
+                # Investigation stage
+                network = self.investigation_stage(
+                    network, group_members, slct_pers, slct_status
+                )
+                # Evolutionary stage
+                network = self.evolutionary_stage(network,group_members)
+
+        return network
+
+    def investigation_stage(
+        self,
+        network: gt.Graph,
+        group_members: FrozenSet[int],
+        slct_pers: int,
+        slct_status: str,
+    ) -&gt; Tuple[Any]:
+        &#34;&#34;&#34;Correspond to the investigation stage.
+
+        Given an group, if the victimizer is found, a punishment is conducted
+        &#34;&#34;&#34;
+        # Get the status proportions of the group
+        _, _, _, p_c, p_h, _ = self.counting_status_proprotions(network, group_members)
+        if slct_status == &#34;h&#34;:
+            # No victimizer -&gt;  No punishment
+            return network
+
+        # If vicitmizer is found, penalties shouldn&#39;t 0.
+        # state investigation
+        state_penalty = self.conducting_investigation(
+            group_members, slct_pers, self.beta_s
+        )
+        # civil investigation
+        civil_penalty = (
+            self.conducting_investigation(group_members, slct_pers, self.beta_h) * p_h
+        )
+        # criminal investigation
+        criminal_penalty = (
+            self.conducting_investigation(group_members, slct_pers, self.beta_c) * p_c
+        )
+
+        if slct_status == &#34;c&#34;:
+            # Punish the victimizer
+            network.vp.fitness[network.vertex(slct_pers)] = (
+                network.vp.fitness[network.vertex(slct_pers)]
+                - state_penalty
+                - civil_penalty
+            )
+            # Punish the partner in crime
+            for member in group_members:
+                if (
+                    network.vp.state[network.vertex(member)] == &#34;c&#34;
+                    and member != slct_pers
+                ):
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] - self.gamma * (state_penalty + civil_penalty)
+
+        elif slct_status == &#34;w&#34;:
+            # Punish the victimizer
+            network.vp.fitness[network.vertex(slct_pers)] = (
+                network.vp.fitness[network.vertex(slct_pers)]
+                - state_penalty
+                - civil_penalty
+                - criminal_penalty
+            )
+
+        else:
+            raise KeyError(&#34;sclt_status should be either h/w/c...&#34;)
+
+        return network
+
+    def conducting_investigation(
+        self, group_members: FrozenSet[int], slct_pers: int, penalty_score: int
+    ) -&gt; int:
+        &#34;&#34;&#34;Perform an state investigation.
+
+        Pick a random person, if victimizer is found, penalty is returned
+        &#34;&#34;&#34;
+        random_picked_person = np.random.choice(list(group_members), 1)
+        if random_picked_person == slct_pers:
+            # Found victimizer
+            return penalty_score
+        elif random_picked_person != slct_pers:
+            # Victimizer not found
+            return 0
+        return None
+
+    def acting_stage(
+        self,
+        network: gt.Graph,
+        group_members: FrozenSet[int],
+    ) -&gt; Tuple[Any, int, str]:
+        &#34;&#34;&#34;Correspond to the acting stage in the paper.
+
+        Given an group, select on person and proceed to the acting.
+        &#34;&#34;&#34;
+        # Select one person
+        slct_pers = np.random.choice(list(group_members), 1)
+        # Check the person status
+        slct_pers_status = network.vp.state[network.vertex(slct_pers)]
+
+        if slct_pers_status == &#34;h&#34;:
+            return network, slct_pers, slct_pers_status
+        elif slct_pers_status == &#34;c&#34;:
+            new_network = self.inflict_damage(
+                network, group_members, slct_pers, slct_pers_status
+            )
+            return new_network, slct_pers, slct_pers_status
+        elif slct_pers_status == &#34;w&#34;:
+            new_network = self.inflict_damage(
+                network, group_members, slct_pers, slct_pers_status
+            )
+            return new_network, slct_pers, slct_pers_status
+        else:
+            raise KeyError(&#34;Person status didn&#39;t correspond to h/c/w...&#34;)
+
+    def inflict_damage(
+        self,
+        network: gt.Graph,
+        group_members: FrozenSet[int],
+        slct_pers: int,
+        slct_pers_status: str,
+    ) -&gt; gt.Graph:
+        &#34;&#34;&#34;Perform criminal activity.
+
+        Rest of the group gets a damage inflicted
+        &#34;&#34;&#34;
+        n_c, n_h, n_w, p_c, p_h, p_w = self.counting_status_proprotions(
+            network=network, group_members=group_members
+        )
+
+        if slct_pers_status == &#34;c&#34;:
+            # Inflict damage to all the wolfs and honest
+            for member in group_members:
+                if network.vp.state[network.vertex(member)] in [&#34;h&#34;, &#34;w&#34;]:
+                    network.vp.fitness[network.vertex(member)] = (
+                        network.vp.fitness[network.vertex(member)] - self.r_c * self.c_c
+                    )
+                elif network.vp.state[network.vertex(member)] == &#34;c&#34;:
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] + (((n_h + n_w) * (self.r_c * self.c_c)) / n_c)
+
+        elif slct_pers_status == &#34;w&#34;:
+            # Decide if lone wolf dares to act
+            acting = False
+            if np.random.uniform() &gt;= 1 - self.delta * (1 - p_c):
+                acting = True
+            # Inflicting damage to everyone but himself
+            if acting is True:
+                for member in group_members:
+                    if member != slct_pers and network.vp.state[
+                        network.vertex(member)
+                    ] in [&#34;h&#34;, &#34;w&#34;]:
+                        network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                            network.vertex(member)
+                        ] - (self.r_w * self.c_w)
+
+                    elif (
+                        member != slct_pers
+                        and network.vp.state[network.vertex(member)] == &#34;c&#34;
+                    ):
+                        network.vp.fitness[network.vertex(member)] = (
+                            network.vp.fitness[network.vertex(member)]
+                            - (self.r_w * self.c_w)
+                            + (
+                                (
+                                    self.tau
+                                    * ((len(group_members) - 1) * (self.r_w * self.c_w))
+                                )
+                                / n_c
+                            )
+                        )
+
+                    elif member == slct_pers:
+                        network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                            network.vertex(member)
+                        ] + (len(group_members) - 1) * (self.r_w * self.c_w)
+
+        else:
+            raise KeyError(&#34;Person status didn&#39;t correspond to c/w...&#34;)
+
+        return network
+
+    def evolutionary_stage(self,network:gt.Graph,group_members:FrozenSet[int]) -&gt; gt.Graph:
+        &#34;&#34;&#34;Perform the evolutionary stage.
+
+        Randomly picks a two players and performs either mutation or a role switch with a certain probability.
+        &#34;&#34;&#34;
+        person_a,person_b = np.random.choice(list(group_members),2)
+        if np.random.rand()&gt;self.mutation_prob:
+            # Based on the fermi function will check if an interaction will happen
+            network = self.interchange_roles(network,person_a,person_b)
+        else:
+            # Mutation will happen
+            network = self.mutation(network,person_a)
+        return network
+
+    def counting_status_proprotions(
+        self, network: gt.Graph, group_members: FrozenSet[int]
+    ) -&gt; Tuple[int, int, int, float, float, float]:
+        &#34;&#34;&#34;Return the proportions of criminals,honest and wolfs.&#34;&#34;&#34;
+        # First get proportions of h/c/w within the group
+        statuses = []
+        size_group = len(group_members)
+        for member in group_members:
+            statuses.append(network.vp.state[network.vertex(member)])
+
+        n_h = statuses.count(&#34;h&#34;)
+        n_c = statuses.count(&#34;c&#34;)
+        n_w = statuses.count(&#34;w&#34;)
+        p_h = n_h / size_group
+        p_c = n_c / size_group
+        p_w = n_w / size_group
+        return n_c, n_h, n_w, p_c, p_h, p_w
+
+    def divide_in_groups(
+        self, network: gt.Graph, min_group: int
+    ) -&gt; Tuple[List[int], FrozenSet[int]]:
+        &#34;&#34;&#34;Divide the network in groups.
+
+        Making use of the  minimize_blockmodel_dl func.
+        For now, the number of groups can&#39;t be imposed.
+        Returns a list with the group number/label.
+        &#34;&#34;&#34;
+        logger.warning(&#34;This function is deprecated!&#34;)
+        partitions = gt.minimize_blockmodel_dl(
+            network, multilevel_mcmc_args={&#34;B_min&#34;: min_group}
+        )
+        mbr_list = partitions.get_blocks()
+        group_numbers = frozenset(mbr_list)
+        return list(mbr_list), group_numbers
+
+    def act_divide_in_groups(
+        self, network: gt.Graph, min_grp: int, max_grp: int
+    ) -&gt; gt.Graph:
+        &#34;&#34;&#34;Divide the network in groups.
+
+        Actually divides in n_groups of connected components
+        &#34;&#34;&#34;
+        logger.info(&#34;This function is deprecated&#34;)
+        assert (
+            2 &lt;= min_grp &lt;= max_grp
+        ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+        assert (
+            min_grp &lt;= max_grp &lt;= network.num_vertices()
+        ), &#34;Maximum group number can exceed network size&#34;
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+        logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+        # Define group_numbers attribute
+        # If it already exists it will overwrite it
+        gpr_nbr = network.new_vertex_property(&#34;int32_t&#34;)
+        network.vertex_properties[&#34;grp_nbr&#34;] = gpr_nbr
+
+        # Get a map of the nodes and its neighbours
+        dict_nodes_and_neighbour = {}
+        for v in network.iter_vertices():
+            dict_nodes_and_neighbour[v] = list(network.iter_all_neighbors(v))
+
+        # Set the seed, number needs to start from 1 because default is 0
+        for v, group_number in zip(
+            np.random.choice(
+                list(range(0, network.num_vertices())),
+                n_groups,
+            ),
+            range(1, n_groups + 1),
+        ):
+            network.vp.grp_nbr[network.vertex(v)] = group_number
+
+        # Loop through the dict and assinging same value to its neigbours
+        pbar = tqdm(total=len(dict_nodes_and_neighbour))
+        while len(dict_nodes_and_neighbour) &gt; 0:
+            key_to_del = []
+            # random order in order to avoid an group to grow too much
+            nodes = list(dict_nodes_and_neighbour.keys())
+            random.shuffle(nodes)
+            for i in nodes:
+                # if node has group number
+                if network.vp.grp_nbr[network.vertex(i)] != 0:
+                    neighbours = list(network.iter_all_neighbors(i))
+                    for neighbour in neighbours:
+                        if network.vp.grp_nbr[network.vertex(neighbour)] == 0:
+                            network.vp.grp_nbr[
+                                network.vertex(neighbour)
+                            ] = network.vp.grp_nbr[network.vertex(i)]
+                    # del key since all neighbours have a group number
+                    key_to_del.append(i)
+
+            # if key_to_del is empty
+            # means the seed can not reach some isolated components
+            if len(key_to_del) == 0:
+                break
+            else:
+                for k in key_to_del:
+                    dict_nodes_and_neighbour.pop(k, None)
+
+            pbar.update(1)
+
+        return network, n_groups
+
+    def act_divide_in_groups_faster(
+        self, network: gt.Graph, min_grp: int, max_grp: int
+    ) -&gt; gt.Graph:
+        &#34;&#34;&#34;Divide the network in groups.
+
+        Actually divides in n_groups of connected components
+        &#34;&#34;&#34;
+        assert (
+            2 &lt;= min_grp &lt;= max_grp
+        ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+        assert (
+            min_grp &lt;= max_grp &lt;= network.num_vertices()
+        ), &#34;Maximum group number can exceed network size&#34;
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+        logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+        # Define group_numbers attribute
+        # If it already exists it will overwrite it
+        gpr_nbr = network.new_vertex_property(&#34;int32_t&#34;)
+        network.vertex_properties[&#34;grp_nbr&#34;] = gpr_nbr
+
+        # Get a map of the nodes and its neighbours
+        dict_nodes_and_neighbour = {}
+        for v in network.iter_vertices():
+            dict_nodes_and_neighbour[v] = list(network.iter_all_neighbors(v))
+
+        nodes_group = divide_network_fast_loop(
+            dict_nodes_and_neighbour, n_groups, network.num_vertices()
+        )
+
+        for node, group_number in nodes_group.items():
+            if group_number is not None:
+                network.vp.grp_nbr[network.vertex(node)] = group_number
+            elif group_number is None:
+                # In order to make sure the result is the same as for the slower function
+                network.vp.grp_nbr[network.vertex(node)] = 0
+
+        return network, n_groups
+
+    def select_multiple_communities(
+        self, network: gt.Graph, radius: int, min_grp: int, max_grp: int
+    ) -&gt; Dict[int, FrozenSet[int]]:
+        &#34;&#34;&#34;Define the groups by randomly selecting one node and it&#39;s neighbours within radius r.
+
+        This is done in an iterative fashion.Thus some groups can overlapp.
+        &#34;&#34;&#34;
+        assert (
+            2 &lt;= min_grp &lt;= max_grp
+        ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+        assert (
+            min_grp &lt;= max_grp &lt;= network.num_vertices()
+        ), &#34;Maximum group number can exceed network size&#34;
+        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+        logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+
+        dict_of_groups = {}
+        for n in range(1, n_groups + 1):
+            seed = np.random.randint(0, network.num_vertices())
+            dict_of_groups[n] = self.select_communities(network, radius, seed)
+
+        return dict_of_groups
+
+    def select_communities(
+        self, network: gt.Graph, radius: int, seed: int
+    ) -&gt; FrozenSet[int]:
+        &#34;&#34;&#34;Select the neighbours and neighbours neighbours of a given node/seed.
+
+        Args:
+            network (gt.Graph): graph-tool network
+            radius (int): how many neigbours to select(neighbours of neighbours of...)
+            seed (int):  starting node
+        &#34;&#34;&#34;
+        nbrs = {seed}
+        all_neighbours = []
+        for _ in range(radius):
+            nbrs = {nbr for n in nbrs for nbr in network.iter_all_neighbors(n)}
+            all_neighbours.append(list(nbrs))
+        all_neighbours_list = list(itertools.chain.from_iterable(all_neighbours))
+        return frozenset(all_neighbours_list)
+
+    def init_fitness(self, network: gt.Graph) -&gt; gt.Graph:
+        &#34;&#34;&#34;Add the attribute fitness to the network.&#34;&#34;&#34;
+        if &#34;fitness&#34; in network.vp:
+            return network
+        else:
+            fitness = network.new_vertex_property(&#34;double&#34;)
+            network.vertex_properties[&#34;fitness&#34;] = fitness
+
+        return network
+
+    def mutation(self, network:gt.Graph, person:int) -&gt; gt.Graph:
+        &#34;&#34;&#34;Perform mutation on a given individual.&#34;&#34;&#34;
+        network.vp.state[network.vertex(person)] = np.random.choice([&#39;c&#39;,&#39;h&#39;,&#39;w&#39;],1)[0]
+        return network
+
+    def interchange_roles(self,network:gt.Graph,person_a:int,person_b:int) -&gt; gt.Graph:
+        &#34;&#34;&#34;Interchange roles based on fermin function.&#34;&#34;&#34;
+        fitness_a = network.vp.fitness[network.vertex(person_a)]
+        fitness_b = network.vp.fitness[network.vertex(person_b)]
+
+        value_a = deepcopy(network.vp.state[network.vertex(person_a)])
+        value_b = deepcopy(network.vp.state[network.vertex(person_b)])
+
+        # Probability that b copies a
+        if self.fermi_function(fitness_a,fitness_b):
+            network.vp.state[network.vertex(person_b)] = value_a
+        # Probability that a copies b
+        if self.fermi_function(fitness_b,fitness_a):
+            network.vp.state[network.vertex(person_a)] = value_b
+
+        return network
+
+    def fermi_function(self,w_j:float,w_i:float) -&gt; bool:
+        &#34;&#34;&#34;Return the probability of changing their role.&#34;&#34;&#34;
+        prob = 1 / (math.exp(-(w_j-w_i)/self.temperature) +1)
+        if np.random.rand() &gt; prob:
+            return False
+        else:
+            return True
+        return None</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Return the name of the simulator.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def name(self) -&gt; str:
+    &#34;&#34;&#34;Return the name of the simulator.&#34;&#34;&#34;
+    return self._name</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.act_divide_in_groups"><code class="name flex">
+<span>def <span class="ident">act_divide_in_groups</span></span>(<span>self, network: graph_tool.Graph, min_grp: int, max_grp: int) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Divide the network in groups.</p>
+<p>Actually divides in n_groups of connected components</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def act_divide_in_groups(
+    self, network: gt.Graph, min_grp: int, max_grp: int
+) -&gt; gt.Graph:
+    &#34;&#34;&#34;Divide the network in groups.
+
+    Actually divides in n_groups of connected components
+    &#34;&#34;&#34;
+    logger.info(&#34;This function is deprecated&#34;)
+    assert (
+        2 &lt;= min_grp &lt;= max_grp
+    ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+    assert (
+        min_grp &lt;= max_grp &lt;= network.num_vertices()
+    ), &#34;Maximum group number can exceed network size&#34;
+    n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+    logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+    # Define group_numbers attribute
+    # If it already exists it will overwrite it
+    gpr_nbr = network.new_vertex_property(&#34;int32_t&#34;)
+    network.vertex_properties[&#34;grp_nbr&#34;] = gpr_nbr
+
+    # Get a map of the nodes and its neighbours
+    dict_nodes_and_neighbour = {}
+    for v in network.iter_vertices():
+        dict_nodes_and_neighbour[v] = list(network.iter_all_neighbors(v))
+
+    # Set the seed, number needs to start from 1 because default is 0
+    for v, group_number in zip(
+        np.random.choice(
+            list(range(0, network.num_vertices())),
+            n_groups,
+        ),
+        range(1, n_groups + 1),
+    ):
+        network.vp.grp_nbr[network.vertex(v)] = group_number
+
+    # Loop through the dict and assinging same value to its neigbours
+    pbar = tqdm(total=len(dict_nodes_and_neighbour))
+    while len(dict_nodes_and_neighbour) &gt; 0:
+        key_to_del = []
+        # random order in order to avoid an group to grow too much
+        nodes = list(dict_nodes_and_neighbour.keys())
+        random.shuffle(nodes)
+        for i in nodes:
+            # if node has group number
+            if network.vp.grp_nbr[network.vertex(i)] != 0:
+                neighbours = list(network.iter_all_neighbors(i))
+                for neighbour in neighbours:
+                    if network.vp.grp_nbr[network.vertex(neighbour)] == 0:
+                        network.vp.grp_nbr[
+                            network.vertex(neighbour)
+                        ] = network.vp.grp_nbr[network.vertex(i)]
+                # del key since all neighbours have a group number
+                key_to_del.append(i)
+
+        # if key_to_del is empty
+        # means the seed can not reach some isolated components
+        if len(key_to_del) == 0:
+            break
+        else:
+            for k in key_to_del:
+                dict_nodes_and_neighbour.pop(k, None)
+
+        pbar.update(1)
+
+    return network, n_groups</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.act_divide_in_groups_faster"><code class="name flex">
+<span>def <span class="ident">act_divide_in_groups_faster</span></span>(<span>self, network: graph_tool.Graph, min_grp: int, max_grp: int) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Divide the network in groups.</p>
+<p>Actually divides in n_groups of connected components</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def act_divide_in_groups_faster(
+    self, network: gt.Graph, min_grp: int, max_grp: int
+) -&gt; gt.Graph:
+    &#34;&#34;&#34;Divide the network in groups.
+
+    Actually divides in n_groups of connected components
+    &#34;&#34;&#34;
+    assert (
+        2 &lt;= min_grp &lt;= max_grp
+    ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+    assert (
+        min_grp &lt;= max_grp &lt;= network.num_vertices()
+    ), &#34;Maximum group number can exceed network size&#34;
+    n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+    logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+    # Define group_numbers attribute
+    # If it already exists it will overwrite it
+    gpr_nbr = network.new_vertex_property(&#34;int32_t&#34;)
+    network.vertex_properties[&#34;grp_nbr&#34;] = gpr_nbr
+
+    # Get a map of the nodes and its neighbours
+    dict_nodes_and_neighbour = {}
+    for v in network.iter_vertices():
+        dict_nodes_and_neighbour[v] = list(network.iter_all_neighbors(v))
+
+    nodes_group = divide_network_fast_loop(
+        dict_nodes_and_neighbour, n_groups, network.num_vertices()
+    )
+
+    for node, group_number in nodes_group.items():
+        if group_number is not None:
+            network.vp.grp_nbr[network.vertex(node)] = group_number
+        elif group_number is None:
+            # In order to make sure the result is the same as for the slower function
+            network.vp.grp_nbr[network.vertex(node)] = 0
+
+    return network, n_groups</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.acting_stage"><code class="name flex">
+<span>def <span class="ident">acting_stage</span></span>(<span>self, network: graph_tool.Graph, group_members: FrozenSet[int]) ‑> Tuple[Any, int, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Correspond to the acting stage in the paper.</p>
+<p>Given an group, select on person and proceed to the acting.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def acting_stage(
+    self,
+    network: gt.Graph,
+    group_members: FrozenSet[int],
+) -&gt; Tuple[Any, int, str]:
+    &#34;&#34;&#34;Correspond to the acting stage in the paper.
+
+    Given an group, select on person and proceed to the acting.
+    &#34;&#34;&#34;
+    # Select one person
+    slct_pers = np.random.choice(list(group_members), 1)
+    # Check the person status
+    slct_pers_status = network.vp.state[network.vertex(slct_pers)]
+
+    if slct_pers_status == &#34;h&#34;:
+        return network, slct_pers, slct_pers_status
+    elif slct_pers_status == &#34;c&#34;:
+        new_network = self.inflict_damage(
+            network, group_members, slct_pers, slct_pers_status
+        )
+        return new_network, slct_pers, slct_pers_status
+    elif slct_pers_status == &#34;w&#34;:
+        new_network = self.inflict_damage(
+            network, group_members, slct_pers, slct_pers_status
+        )
+        return new_network, slct_pers, slct_pers_status
+    else:
+        raise KeyError(&#34;Person status didn&#39;t correspond to h/c/w...&#34;)</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.conducting_investigation"><code class="name flex">
+<span>def <span class="ident">conducting_investigation</span></span>(<span>self, group_members: FrozenSet[int], slct_pers: int, penalty_score: int) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform an state investigation.</p>
+<p>Pick a random person, if victimizer is found, penalty is returned</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def conducting_investigation(
+    self, group_members: FrozenSet[int], slct_pers: int, penalty_score: int
+) -&gt; int:
+    &#34;&#34;&#34;Perform an state investigation.
+
+    Pick a random person, if victimizer is found, penalty is returned
+    &#34;&#34;&#34;
+    random_picked_person = np.random.choice(list(group_members), 1)
+    if random_picked_person == slct_pers:
+        # Found victimizer
+        return penalty_score
+    elif random_picked_person != slct_pers:
+        # Victimizer not found
+        return 0
+    return None</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.counting_status_proprotions"><code class="name flex">
+<span>def <span class="ident">counting_status_proprotions</span></span>(<span>self, network: graph_tool.Graph, group_members: FrozenSet[int]) ‑> Tuple[int, int, int, float, float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the proportions of criminals,honest and wolfs.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def counting_status_proprotions(
+    self, network: gt.Graph, group_members: FrozenSet[int]
+) -&gt; Tuple[int, int, int, float, float, float]:
+    &#34;&#34;&#34;Return the proportions of criminals,honest and wolfs.&#34;&#34;&#34;
+    # First get proportions of h/c/w within the group
+    statuses = []
+    size_group = len(group_members)
+    for member in group_members:
+        statuses.append(network.vp.state[network.vertex(member)])
+
+    n_h = statuses.count(&#34;h&#34;)
+    n_c = statuses.count(&#34;c&#34;)
+    n_w = statuses.count(&#34;w&#34;)
+    p_h = n_h / size_group
+    p_c = n_c / size_group
+    p_w = n_w / size_group
+    return n_c, n_h, n_w, p_c, p_h, p_w</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.divide_in_groups"><code class="name flex">
+<span>def <span class="ident">divide_in_groups</span></span>(<span>self, network: graph_tool.Graph, min_group: int) ‑> Tuple[List[int], FrozenSet[int]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Divide the network in groups.</p>
+<p>Making use of the
+minimize_blockmodel_dl func.
+For now, the number of groups can't be imposed.
+Returns a list with the group number/label.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def divide_in_groups(
+    self, network: gt.Graph, min_group: int
+) -&gt; Tuple[List[int], FrozenSet[int]]:
+    &#34;&#34;&#34;Divide the network in groups.
+
+    Making use of the  minimize_blockmodel_dl func.
+    For now, the number of groups can&#39;t be imposed.
+    Returns a list with the group number/label.
+    &#34;&#34;&#34;
+    logger.warning(&#34;This function is deprecated!&#34;)
+    partitions = gt.minimize_blockmodel_dl(
+        network, multilevel_mcmc_args={&#34;B_min&#34;: min_group}
+    )
+    mbr_list = partitions.get_blocks()
+    group_numbers = frozenset(mbr_list)
+    return list(mbr_list), group_numbers</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.evolutionary_stage"><code class="name flex">
+<span>def <span class="ident">evolutionary_stage</span></span>(<span>self, network: graph_tool.Graph, group_members: FrozenSet[int]) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform the evolutionary stage.</p>
+<p>Randomly picks a two players and performs either mutation or a role switch with a certain probability.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def evolutionary_stage(self,network:gt.Graph,group_members:FrozenSet[int]) -&gt; gt.Graph:
+    &#34;&#34;&#34;Perform the evolutionary stage.
+
+    Randomly picks a two players and performs either mutation or a role switch with a certain probability.
+    &#34;&#34;&#34;
+    person_a,person_b = np.random.choice(list(group_members),2)
+    if np.random.rand()&gt;self.mutation_prob:
+        # Based on the fermi function will check if an interaction will happen
+        network = self.interchange_roles(network,person_a,person_b)
+    else:
+        # Mutation will happen
+        network = self.mutation(network,person_a)
+    return network</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.fermi_function"><code class="name flex">
+<span>def <span class="ident">fermi_function</span></span>(<span>self, w_j: float, w_i: float) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the probability of changing their role.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fermi_function(self,w_j:float,w_i:float) -&gt; bool:
+    &#34;&#34;&#34;Return the probability of changing their role.&#34;&#34;&#34;
+    prob = 1 / (math.exp(-(w_j-w_i)/self.temperature) +1)
+    if np.random.rand() &gt; prob:
+        return False
+    else:
+        return True
+    return None</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.inflict_damage"><code class="name flex">
+<span>def <span class="ident">inflict_damage</span></span>(<span>self, network: graph_tool.Graph, group_members: FrozenSet[int], slct_pers: int, slct_pers_status: str) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform criminal activity.</p>
+<p>Rest of the group gets a damage inflicted</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inflict_damage(
+    self,
+    network: gt.Graph,
+    group_members: FrozenSet[int],
+    slct_pers: int,
+    slct_pers_status: str,
+) -&gt; gt.Graph:
+    &#34;&#34;&#34;Perform criminal activity.
+
+    Rest of the group gets a damage inflicted
+    &#34;&#34;&#34;
+    n_c, n_h, n_w, p_c, p_h, p_w = self.counting_status_proprotions(
+        network=network, group_members=group_members
+    )
+
+    if slct_pers_status == &#34;c&#34;:
+        # Inflict damage to all the wolfs and honest
+        for member in group_members:
+            if network.vp.state[network.vertex(member)] in [&#34;h&#34;, &#34;w&#34;]:
+                network.vp.fitness[network.vertex(member)] = (
+                    network.vp.fitness[network.vertex(member)] - self.r_c * self.c_c
+                )
+            elif network.vp.state[network.vertex(member)] == &#34;c&#34;:
+                network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                    network.vertex(member)
+                ] + (((n_h + n_w) * (self.r_c * self.c_c)) / n_c)
+
+    elif slct_pers_status == &#34;w&#34;:
+        # Decide if lone wolf dares to act
+        acting = False
+        if np.random.uniform() &gt;= 1 - self.delta * (1 - p_c):
+            acting = True
+        # Inflicting damage to everyone but himself
+        if acting is True:
+            for member in group_members:
+                if member != slct_pers and network.vp.state[
+                    network.vertex(member)
+                ] in [&#34;h&#34;, &#34;w&#34;]:
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] - (self.r_w * self.c_w)
+
+                elif (
+                    member != slct_pers
+                    and network.vp.state[network.vertex(member)] == &#34;c&#34;
+                ):
+                    network.vp.fitness[network.vertex(member)] = (
+                        network.vp.fitness[network.vertex(member)]
+                        - (self.r_w * self.c_w)
+                        + (
+                            (
+                                self.tau
+                                * ((len(group_members) - 1) * (self.r_w * self.c_w))
+                            )
+                            / n_c
+                        )
+                    )
+
+                elif member == slct_pers:
+                    network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                        network.vertex(member)
+                    ] + (len(group_members) - 1) * (self.r_w * self.c_w)
+
+    else:
+        raise KeyError(&#34;Person status didn&#39;t correspond to c/w...&#34;)
+
+    return network</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.init_fitness"><code class="name flex">
+<span>def <span class="ident">init_fitness</span></span>(<span>self, network: graph_tool.Graph) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add the attribute fitness to the network.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init_fitness(self, network: gt.Graph) -&gt; gt.Graph:
+    &#34;&#34;&#34;Add the attribute fitness to the network.&#34;&#34;&#34;
+    if &#34;fitness&#34; in network.vp:
+        return network
+    else:
+        fitness = network.new_vertex_property(&#34;double&#34;)
+        network.vertex_properties[&#34;fitness&#34;] = fitness
+
+    return network</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.initialise_network"><code class="name flex">
+<span>def <span class="ident">initialise_network</span></span>(<span>self, network: graph_tool.Graph, n_new_edges: int = 2) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add to the existing criminal network honests and lone wolfs.</p>
+<p>Thereby, the nodes are added based on the preferential attachment principle.
+Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initialise_network(self, network: gt.Graph, n_new_edges: int = 2) -&gt; gt.Graph:
+    &#34;&#34;&#34;Add to the existing criminal network honests and lone wolfs.
+
+    Thereby, the nodes are added based on the preferential attachment principle.
+    Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
+    &#34;&#34;&#34;
+    logger.info(
+        f&#34;Given the ratio param, {self.new_nodes} \
+                nodes are added, total = {self.total_number_nodes} nodes!&#34;
+    )
+    new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
+        network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
+    )
+
+    # Get all the agents with no states
+    nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, &#34;&#34;)
+    for i in tqdm(
+        nodes_no_states, desc=&#34;Adding attributes to nodes&#34;, total=self.new_nodes
+    ):
+        new_network.vp.state[new_network.vertex(i)] = np.random.choice(
+            [&#34;h&#34;, &#34;w&#34;], 1, p=[self.relative_ratio_honest, self.relative_ratio_wolf]
+        )[0]
+
+    return new_network</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.interchange_roles"><code class="name flex">
+<span>def <span class="ident">interchange_roles</span></span>(<span>self, network: graph_tool.Graph, person_a: int, person_b: int) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Interchange roles based on fermin function.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def interchange_roles(self,network:gt.Graph,person_a:int,person_b:int) -&gt; gt.Graph:
+    &#34;&#34;&#34;Interchange roles based on fermin function.&#34;&#34;&#34;
+    fitness_a = network.vp.fitness[network.vertex(person_a)]
+    fitness_b = network.vp.fitness[network.vertex(person_b)]
+
+    value_a = deepcopy(network.vp.state[network.vertex(person_a)])
+    value_b = deepcopy(network.vp.state[network.vertex(person_b)])
+
+    # Probability that b copies a
+    if self.fermi_function(fitness_a,fitness_b):
+        network.vp.state[network.vertex(person_b)] = value_a
+    # Probability that a copies b
+    if self.fermi_function(fitness_b,fitness_a):
+        network.vp.state[network.vertex(person_a)] = value_b
+
+    return network</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.investigation_stage"><code class="name flex">
+<span>def <span class="ident">investigation_stage</span></span>(<span>self, network: graph_tool.Graph, group_members: FrozenSet[int], slct_pers: int, slct_status: str) ‑> Tuple[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Correspond to the investigation stage.</p>
+<p>Given an group, if the victimizer is found, a punishment is conducted</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def investigation_stage(
+    self,
+    network: gt.Graph,
+    group_members: FrozenSet[int],
+    slct_pers: int,
+    slct_status: str,
+) -&gt; Tuple[Any]:
+    &#34;&#34;&#34;Correspond to the investigation stage.
+
+    Given an group, if the victimizer is found, a punishment is conducted
+    &#34;&#34;&#34;
+    # Get the status proportions of the group
+    _, _, _, p_c, p_h, _ = self.counting_status_proprotions(network, group_members)
+    if slct_status == &#34;h&#34;:
+        # No victimizer -&gt;  No punishment
+        return network
+
+    # If vicitmizer is found, penalties shouldn&#39;t 0.
+    # state investigation
+    state_penalty = self.conducting_investigation(
+        group_members, slct_pers, self.beta_s
+    )
+    # civil investigation
+    civil_penalty = (
+        self.conducting_investigation(group_members, slct_pers, self.beta_h) * p_h
+    )
+    # criminal investigation
+    criminal_penalty = (
+        self.conducting_investigation(group_members, slct_pers, self.beta_c) * p_c
+    )
+
+    if slct_status == &#34;c&#34;:
+        # Punish the victimizer
+        network.vp.fitness[network.vertex(slct_pers)] = (
+            network.vp.fitness[network.vertex(slct_pers)]
+            - state_penalty
+            - civil_penalty
+        )
+        # Punish the partner in crime
+        for member in group_members:
+            if (
+                network.vp.state[network.vertex(member)] == &#34;c&#34;
+                and member != slct_pers
+            ):
+                network.vp.fitness[network.vertex(member)] = network.vp.fitness[
+                    network.vertex(member)
+                ] - self.gamma * (state_penalty + civil_penalty)
+
+    elif slct_status == &#34;w&#34;:
+        # Punish the victimizer
+        network.vp.fitness[network.vertex(slct_pers)] = (
+            network.vp.fitness[network.vertex(slct_pers)]
+            - state_penalty
+            - civil_penalty
+            - criminal_penalty
+        )
+
+    else:
+        raise KeyError(&#34;sclt_status should be either h/w/c...&#34;)
+
+    return network</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.mutation"><code class="name flex">
+<span>def <span class="ident">mutation</span></span>(<span>self, network: graph_tool.Graph, person: int) ‑> graph_tool.Graph</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform mutation on a given individual.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mutation(self, network:gt.Graph, person:int) -&gt; gt.Graph:
+    &#34;&#34;&#34;Perform mutation on a given individual.&#34;&#34;&#34;
+    network.vp.state[network.vertex(person)] = np.random.choice([&#39;c&#39;,&#39;h&#39;,&#39;w&#39;],1)[0]
+    return network</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.play"><code class="name flex">
+<span>def <span class="ident">play</span></span>(<span>self, network: graph_tool.Graph, rounds: int = 1, n_new_edges: int = 2, min_grp: int = 5, max_grp: int = 20, radius: int = 3) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Run the simulation.</p>
+<p>Network is subdivided in to n groups.
+In each group, a person is selected.
+If selected person is a wolf or criminal,
+damage is inflicted on others.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def play(
+    self,
+    network: gt.Graph,
+    rounds: int = 1,
+    n_new_edges: int = 2,
+    min_grp: int = 5,
+    max_grp: int = 20,
+    radius: int = 3,
+) -&gt; None:
+    &#34;&#34;&#34;Run the simulation.
+
+    Network is subdivided in to n groups.
+    In each group, a person is selected.
+    If selected person is a wolf or criminal,
+    damage is inflicted on others.
+    &#34;&#34;&#34;
+    # Init a population
+    network = self.initialise_network(network, n_new_edges)
+    # Init fitness attribute
+    network = self.init_fitness(network)
+
+    # Run the simulation
+    for i in tqdm(range(0, rounds), desc=&#34;Playing the rounds...&#34;, total=rounds):
+        # Divide the network in random new groups
+        dict_of_group = self.select_multiple_communities(
+            network=network, radius=radius, min_grp=min_grp, max_grp=max_grp
+        )
+        logger.debug(f&#34;The Network is divided in {len(dict_of_group)} groups&#34;)
+
+        # Go through each group
+        for group_number, group_members in dict_of_group.items():
+            # Acting stage
+            network, slct_pers, slct_status = self.acting_stage(
+                network, group_members
+            )
+            # Investigation stage
+            network = self.investigation_stage(
+                network, group_members, slct_pers, slct_status
+            )
+            # Evolutionary stage
+            network = self.evolutionary_stage(network,group_members)
+
+    return network</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.select_communities"><code class="name flex">
+<span>def <span class="ident">select_communities</span></span>(<span>self, network: graph_tool.Graph, radius: int, seed: int) ‑> FrozenSet[int]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Select the neighbours and neighbours neighbours of a given node/seed.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>network</code></strong> :&ensp;<code>gt.Graph</code></dt>
+<dd>graph-tool network</dd>
+<dt><strong><code>radius</code></strong> :&ensp;<code>int</code></dt>
+<dd>how many neigbours to select(neighbours of neighbours of&hellip;)</dd>
+<dt><strong><code>seed</code></strong> :&ensp;<code>int</code></dt>
+<dd>starting node</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select_communities(
+    self, network: gt.Graph, radius: int, seed: int
+) -&gt; FrozenSet[int]:
+    &#34;&#34;&#34;Select the neighbours and neighbours neighbours of a given node/seed.
+
+    Args:
+        network (gt.Graph): graph-tool network
+        radius (int): how many neigbours to select(neighbours of neighbours of...)
+        seed (int):  starting node
+    &#34;&#34;&#34;
+    nbrs = {seed}
+    all_neighbours = []
+    for _ in range(radius):
+        nbrs = {nbr for n in nbrs for nbr in network.iter_all_neighbors(n)}
+        all_neighbours.append(list(nbrs))
+    all_neighbours_list = list(itertools.chain.from_iterable(all_neighbours))
+    return frozenset(all_neighbours_list)</code></pre>
+</details>
+</dd>
+<dt id="simulators.sim_mart_vaq.SimMartVaq.select_multiple_communities"><code class="name flex">
+<span>def <span class="ident">select_multiple_communities</span></span>(<span>self, network: graph_tool.Graph, radius: int, min_grp: int, max_grp: int) ‑> Dict[int, FrozenSet[int]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the groups by randomly selecting one node and it's neighbours within radius r.</p>
+<p>This is done in an iterative fashion.Thus some groups can overlapp.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select_multiple_communities(
+    self, network: gt.Graph, radius: int, min_grp: int, max_grp: int
+) -&gt; Dict[int, FrozenSet[int]]:
+    &#34;&#34;&#34;Define the groups by randomly selecting one node and it&#39;s neighbours within radius r.
+
+    This is done in an iterative fashion.Thus some groups can overlapp.
+    &#34;&#34;&#34;
+    assert (
+        2 &lt;= min_grp &lt;= max_grp
+    ), f&#34;Min number of groups must be between 2 and {max_grp}&#34;
+    assert (
+        min_grp &lt;= max_grp &lt;= network.num_vertices()
+    ), &#34;Maximum group number can exceed network size&#34;
+    n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+    logger.debug(f&#34;Number of groups is {n_groups}&#34;)
+
+    dict_of_groups = {}
+    for n in range(1, n_groups + 1):
+        seed = np.random.randint(0, network.num_vertices())
+        dict_of_groups[n] = self.select_communities(network, radius, seed)
+
+    return dict_of_groups</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="simulators" href="index.html">simulators</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="simulators.sim_mart_vaq.SimMartVaq" href="#simulators.sim_mart_vaq.SimMartVaq">SimMartVaq</a></code></h4>
+<ul class="">
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.act_divide_in_groups" href="#simulators.sim_mart_vaq.SimMartVaq.act_divide_in_groups">act_divide_in_groups</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.act_divide_in_groups_faster" href="#simulators.sim_mart_vaq.SimMartVaq.act_divide_in_groups_faster">act_divide_in_groups_faster</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.acting_stage" href="#simulators.sim_mart_vaq.SimMartVaq.acting_stage">acting_stage</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.conducting_investigation" href="#simulators.sim_mart_vaq.SimMartVaq.conducting_investigation">conducting_investigation</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.counting_status_proprotions" href="#simulators.sim_mart_vaq.SimMartVaq.counting_status_proprotions">counting_status_proprotions</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.divide_in_groups" href="#simulators.sim_mart_vaq.SimMartVaq.divide_in_groups">divide_in_groups</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.evolutionary_stage" href="#simulators.sim_mart_vaq.SimMartVaq.evolutionary_stage">evolutionary_stage</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.fermi_function" href="#simulators.sim_mart_vaq.SimMartVaq.fermi_function">fermi_function</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.inflict_damage" href="#simulators.sim_mart_vaq.SimMartVaq.inflict_damage">inflict_damage</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.init_fitness" href="#simulators.sim_mart_vaq.SimMartVaq.init_fitness">init_fitness</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.initialise_network" href="#simulators.sim_mart_vaq.SimMartVaq.initialise_network">initialise_network</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.interchange_roles" href="#simulators.sim_mart_vaq.SimMartVaq.interchange_roles">interchange_roles</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.investigation_stage" href="#simulators.sim_mart_vaq.SimMartVaq.investigation_stage">investigation_stage</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.mutation" href="#simulators.sim_mart_vaq.SimMartVaq.mutation">mutation</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.name" href="#simulators.sim_mart_vaq.SimMartVaq.name">name</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.play" href="#simulators.sim_mart_vaq.SimMartVaq.play">play</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.select_communities" href="#simulators.sim_mart_vaq.SimMartVaq.select_communities">select_communities</a></code></li>
+<li><code><a title="simulators.sim_mart_vaq.SimMartVaq.select_multiple_communities" href="#simulators.sim_mart_vaq.SimMartVaq.select_multiple_communities">select_multiple_communities</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

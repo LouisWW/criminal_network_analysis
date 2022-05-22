@@ -6,15 +6,18 @@ python3 setup.py build_ext --inplace
 __author__ = Louis Weyland
 __date__   = 18/03/2022
 """
+from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 from distutils.core import setup
 from distutils.extension import Extension
 
 ext_modules = [
-    Extension("network_stats_c", ["network_stats_c.pyx"]),
-    Extension("nx_to_gt_c", ["nx_to_gt_c.pyx"]),
+    Extension(
+        "simulators.sim_mart_vaq_helper_c", ["simulators/sim_mart_vaq_helper_c.pyx"]
+    )
 ]
 
+extensions = cythonize(ext_modules, compiler_directives={"language_level": "3"})
 setup(
     name="MyProject",
     cmdclass={"build_ext": build_ext},

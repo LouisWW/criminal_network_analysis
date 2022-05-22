@@ -1,6 +1,13 @@
 # Criminal_network_analysis
 Analysing the resilience of criminal networks in an iterative fashion.
 
+<p align="center">
+
+![Works with Ubuntu](https://img.shields.io/badge/Ubuntu-v20.04--LTS-blue?style=flat-square)
+![Tested with](https://img.shields.io/badge/Pytest-80%25%20coverage-red)
+![Python](https://img.shields.io/badge/python-v3.8-green)
+
+</p>
 
 ---
 ## Setup
@@ -25,14 +32,16 @@ Additionally to the pipenv environment, a python package called **graph-tool** i
 
     # Install Graph-tool
 
+    # Make sure to activate python environment
     # First install all missing dependencies
     # In my case:
 
+    $ sudo apt-get install libboost-all-dev
     $ sudo apt-get install libcgal-dev
     $ sudo apt-get install expat
     $ sudo apt install libsparsehash-dev
+    $ sudo apt install libcairomm-1.0-dev
 
-    # Activate python environment
     $ git clone https://github.com/pygobject/pycairo.git
     $ cd pycairo/
     $ python3 setup.py build
@@ -42,6 +51,9 @@ Additionally to the pipenv environment, a python package called **graph-tool** i
     $ ./configure --prefix=$HOME/.local
     $ make install
 
+To profile the code, the library pycallgraph is used. The package depends on graphviz, which has to be installed via the ubunut installing system
+
+    $ sudo apt install graphviz
 
 ### Mac OSX
 ##### Conda (preferred for Mac OSX)
@@ -72,6 +84,7 @@ If you try to run some code outside of conda and you experience some troubles wi
 
 
 ---
+#### Pre-commit
 
 A pre-commit hook is used in this repo to uniform the linting. Thus after the first commit, some additional packages will automatically be installed. Commit will only go through if the pylinting is successful! More info can be found on https://www.youtube.com/watch?v=psjz6rwzMdk&ab_channel=mCoding
 
@@ -93,3 +106,9 @@ What you need to do it either change your stuff, if an error is shown and/or do 
     git commit -m"Your message"
 
 ---
+#### Compile cython
+
+The last step to run the code is to compile the cython code (.pyx files)
+To do so, run in src/ the following command
+
+    python3 setup.py build_ext --inplace
