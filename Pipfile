@@ -17,12 +17,6 @@ pytest = "*"
 pytest-xdist = "*"
 pytest-subtests = "*"
 pytest-cov = "*"
-<<<<<<< HEAD
-vext = "*"
-"vext.gi" = "*"
-mypy = "*"
-=======
->>>>>>> main
 pyintergraph = "*"
 tqdm = "*"
 pdoc3 = "*"
