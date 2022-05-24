@@ -55,7 +55,7 @@ class SensitivityAnalyser(ConfigParser):
                 timestamp = e.strftime("%d-%m-%Y-%H-%M")
                 # Get the saving directory
                 # Get directory first
-                path = os.getcwd()
+                path = os.path.dirname(os.path.realpath(__file__))
                 par_dir = os.path.abspath(os.path.join(path))
                 # par_dir = ../src/
                 savig_dir = par_dir + "/results/data/sensitivity_analysis/"

@@ -6,6 +6,7 @@ More specifically, generated data is visualized.
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
+import os
 from typing import Any
 from typing import DefaultDict
 from typing import List
@@ -34,6 +35,11 @@ class Plotter(ConfigParser):
         mpl.rcParams["axes.prop_cycle"] = cycler(color="krbgmyc")
         mpl.rcParams["figure.dpi"] = 100
         mpl.rcParams["savefig.dpi"] = 300
+
+        path = os.path.dirname(os.path.realpath(__file__))
+        par_dir = os.path.abspath(os.path.join(path, "../"))
+        # par_dir = ../src/
+        self.savig_dir = par_dir + "/results/figures/"
 
     def draw_network(
         self,
@@ -72,7 +78,11 @@ class Plotter(ConfigParser):
             )
 
         elif self.args.draw_network == "n" and color_vertex_property is None:
-            gt.graph_draw(network, pos=pos)
+            gt.graph_draw(
+                network,
+                pos=pos,
+                output=f"{self.savig_dir}{network.graph_properties.name}.png",
+            )
 
         elif self.args.draw_network == "n" and color_vertex_property is not None:
             # Add a color map corresponding to the chosen vertex_property
@@ -84,6 +94,7 @@ class Plotter(ConfigParser):
                 network,
                 pos=pos,
                 vertex_fill_color=network.vertex_properties[color_vertex_property],
+                output=f"{self.savig_dir}{network.graph_properties.name}.png",
             )
 
     def plot_log_log(self, data: List[float], x_label: str, y_label: str) -> plt.Axes:

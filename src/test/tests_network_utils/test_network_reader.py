@@ -51,7 +51,7 @@ class TestNetworkReader:
         assert network_obj.nodes["N100"]["state"] == "c", "Attributes are set wrong"
         assert network_obj.nodes["N80"]["state"] == "c", "Attributes are set wrong"
 
-        assert network_obj.name == "montagna_phone_calls", "Network name is not correct"
+        assert network_obj.name == "montagna_calls", "Network name is not correct"
 
 
 if __name__ == "__main__":
