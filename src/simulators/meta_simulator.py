@@ -32,7 +32,16 @@ class MetaSimulator:
         n_new_edges: int = 2,
         random_fit_init: bool = False,
     ) -> None:
-        """Define the ratio of honest and criminals."""
+        """Define the ratio of honest and criminals.
+
+        Args:
+            network_name (str): _description_
+            ratio_honest (float, optional): Honest ratio. Defaults to 0.7.
+            ratio_wolf (float, optional): Wolf ratio. Defaults to 0.1.
+            n_new_edges (int, optional): Number of edges to add for preferential attachement.
+                                                            Defaults to 2.
+            random_fit_init (bool, optional): Init random fintess. Defaults to False.
+        """
         # Define name of simulator
         self._name = "meta_simulator"
 

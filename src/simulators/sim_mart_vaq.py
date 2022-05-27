@@ -55,8 +55,6 @@ class SimMartVaq:
 
         Args:
             network (gt.Graph): Initial criminal network
-            ratio_honest (float, optional): Honest ratio. Defaults to 0.7.
-            ratio_wolf (float, optional): Wolf ratio. Defaults to 0.1.
             delta (int, optional): Influence of criminals on the acting of the wolf. Defaults to 0.
             tau (int, optional):Influence of the wolf's action on criminals. Defaults to 0.
             gamma (float, optional): Punishment ratio for the other members of the criminal
