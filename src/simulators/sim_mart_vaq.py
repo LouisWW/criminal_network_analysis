@@ -48,6 +48,7 @@ class SimMartVaq:
         c_c: int = 1,
         r_w: int = 1,
         r_c: int = 1,
+        r_h: int = 0,
         temperature: float = 10,
         mutation_prob: float = 0.3,
     ) -> None:
@@ -66,6 +67,7 @@ class SimMartVaq:
             c_c (int, optional): Damage caused by criminal. Defaults to 1.
             r_w (int, optional): Damage ratio for wolf. Defaults to 1.
             r_c (int, optional): Damage ratio for criminal. Defaults to 1.
+            r_h (int, optional): Bonus ratio for honest. Defaults to 0.
             temperature (int, optional): Temperature used in the fermi function. Defaults to 10.
             mutation_prob (float, optional): Mutation probability to either randomly pick a
                                 new state or switch state with an other agent. Defaults to 0.3.
@@ -103,6 +105,7 @@ class SimMartVaq:
         self.c_c = c_c
         self.r_w = r_w
         self.r_c = r_c
+        self.r_h = r_h
 
         # Set the fermic temperature & mutation probability
         self.temperature = temperature
@@ -368,13 +371,18 @@ class SimMartVaq:
     ) -> gt.Graph:
         """Perform criminal activity.
 
-        Rest of the group gets a damage inflicted
+        Rest of the group gets a damage inflicted.
+        If slct_pers is honest, the person gets bonus points for acting good!
         """
         n_c, n_h, n_w, p_c, p_h, p_w = self.counting_status_proportions(
             network=network, group_members=group_members
         )
-
-        if slct_pers_status == "c":
+        if slct_pers_status == "h":
+            # Bonus points if law-abiding
+            network.vp.fitness[network.vertex(slct_pers)] = (
+                network.vp.fitness[network.vertex(slct_pers)] + self.r_h
+            )
+        elif slct_pers_status == "c":
             # Inflict damage to all the wolfs and honest
             # If only criminals are present in the group
             # then there is no acting
@@ -387,13 +395,12 @@ class SimMartVaq:
                 for member in group_members:
                     if network.vp.state[network.vertex(member)] in ["h", "w"]:
                         network.vp.fitness[network.vertex(member)] = (
-                            network.vp.fitness[network.vertex(member)]
-                            - self.r_c * self.c_c
+                            network.vp.fitness[network.vertex(member)] - self.c_c
                         )
                     elif network.vp.state[network.vertex(member)] == "c":
                         network.vp.fitness[network.vertex(member)] = network.vp.fitness[
                             network.vertex(member)
-                        ] + (((n_h + n_w) * (self.r_c * self.c_c)) / n_c)
+                        ] + ((self.r_c * self.c_c) / n_c)
 
         elif slct_pers_status == "w":
             # Decide if lone wolf dares to act
@@ -406,9 +413,9 @@ class SimMartVaq:
                     if member != slct_pers and network.vp.state[
                         network.vertex(member)
                     ] in ["h", "w"]:
-                        network.vp.fitness[network.vertex(member)] = network.vp.fitness[
-                            network.vertex(member)
-                        ] - (self.r_w * self.c_w)
+                        network.vp.fitness[network.vertex(member)] = (
+                            network.vp.fitness[network.vertex(member)] - self.c_w
+                        )
 
                     elif (
                         member != slct_pers
@@ -416,20 +423,14 @@ class SimMartVaq:
                     ):
                         network.vp.fitness[network.vertex(member)] = (
                             network.vp.fitness[network.vertex(member)]
-                            - (self.r_w * self.c_w)
-                            + (
-                                (
-                                    self.tau
-                                    * ((len(group_members) - 1) * (self.r_w * self.c_w))
-                                )
-                                / n_c
-                            )
+                            - self.c_w
+                            + ((self.tau * (self.r_w * self.c_w)) / n_c)
                         )
 
                     elif member == slct_pers:
                         network.vp.fitness[network.vertex(member)] = network.vp.fitness[
                             network.vertex(member)
-                        ] + (len(group_members) - 1) * (self.r_w * self.c_w)
+                        ] + (self.r_w * self.c_w)
 
         else:
             raise KeyError("Person status didn't correspond to c/w...")
@@ -770,7 +771,7 @@ class SimMartVaq:
 
                     mean_fitness_dict[k] += self.hypergeometric_dist(
                         N_h_prime, N_c_prime, N_w_prime, Z_h, Z_c, Z_w, Z, N, k
-                    ) * (mean_field_approx[k]["a"] + mean_field_approx[k]["a"])
+                    ) * (mean_field_approx[k]["a"] + mean_field_approx[k]["i"])
 
         return mean_fitness_dict
 

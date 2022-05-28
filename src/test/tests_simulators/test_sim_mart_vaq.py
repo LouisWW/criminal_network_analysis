@@ -163,7 +163,7 @@ class TestSimMartVaq:
                 assert network_aft_dmge.vp.fitness[
                     network_aft_dmge.vertex(node)
                 ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
-                    ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+                    (simulators.r_c * simulators.c_c) / n_c
                 )
             elif network.vp.state[network.vertex(node)] in ["h", "w"]:
                 assert network_aft_dmge.vp.fitness[
@@ -267,7 +267,7 @@ class TestSimMartVaq:
                 assert network_aft_dmge.vp.fitness[
                     network_aft_dmge.vertex(node)
                 ] == untouched_network.vp.fitness[untouched_network.vertex(node)] + (
-                    ((n_h + n_w) * (simulators.r_c * simulators.c_c)) / n_c
+                    (simulators.r_c * simulators.c_c) / n_c
                 )
             elif network.vp.state[network.vertex(node)] in ["h", "w"]:
                 assert network_aft_dmge.vp.fitness[
@@ -425,7 +425,7 @@ class TestSimMartVaq:
         """Test if the inflicting damage function works correclty."""
         # set delta to 100 to make sure lone wolf acts
         simulators = SimMartVaq(
-            create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2, delta=100, tau=0.5
+            create_gt_network, c_c=5, r_c=1, c_w=3, r_w=2, r_h=4, delta=100, tau=0.5
         )
         network = simulators.network
 
@@ -437,12 +437,12 @@ class TestSimMartVaq:
             node,
             network.vp.state[network.vertex(node)],
         )
-        assert network.vp.fitness[network.vertex(0)] == 30
+        assert network.vp.fitness[network.vertex(0)] == 15
         assert network.vp.fitness[network.vertex(2)] == 1
         assert network.vp.fitness[network.vertex(3)] == 6
         assert network.vp.fitness[network.vertex(4)] == -2
 
-        # What if the criminal is chosen
+        # What if the wolf is chosen
         # Based on the previous fitness resulting from the criminal
         # activity above.
         node = 3
@@ -452,10 +452,24 @@ class TestSimMartVaq:
             node,
             network.vp.state[network.vertex(node)],
         )
-        assert network.vp.fitness[network.vertex(0)] == 36
-        assert network.vp.fitness[network.vertex(2)] == -5
-        assert network.vp.fitness[network.vertex(4)] == -8
-        assert network.vp.fitness[network.vertex(3)] == 30
+        assert network.vp.fitness[network.vertex(0)] == 15
+        assert network.vp.fitness[network.vertex(2)] == -2
+        assert network.vp.fitness[network.vertex(4)] == -5
+        assert network.vp.fitness[network.vertex(3)] == 12
+
+        # What if a honest person is chosen
+        node = 1
+        network = simulators.inflict_damage(
+            network,
+            frozenset([0, 1, 2, 3, 4]),
+            node,
+            network.vp.state[network.vertex(node)],
+        )
+        assert network.vp.fitness[network.vertex(0)] == 15
+        assert network.vp.fitness[network.vertex(1)] == 4
+        assert network.vp.fitness[network.vertex(2)] == -2
+        assert network.vp.fitness[network.vertex(4)] == -5
+        assert network.vp.fitness[network.vertex(3)] == 12
 
     @pytest.mark.essential
     def test_investigation_stage(self, create_gt_network: gt.Graph) -> None:
