@@ -141,7 +141,7 @@ class MetaSimulator:
         else:
             fitness = network.new_vertex_property("double")
             if random_fit:
-                fitness.a = np.random.random(network.num_vertices())
+                fitness.a = np.random.uniform(-50, 50, network.num_vertices())
             network.vertex_properties["fitness"] = fitness
         return network
 
