@@ -348,6 +348,9 @@ class SimMartVaq:
         Given an group, select on person and proceed to the acting.
         """
         if slct_pers_status == "h":
+            new_network = self.inflict_damage(
+                network, group_members, slct_pers, slct_pers_status
+            )
             return network, slct_pers, slct_pers_status
         elif slct_pers_status == "c":
             new_network = self.inflict_damage(
