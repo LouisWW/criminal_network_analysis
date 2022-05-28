@@ -91,6 +91,68 @@ class ConfigParser:
             """,
         )
 
+        parser.add_argument(
+            "--delta",
+            type=float,
+            help="""Defines the influence of criminals on the acting of the wolf (SimMartVaq)
+            """,
+        )
+
+        parser.add_argument(
+            "--tau",
+            type=float,
+            help="""Influence of wolf's action on criminals (SimMartVaq)""",
+        )
+
+        parser.add_argument(
+            "--gamma",
+            type=float,
+            help="""Punishment ratio for the members of a criminal organization  (SimMartVaq)""",
+        )
+
+        parser.add_argument(
+            "--beta-s", type=int, help="""State punishment value (SimMartVaq)"""
+        )
+
+        parser.add_argument(
+            "--beta-h", type=int, help="""Civil punishment value (SimMartVaq)"""
+        )
+
+        parser.add_argument(
+            "--beta-c", type=int, help="""Criminal punishment value (SimMartVaq)"""
+        )
+
+        parser.add_argument(
+            "--c-w", type=int, help="""Damage caused by wolf (SimMartVaq)"""
+        )
+
+        parser.add_argument(
+            "--c-c", type=int, help="""Damage caused by ciminal (SimMartVaq)"""
+        )
+
+        parser.add_argument(
+            "--r-w", type=int, help="""Reward ratio for wolf (SimMartVaq)"""
+        )
+
+        parser.add_argument(
+            "--r-c", type=int, help="""Reward ratio for criminal (SimMartVaq)"""
+        )
+
+        parser.add_argument(
+            "--r-h", type=int, help="""Reward ratio for honest (SimMartVaq)"""
+        )
+
+        parser.add_argument(
+            "-temp",
+            "--temperature",
+            type=int,
+            help="""Temperature for the fermi function (SimMartVaq)""",
+        )
+
+        parser.add_argument(
+            "--mutation-prob", type=float, help="""Mutation probability (SimMartVaq)"""
+        )
+
         parser.add_argument("-verbose", action="store_true", help="Print extra info")
 
         # compile the flags

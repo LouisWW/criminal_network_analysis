@@ -52,7 +52,7 @@ class SimMartVaq:
         temperature: float = 10,
         mutation_prob: float = 0.3,
     ) -> None:
-        """Init the network charateristics.
+        """Init the network characteristics.
 
         Args:
             network (gt.Graph): Initial criminal network
@@ -65,8 +65,8 @@ class SimMartVaq:
             beta_c (int, optional): Criminal punishment value. Defaults to 400.
             c_w (int, optional): Damage caused by wolf. Defaults to 1.
             c_c (int, optional): Damage caused by criminal. Defaults to 1.
-            r_w (int, optional): Damage ratio for wolf. Defaults to 1.
-            r_c (int, optional): Damage ratio for criminal. Defaults to 1.
+            r_w (int, optional): Reward ratio for wolf. Defaults to 1.
+            r_c (int, optional): Reward ratio for criminal. Defaults to 1.
             r_h (int, optional): Bonus ratio for honest. Defaults to 0.
             temperature (int, optional): Temperature used in the fermi function. Defaults to 10.
             mutation_prob (float, optional): Mutation probability to either randomly pick a
