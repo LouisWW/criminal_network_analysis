@@ -730,9 +730,9 @@ class SimMartVaq:
         fitness_b = network.vp.fitness[network.vertex(person_b)]
 
         # Probability that b copies a
-        if self.fermi_function(fitness_a, fitness_b):
-            network.vp.state[network.vertex(person_b)] = network.vp.state[
-                network.vertex(person_a)
+        if self.fermi_function(fitness_b, fitness_a):
+            network.vp.state[network.vertex(person_a)] = network.vp.state[
+                network.vertex(person_b)
             ]
 
         return network

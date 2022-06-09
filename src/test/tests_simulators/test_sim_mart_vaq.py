@@ -604,16 +604,16 @@ class TestSimMartVaq:
 
     @pytest.mark.essential
     def test_interchange_roles(self, create_gt_network: gt.Graph) -> None:
-        """Test if the interchanging role is working."""
+        """Test if the copying role is working."""
         simulators = SimMartVaq(create_gt_network, temperature=10)
-        # Seed 2 will trigger that the roles are interchanged
+        # Seed 2 will trigger that one role is changed
         np.random.seed(2)
         network = simulators.interchange_roles(
             network=simulators.network, person_a=0, person_b=4
         )
         # Check if wolf turned criminal based on the criminal's fitness
         assert (
-            network.vp.state[network.vertex(4)] == "c"
+            network.vp.state[network.vertex(4)] == "w"
         ), "Wolf didn't copied criminal...."
         assert (
             network.vp.state[network.vertex(0)] == "w"
