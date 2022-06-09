@@ -156,7 +156,7 @@ class SensitivityAnalyser(ConfigParser):
     def sim_mart_vaq_sa_helper(self, tuple_of_variable: Any) -> float:
         """Run the simulation Mart-Vaq given the parameter."""
         # Set the seed each time, otherwise the simulation will be exactly the same
-        np.random.seed()
+        np.random.seed(0)
         gt_network, problem, params, output_value, rounds = tuple_of_variable
 
         # Unpack input variables
