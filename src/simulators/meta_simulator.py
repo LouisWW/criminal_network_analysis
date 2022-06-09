@@ -55,6 +55,7 @@ class MetaSimulator:
         self.ratio_criminal = 1 - self.ratio_honest - self.ratio_wolf
 
         self.network = self.prepare_network(network_name)
+        self.network_name = self.network.gp.name
 
         # Network needs to have a base criminal network
         self.n_criminal = len(gt.find_vertex(self.network, self.network.vp.state, "c"))

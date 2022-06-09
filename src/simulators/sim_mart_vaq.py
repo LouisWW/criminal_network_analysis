@@ -12,7 +12,6 @@ import math
 import multiprocessing
 import random
 from collections import defaultdict
-from copy import deepcopy
 from typing import Any
 from typing import DefaultDict
 from typing import Dict
@@ -34,6 +33,29 @@ logger = logging.getLogger("logger")
 
 class SimMartVaq:
     """Contain the framework to simulate the process."""
+
+    __slots__ = (
+        "network",
+        "delta",
+        "tau",
+        "gamma",
+        "beta_s",
+        "beta_h",
+        "beta_c",
+        "c_w",
+        "c_c",
+        "r_w",
+        "r_c",
+        "r_h",
+        "temperature",
+        "mutation_prob",
+        "_name",
+        "wolf_acting",
+        "criminal_acting",
+        "ratio_honest",
+        "ratio_wolf",
+        "ratio_criminal",
+    )
 
     def __init__(
         self,
@@ -169,7 +191,7 @@ class SimMartVaq:
             # Divide the network in random new groups for evolutionary process
             dict_of_group_evol = self.slct_pers_n_neighbours(
                 network=network,
-                n_groups=int(n_groups / 10),
+                n_groups=n_groups,
                 network_size=network.num_vertices(),
             )
             # Go through each group
@@ -265,11 +287,12 @@ class SimMartVaq:
 
         Given an group, if the victimizer is found, a punishment is conducted
         """
-        # Get the status proportions of the group
-        _, _, _, p_c, p_h, _ = self.counting_status_proportions(network, group_members)
         if slct_status == "h":
             # No victimizer ->  No punishment
             return network
+
+        # Get the status proportions of the group
+        _, _, _, p_c, p_h, _ = self.counting_status_proportions(network, group_members)
 
         # If victimizer is found, penalties shouldn't 0.
         # state investigation
@@ -706,15 +729,11 @@ class SimMartVaq:
         fitness_a = network.vp.fitness[network.vertex(person_a)]
         fitness_b = network.vp.fitness[network.vertex(person_b)]
 
-        value_a = deepcopy(network.vp.state[network.vertex(person_a)])
-        value_b = deepcopy(network.vp.state[network.vertex(person_b)])
-
         # Probability that b copies a
         if self.fermi_function(fitness_a, fitness_b):
-            network.vp.state[network.vertex(person_b)] = value_a
-        # Probability that a copies b
-        if self.fermi_function(fitness_b, fitness_a):
-            network.vp.state[network.vertex(person_a)] = value_b
+            network.vp.state[network.vertex(person_b)] = network.vp.state[
+                network.vertex(person_a)
+            ]
 
         return network
 
