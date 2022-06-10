@@ -36,7 +36,7 @@ class TestPlotter:
 
         ax = plotter.plot_lines(
             dict_data=data_collector,
-            data_to_plot=["honest_ratio", "wolf_ratio"],
+            y_data_to_plot=["honest_ratio", "wolf_ratio"],
             xlabel="rounds",
             ylabel="ratio (per)",
             title="This is a test",
@@ -61,7 +61,7 @@ class TestPlotter:
 
         ax = plotter.plot_lines(
             dict_data=data_collector,
-            data_to_plot=["mean_honest_ratio", "mean_criminal_ratio"],
+            y_data_to_plot=["mean_honest_ratio", "mean_criminal_ratio"],
             xlabel="rounds",
             ylabel="ratio (per)",
             title="This is a test",

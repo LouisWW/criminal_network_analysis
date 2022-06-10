@@ -607,7 +607,7 @@ class TestSimMartVaq:
         """Test if the copying role is working."""
         simulators = SimMartVaq(create_gt_network, temperature=10)
         # Seed 2 will trigger that one role is changed
-        np.random.seed(2)
+        np.random.seed(5)
         network = simulators.interchange_roles(
             network=simulators.network, person_a=0, person_b=4
         )
@@ -660,7 +660,7 @@ class TestSimMartVaq:
         )
         # Check if the players changed status
         # With seed 0, role interchange is triggered
-        np.random.seed(1)
+        np.random.seed(3)
         protagonist = list(dict_of_communities.keys())[0]
         mbrs = dict_of_communities[protagonist]
         network = simulators.evolutionary_stage(network, protagonist, mbrs)
@@ -690,7 +690,9 @@ class TestSimMartVaq:
         # Play the simulation
         rounds = 50
         simulator = SimMartVaq(meta_simulator_network)
-        network, data_collector = simulator.play(simulator.network, rounds=rounds)
+        network, data_collector = simulator.play(
+            simulator.network, rounds=rounds, ith_collect=1
+        )
 
         # Check if the data_collectors collect at each round data
         assert (
@@ -738,7 +740,9 @@ class TestSimMartVaq:
         # Play the simulation
         rounds = 20
         simulator = SimMartVaq(meta_simulator_network)
-        data = simulator.avg_play(simulator.network, rounds=rounds, repetition=5)
+        data = simulator.avg_play(
+            simulator.network, rounds=rounds, repetition=5, ith_collect=1
+        )
 
         assert "mean_ratio_criminal" in data.keys(), "Key not found"
         assert "mean_ratio_honest" in data.keys(), "Key not found"

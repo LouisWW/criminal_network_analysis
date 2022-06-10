@@ -116,7 +116,11 @@ class SimMartVaq:
         return self._name
 
     def play(
-        self, network: gt.Graph, rounds: int = 1, n_groups: int = 20
+        self,
+        network: gt.Graph,
+        rounds: int = 1,
+        n_groups: int = 20,
+        ith_collect: int = 20,
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
@@ -143,7 +147,10 @@ class SimMartVaq:
 
         # Run the simulation
         for i in tqdm(
-            range(0, rounds), desc="Playing the rounds...", total=rounds, leave=False
+            range(1, rounds + 1),
+            desc="Playing the rounds...",
+            total=rounds,
+            leave=False,
         ):
             # Divide the network in random new groups
             dict_of_group = self.slct_pers_n_neighbours(
@@ -179,21 +186,27 @@ class SimMartVaq:
                 )
 
             # Collect the data
-            _, _, _, p_c, p_h, p_w = self.counting_status_proportions(
-                network=network,
-                group_members=frozenset(range(0, network.num_vertices())),
-            )
+            if i % ith_collect == 0:
+                _, _, _, p_c, p_h, p_w = self.counting_status_proportions(
+                    network=network,
+                    group_members=frozenset(range(0, network.num_vertices())),
+                )
 
-            mean_h_fit, mean_c_fit, mean_w_fit = self.get_overall_fitness_distribution(
-                network=network,
-                group_members=list(range(0, network.num_vertices())),
-            )
-            data_collector["ratio_honest"].append(p_h)
-            data_collector["ratio_wolf"].append(p_w)
-            data_collector["ratio_criminal"].append(p_c)
-            data_collector["fitness_honest"].append(mean_h_fit)
-            data_collector["fitness_criminal"].append(mean_c_fit)
-            data_collector["fitness_wolf"].append(mean_w_fit)
+                (
+                    mean_h_fit,
+                    mean_c_fit,
+                    mean_w_fit,
+                ) = self.get_overall_fitness_distribution(
+                    network=network,
+                    group_members=list(range(0, network.num_vertices())),
+                )
+                data_collector["iteration"].append(i)
+                data_collector["ratio_honest"].append(p_h)
+                data_collector["ratio_wolf"].append(p_w)
+                data_collector["ratio_criminal"].append(p_c)
+                data_collector["fitness_honest"].append(mean_h_fit)
+                data_collector["fitness_criminal"].append(mean_c_fit)
+                data_collector["fitness_wolf"].append(mean_w_fit)
 
         return network, data_collector
 
@@ -202,6 +215,7 @@ class SimMartVaq:
         network: gt.Graph,
         rounds: int = 1,
         n_groups: int = 20,
+        ith_collect: int = 20,
         repetition: int = 20,
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
@@ -229,7 +243,7 @@ class SimMartVaq:
             (
                 [
                     # arguments need to be in this order
-                    (network, rounds, n_groups)
+                    (network, rounds, n_groups, ith_collect)
                     for i in range(0, repetition)
                 ]
             ),
@@ -249,8 +263,8 @@ class SimMartVaq:
         """Help for the avg_play to return only the default dict."""
         # Set the seed each time, otherwise the simulation will be exactly the same
         np.random.seed()
-        network, rounds, n_groups = tuple_of_variable
-        _, data_collector = self.play(network, rounds, n_groups)
+        network, rounds, n_groups, ith_collect = tuple_of_variable
+        _, data_collector = self.play(network, rounds, n_groups, ith_collect)
         return data_collector
 
     def investigation_stage(

@@ -68,12 +68,13 @@ if args.sim_mart_vaq:
         mutation_prob=1,  # only fermi function
     )
     network, data_collector = simulators.play(
-        network=simulators.network, rounds=100, n_groups=1
+        network=simulators.network, rounds=2000, n_groups=1
     )
 
     ax_0 = plotter.plot_lines(
         dict_data=data_collector,
-        data_to_plot=["ratio_honest", "ratio_wolf", "ratio_criminal"],
+        y_data_to_plot=["ratio_honest", "ratio_wolf", "ratio_criminal"],
+        x_data_to_plot="iteration",
         title="Testing the simulation",
         xlabel="rounds",
         ylabel="ratio",
@@ -99,7 +100,8 @@ if args.sim_mart_vaq:
 
     ax_1 = plotter.plot_lines(
         dict_data=data_collector,
-        data_to_plot=["fitness_honest", "fitness_wolf", "fitness_criminal"],
+        y_data_to_plot=["fitness_honest", "fitness_wolf", "fitness_criminal"],
+        x_data_to_plot="iteration",
         title="Testing the simulation",
         xlabel="rounds",
         ylabel="Average fitness",

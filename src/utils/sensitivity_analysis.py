@@ -83,7 +83,12 @@ class SensitivityAnalyser(ConfigParser):
 
     @save_results
     def sim_mart_vaq_sa(
-        self, output_value: str, n_samples: int, rounds: int, problem: dict = None
+        self,
+        output_value: str,
+        n_samples: int,
+        rounds: int,
+        ith_collect: int,
+        problem: dict = None,
     ) -> Dict[str, List[float]]:
         """Perform a sensitivity analysis on the Martinez-Vaquero model.
 
@@ -106,7 +111,8 @@ class SensitivityAnalyser(ConfigParser):
             problem      (dict): Define which variables to conduct sensitivity analysis
                                     with defining the bounds
             n_samples     (int): Define the size of the search space
-            rounds        (int); Define the number of rounds played in the Simulation
+            rounds        (int): Define the number of rounds played in the Simulation
+            ith_collect   (int): Define the how many nth round to collect data
         """
         # Get the network of criminal first
         meta_sim = MetaSimulator(network_name=self.args.read_data)
@@ -140,7 +146,7 @@ class SensitivityAnalyser(ConfigParser):
             self.sim_mart_vaq_sa_helper,
             (
                 [
-                    (gt_network, problem, params, output_value, rounds)
+                    (gt_network, problem, params, output_value, rounds, ith_collect)
                     for params in param_values
                 ]
             ),
@@ -157,12 +163,21 @@ class SensitivityAnalyser(ConfigParser):
         """Run the simulation Mart-Vaq given the parameter."""
         # Set the seed each time, otherwise the simulation will be exactly the same
         np.random.seed(0)
-        gt_network, problem, params, output_value, rounds = tuple_of_variable
+        (
+            gt_network,
+            problem,
+            params,
+            output_value,
+            rounds,
+            ith_collect,
+        ) = tuple_of_variable
 
         # Unpack input variables
         variable_dict = OrderedDict().fromkeys(problem["names"], 0)
         variable_dict = dict(zip(variable_dict.keys(), params))
 
         simulator = SimMartVaq(network=gt_network, **variable_dict)
-        _, data_collector = simulator.play(network=simulator.network, rounds=rounds)
+        _, data_collector = simulator.play(
+            network=simulator.network, rounds=rounds, ith_collect=ith_collect
+        )
         return data_collector[output_value][-1]

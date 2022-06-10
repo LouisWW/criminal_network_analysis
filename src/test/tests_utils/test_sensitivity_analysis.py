@@ -33,7 +33,11 @@ class TestSensitivityAnalyser:
         sa.args.n_samples = 10
 
         sobol_indices = sa.sim_mart_vaq_sa(
-            output_value="ratio_criminal", n_samples=4, rounds=10, problem=problem
+            output_value="ratio_criminal",
+            n_samples=4,
+            rounds=10,
+            ith_collect=1,
+            problem=problem,
         )
 
         assert any(sobol_indices["S1"]), "List contains only zeros/False"

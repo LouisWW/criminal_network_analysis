@@ -149,7 +149,8 @@ class Plotter(ConfigParser):
     def plot_lines(
         self,
         dict_data: DefaultDict[str, List[int]],
-        data_to_plot: List[str],
+        y_data_to_plot: List[str],
+        x_data_to_plot: str = None,
         *args: str,
         **kwargs: Any,
     ) -> plt.Axes:
@@ -166,18 +167,30 @@ class Plotter(ConfigParser):
         if ax is None:
             ax = plt.gca()
 
-        for data in data_to_plot:
+        for data in y_data_to_plot:
             if data not in dict_data.keys():
-                raise KeyError(f"Given key doens't exist,{dict_data.keys()=}")
-            ax.plot(dict_data[data], label=data)
+                raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
+
+            if x_data_to_plot:
+                ax.plot(dict_data[x_data_to_plot], dict_data[data], label=data)
+            else:
+                ax.plot(dict_data[data], label=data)
             if "plot_std" in kwargs:
                 std = data.replace("mean", "std")
-                ax.fill_between(
-                    range(0, len(dict_data[data])),
-                    np.array(dict_data[data]) - np.array(dict_data[std]),
-                    np.array(dict_data[data]) + np.array(dict_data[std]),
-                    alpha=0.5,
-                )
+                if x_data_to_plot:
+                    ax.fill_between(
+                        dict_data[x_data_to_plot],
+                        np.array(dict_data[data]) - np.array(dict_data[std]),
+                        np.array(dict_data[data]) + np.array(dict_data[std]),
+                        alpha=0.5,
+                    )
+                else:
+                    ax.fill_between(
+                        range(0, len(dict_data[data])),
+                        np.array(dict_data[data]) - np.array(dict_data[std]),
+                        np.array(dict_data[data]) + np.array(dict_data[std]),
+                        alpha=0.5,
+                    )
 
         if "title" in kwargs:
             ax.set_title(kwargs["title"])
