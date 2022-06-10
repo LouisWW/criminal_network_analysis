@@ -262,7 +262,7 @@ class SimMartVaq:
     def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
         """Help for the avg_play to return only the default dict."""
         # Set the seed each time, otherwise the simulation will be exactly the same
-        np.random.seed()
+        random.seed()
         network, rounds, n_groups, ith_collect = tuple_of_variable
         _, data_collector = self.play(network, rounds, n_groups, ith_collect)
         return data_collector
@@ -341,7 +341,7 @@ class SimMartVaq:
 
         Pick a random person, if victimizer is found, penalty is returned
         """
-        random_picked_person = np.random.choice(list(group_members), 1)
+        random_picked_person = random.choice(list(group_members))
         if random_picked_person == slct_pers:
             # Found victimizer
             return penalty_score
@@ -422,7 +422,7 @@ class SimMartVaq:
         elif slct_pers_status == "w":
             # Decide if lone wolf dares to act
             self.wolf_acting = False
-            if np.random.uniform() >= 1 - self.delta * (1 - p_c):
+            if random.random() >= 1 - self.delta * (1 - p_c):
                 self.wolf_acting = True
             # Inflicting damage to everyone but himself
             if self.wolf_acting is True:
@@ -465,8 +465,8 @@ class SimMartVaq:
         person_a = slct_person
         bucket_list = list(group_members)
         bucket_list.remove(person_a)
-        person_b = np.random.choice(bucket_list, 1)[0]
-        if np.random.rand() > self.mutation_prob:
+        person_b = random.choice(bucket_list)
+        if random.random() > self.mutation_prob:
             # Based on the fermi function will check if an interaction will happen
             network = self.interchange_roles(network, person_a, person_b)
         else:
@@ -554,7 +554,7 @@ class SimMartVaq:
         assert (
             min_grp <= max_grp <= network.num_vertices()
         ), "Maximum group number can exceed network size"
-        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+        n_groups = random.randint(min_grp, max_grp + 1)
         logger.debug(f"Number of groups is {n_groups}")
         # Define group_numbers attribute
         # If it already exists it will overwrite it
@@ -658,12 +658,12 @@ class SimMartVaq:
         assert (
             min_grp <= max_grp <= network.num_vertices()
         ), "Maximum group number can exceed network size"
-        n_groups = np.random.randint(low=min_grp, high=max_grp + 1)
+        n_groups = random.randint(min_grp, max_grp + 1)
         logger.debug(f"Number of groups is {n_groups}")
 
         dict_of_groups = {}
         for n in range(1, n_groups + 1):
-            seed = np.random.randint(0, network.num_vertices())
+            seed = random.randint(0, network.num_vertices())
             dict_of_groups[n] = self.select_communities(network, radius, seed)
 
         return dict_of_groups
@@ -708,9 +708,7 @@ class SimMartVaq:
 
     def mutation(self, network: gt.Graph, person: int) -> gt.Graph:
         """Perform mutation on a given individual."""
-        network.vp.state[network.vertex(person)] = np.random.choice(["c", "h", "w"], 1)[
-            0
-        ]
+        network.vp.state[network.vertex(person)] = random.choice(["c", "h", "w"])
         return network
 
     def interchange_roles(
@@ -731,7 +729,7 @@ class SimMartVaq:
     def fermi_function(self, w_j: float, w_i: float) -> bool:
         """Return the probability of changing their role."""
         prob = 1 / (np.exp(-(w_j - w_i) / self.temperature) + 1)
-        if np.random.rand() > prob:
+        if random.random() > prob:
             return False
         else:
             return True
