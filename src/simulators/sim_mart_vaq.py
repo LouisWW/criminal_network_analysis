@@ -34,29 +34,6 @@ logger = logging.getLogger("logger")
 class SimMartVaq:
     """Contain the framework to simulate the process."""
 
-    __slots__ = (
-        "network",
-        "delta",
-        "tau",
-        "gamma",
-        "beta_s",
-        "beta_h",
-        "beta_c",
-        "c_w",
-        "c_c",
-        "r_w",
-        "r_c",
-        "r_h",
-        "temperature",
-        "mutation_prob",
-        "_name",
-        "wolf_acting",
-        "criminal_acting",
-        "ratio_honest",
-        "ratio_wolf",
-        "ratio_criminal",
-    )
-
     def __init__(
         self,
         network: gt.Graph,

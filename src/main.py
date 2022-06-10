@@ -68,7 +68,7 @@ if args.sim_mart_vaq:
         mutation_prob=1,  # only fermi function
     )
     network, data_collector = simulators.play(
-        network=simulators.network, rounds=10000, n_groups=1
+        network=simulators.network, rounds=100, n_groups=1
     )
 
     ax_0 = plotter.plot_lines(
