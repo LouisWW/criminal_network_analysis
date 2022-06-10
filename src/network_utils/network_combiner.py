@@ -24,7 +24,6 @@ class NetworkCombiner:
     ) -> gt.Graph:
         """Apply preferential attachment to a existing network."""
         # Get the number of nodes of the existing network
-        print("Hello")
         for _ in tqdm(
             range(0, new_nodes),
             desc="Adding nodes to existing network using preferential attachment...",
