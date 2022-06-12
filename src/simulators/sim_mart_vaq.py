@@ -11,6 +11,7 @@ import logging
 import math
 import multiprocessing
 import random
+import warnings
 from collections import defaultdict
 from typing import Any
 from typing import DefaultDict
@@ -28,6 +29,8 @@ from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
 from utils.stats import get_mean_std_over_list
 
+# suppress warnings
+warnings.filterwarnings("ignore")
 logger = logging.getLogger("logger")
 
 
@@ -186,7 +189,7 @@ class SimMartVaq:
                 )
 
             # Collect the data
-            if i % ith_collect == 0:
+            if i % ith_collect == 0 or i == 1:
                 _, _, _, p_c, p_h, p_w = self.counting_status_proportions(
                     network=network,
                     group_members=frozenset(range(0, network.num_vertices())),
@@ -699,7 +702,7 @@ class SimMartVaq:
             Dict[int,FrozenSet[int]]: key is the protagonist and value is protagonist + neighbors
         """
         communities = {}
-        protagonists = np.random.randint(network_size, size=n_groups)
+        protagonists = random.sample(range(0, network_size), n_groups)
         for protagonist in protagonists:
             communities[protagonist] = frozenset(
                 [protagonist] + list(network.iter_all_neighbors(protagonist))

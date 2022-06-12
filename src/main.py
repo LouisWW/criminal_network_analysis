@@ -50,25 +50,28 @@ if args.sim_mart_vaq:
     # Add nodes to network
     # First convert to gt
     meta_sim = MetaSimulator(
-        network_name=nx_network.name, ratio_honest=0.9, ratio_wolf=0.01
+        network_name=nx_network.name,
+        ratio_honest=0.9,
+        ratio_wolf=0.01,
+        random_fit_init=True,
     )
 
     simulators = SimMartVaq(
         network=meta_sim.network,
-        delta=-10,  # no acting for wolfs
-        gamma=0.5,
-        tau=0.4,  # no fitness sharing between wolf to criminal
-        beta_s=5000,
-        beta_h=300,
-        beta_c=600,
-        c_c=1,  # no benefits from criminals/ they still act
+        delta=0.7,  # no acting for wolfs
+        gamma=0.8,
+        tau=0.2,  # no fitness sharing between wolf to criminal
+        beta_s=10,
+        beta_h=10,
+        beta_c=10,
+        c_c=4,  # no benefits from criminals/ they still act
         r_c=1,
-        c_w=0.1,
-        r_w=1,
-        mutation_prob=1,  # only fermi function
+        c_w=5,
+        r_w=3,
+        mutation_prob=0.0001,  # only fermi function
     )
     network, data_collector = simulators.play(
-        network=simulators.network, rounds=2000, n_groups=1
+        network=simulators.network, rounds=50000, n_groups=5, ith_collect=5000
     )
 
     ax_0 = plotter.plot_lines(
