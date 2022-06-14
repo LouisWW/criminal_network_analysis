@@ -114,12 +114,14 @@ class SensitivityAnalyser(ConfigParser):
             ith_collect   (int): Define the how many nth round to collect data
         """
         # Get the network of criminal first
-        meta_sim = MetaSimulator(network_name=self.args.read_data)
+        meta_sim = MetaSimulator(
+            network_name=self.args.read_data, ratio_honest=0.9, ratio_wolf=0.01
+        )
         gt_network = meta_sim.network
 
         if problem is None:
             problem = {
-                "num_vars": 6,
+                "num_vars": 11,
                 "names": [
                     "delta",
                     "tau",
@@ -127,14 +129,31 @@ class SensitivityAnalyser(ConfigParser):
                     "beta_s",
                     "beta_h",
                     "beta_c",
+                    "c_w",
+                    "c_c",
+                    "r_w",
+                    "r_c",
+                    "r_c",
                 ],
-                "bounds": [[0, 1], [0, 1], [0, 1], [0, 20], [0, 20], [0, 20]],
+                "bounds": [
+                    [0, 1],
+                    [0, 1],
+                    [0, 1],
+                    [0, 20],
+                    [0, 20],
+                    [0, 20],
+                    [0, 5],
+                    [0, 5],
+                    [0, 5],
+                    [0, 5],
+                    [0, 5],
+                ],
             }
         # sample
         param_values = saltelli.sample(problem, n_samples)
 
         # ((number of loops*rounds/average_time_per_round)/n_threads)/ convert_to_hours
-        approx_running_time = ((len(param_values) * rounds * (45 / 1000)) / 23) / 3600
+        approx_running_time = ((len(param_values) * rounds * (1 / 13000)) / 23) / 3600
         logger.warning(
             f"The sensitivity analysis will take approx {approx_running_time:.2f}h on\
             24 cpus (~ 3.8 GHz))"
