@@ -1,4 +1,5 @@
 """Test if the simulation from Martinez-Vaquero is running correctly."""
+import random
 from copy import deepcopy
 from unittest import main
 
@@ -352,13 +353,13 @@ class TestSimMartVaq:
     def test_slct_pers_n_neighbours(self, create_gt_network: gt.Graph) -> None:
         """Test if the slct_pers_n_neighbours is working correctly."""
         simulators = SimMartVaq(network=create_gt_network)
-        np.random.seed(0)
+        random.seed(0)
         result = simulators.slct_pers_n_neighbours(
             network=simulators.network,
             n_groups=3,
             network_size=simulators.network.num_vertices(),
         )
-        assert list(result.keys())[0] == 4, "Key should be 4 otherwise nxt test fails."
+        assert 4 in list(result.keys()), "Key should be 4 otherwise nxt test fails."
         assert result[4] == {4, 2, 3}, "Selected neighbours is wrong..."
         assert result[0] == {0, 1, 2, 3}, "Selected neighbours is wrong..."
         assert result[3] == {3, 4, 0}, "Selected neighbours is wrong..."
@@ -482,7 +483,7 @@ class TestSimMartVaq:
 
         # What if the criminal is chosen
         # Triggers state and civilian punishment
-        np.random.seed(2)
+        random.seed(2)
         node = 0
         simulators.criminal_acting = True
         network = simulators.investigation_stage(
@@ -500,7 +501,7 @@ class TestSimMartVaq:
         # What if the lone wolf is not chosen
         # Based on the previous fitness resulting from the criminal
         # activity above.
-        np.random.seed(3)
+        random.seed(3)
         node = 3
         # Wolf did act
         simulators.wolf_acting = True
@@ -519,7 +520,7 @@ class TestSimMartVaq:
         # What if the lone wolf is chosen
         # Based on the previous fitness resulting from the criminal
         # activity above.
-        np.random.seed(6)
+        random.seed(6)
         node = 3
         # Wolf did act
         simulators.wolf_acting = True
@@ -538,7 +539,7 @@ class TestSimMartVaq:
         # Check in case multiple criminals are present
         network.vp.state[network.vertex(4)] = "c"
         # Triggers state and civilian punishment
-        np.random.seed(2)
+        random.seed(2)
         node = 0
         network = simulators.investigation_stage(
             simulators.network,
@@ -555,7 +556,7 @@ class TestSimMartVaq:
         # What if the criminal is chosen
         # But didn't act
         # Triggers state and civilian punishment
-        np.random.seed(2)
+        random.seed(2)
         node = 0
         simulators.criminal_acting = False
         network = simulators.investigation_stage(
@@ -575,7 +576,7 @@ class TestSimMartVaq:
         """Test if the fermi function is working correctly."""
         # The given network is just a placeholder
         simulators = SimMartVaq(create_gt_network)
-        np.random.seed(0)
+        random.seed(0)
         assert simulators.fermi_function(40, 3), "Should be True"
         assert simulators.fermi_function(-40.1, 3) is False, "Should be False"
 
@@ -607,7 +608,7 @@ class TestSimMartVaq:
         """Test if the copying role is working."""
         simulators = SimMartVaq(create_gt_network, temperature=10)
         # Seed 2 will trigger that one role is changed
-        np.random.seed(5)
+        random.seed(5)
         network = simulators.interchange_roles(
             network=simulators.network, person_a=0, person_b=4
         )
@@ -624,7 +625,7 @@ class TestSimMartVaq:
         """Test if the mutation works correctly."""
         simulators = SimMartVaq(create_gt_network, temperature=10)
         # The seed should turn nodes into a criminal,honest or wolf
-        np.random.seed(0)
+        random.seed(0)
         node = 4
         network = simulators.mutation(simulators.network, person=node)
         assert (
@@ -649,7 +650,7 @@ class TestSimMartVaq:
         )
         network = simulators.network
         # Need to randomly change the fitness
-        np.random.seed(0)
+        random.seed(0)
         for i in range(0, network.num_vertices()):
             network.vp.fitness[network.vertex(i)] = np.random.randint(0, 200)
 
@@ -660,7 +661,7 @@ class TestSimMartVaq:
         )
         # Check if the players changed status
         # With seed 0, role interchange is triggered
-        np.random.seed(3)
+        random.seed(3)
         protagonist = list(dict_of_communities.keys())[0]
         mbrs = dict_of_communities[protagonist]
         network = simulators.evolutionary_stage(network, protagonist, mbrs)
@@ -676,7 +677,7 @@ class TestSimMartVaq:
 
         # Check if the players changed status
         # With seed 5, mutation is triggered
-        np.random.seed(10)
+        random.seed(10)
         protagonist = list(dict_of_communities.keys())[1]
         mbrs = dict_of_communities[protagonist]
         network = simulators.evolutionary_stage(network, protagonist, mbrs)

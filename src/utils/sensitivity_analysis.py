@@ -56,7 +56,7 @@ class SensitivityAnalyser(ConfigParser):
                 # Get the saving directory
                 # Get directory first
                 path = os.path.dirname(os.path.realpath(__file__))
-                par_dir = os.path.abspath(os.path.join(path))
+                par_dir = os.path.abspath(os.path.join(path, "../"))
                 # par_dir = ../src/
                 savig_dir = par_dir + "/results/data/sensitivity_analysis/"
                 file_name = (
@@ -87,7 +87,6 @@ class SensitivityAnalyser(ConfigParser):
         output_value: str,
         n_samples: int,
         rounds: int,
-        ith_collect: int,
         problem: dict = None,
     ) -> Dict[str, List[float]]:
         """Perform a sensitivity analysis on the Martinez-Vaquero model.
@@ -129,7 +128,7 @@ class SensitivityAnalyser(ConfigParser):
                     "beta_h",
                     "beta_c",
                 ],
-                "bounds": [[0, 1], [0, 1], [0, 1], [0, 200], [0, 200], [0, 200]],
+                "bounds": [[0, 1], [0, 1], [0, 1], [0, 20], [0, 20], [0, 20]],
             }
         # sample
         param_values = saltelli.sample(problem, n_samples)
@@ -146,7 +145,7 @@ class SensitivityAnalyser(ConfigParser):
             self.sim_mart_vaq_sa_helper,
             (
                 [
-                    (gt_network, problem, params, output_value, rounds, ith_collect)
+                    (gt_network, problem, params, output_value, rounds)
                     for params in param_values
                 ]
             ),
@@ -163,14 +162,7 @@ class SensitivityAnalyser(ConfigParser):
         """Run the simulation Mart-Vaq given the parameter."""
         # Set the seed each time, otherwise the simulation will be exactly the same
         np.random.seed(0)
-        (
-            gt_network,
-            problem,
-            params,
-            output_value,
-            rounds,
-            ith_collect,
-        ) = tuple_of_variable
+        (gt_network, problem, params, output_value, rounds) = tuple_of_variable
 
         # Unpack input variables
         variable_dict = OrderedDict().fromkeys(problem["names"], 0)
@@ -178,6 +170,9 @@ class SensitivityAnalyser(ConfigParser):
 
         simulator = SimMartVaq(network=gt_network, **variable_dict)
         _, data_collector = simulator.play(
-            network=simulator.network, rounds=rounds, ith_collect=ith_collect
+            # ith_collect == rounds to collect only at the end
+            network=simulator.network,
+            rounds=rounds,
+            ith_collect=rounds,
         )
         return data_collector[output_value][-1]

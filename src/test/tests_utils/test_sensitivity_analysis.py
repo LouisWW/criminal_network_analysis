@@ -36,7 +36,6 @@ class TestSensitivityAnalyser:
             output_value="ratio_criminal",
             n_samples=4,
             rounds=10,
-            ith_collect=1,
             problem=problem,
         )
 
