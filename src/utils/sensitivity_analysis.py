@@ -75,7 +75,7 @@ class SensitivityAnalyser(ConfigParser):
                 df_list = value.to_df()
                 df = pd.concat([df_list[0], df_list[1], df_list[2]], axis=1)
                 with open(file_name, "w") as fo:
-                    fo.write(df.__repr__())
+                    fo.write(df.to_string())
 
             return value
 
@@ -133,7 +133,7 @@ class SensitivityAnalyser(ConfigParser):
                     "c_c",
                     "r_w",
                     "r_c",
-                    "r_c",
+                    "r_h",
                 ],
                 "bounds": [
                     [0, 1],
@@ -153,7 +153,7 @@ class SensitivityAnalyser(ConfigParser):
         param_values = saltelli.sample(problem, n_samples)
 
         # ((number of loops*rounds/average_time_per_round)/n_threads)/ convert_to_hours
-        approx_running_time = ((len(param_values) * rounds * (1 / 13000)) / 23) / 3600
+        approx_running_time = ((len(param_values) * rounds * (1 / 300)) / 23) / 3600
         logger.warning(
             f"The sensitivity analysis will take approx {approx_running_time:.2f}h on\
             24 cpus (~ 3.8 GHz))"

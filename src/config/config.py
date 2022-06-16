@@ -62,6 +62,13 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "-phase-diag",
+            "--phase-diagram",
+            action="store_true",
+            help="""Creates a phase diagram with the defined parameters.""",
+        )
+
+        parser.add_argument(
             "-n-samples",
             type=int,
             default=15,

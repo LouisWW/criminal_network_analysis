@@ -8,6 +8,7 @@ import datetime
 import logging
 
 import matplotlib.pyplot as plt
+import numpy as np
 from config.config import ConfigParser
 from network_utils.network_reader import NetworkReader
 from PIL import Image
@@ -71,7 +72,7 @@ if args.sim_mart_vaq:
         mutation_prob=0.0001,  # only fermi function
     )
     network, data_collector = simulators.play(
-        network=simulators.network, rounds=50000, n_groups=5, ith_collect=5000
+        network=simulators.network, rounds=50000, n_groups=1, ith_collect=50000
     )
 
     ax_0 = plotter.plot_lines(
@@ -128,3 +129,67 @@ if args.sensitivity_analysis:
             n_samples=args.n_samples,
             rounds=args.rounds,
         )
+
+if args.phase_diagram:
+    parameter_dict = {
+        1: "beta_s",
+        2: "beta_h",
+        3: "beta_c",
+        4: "delta",
+        5: "gamma",
+        6: "tau",
+    }
+
+    print("Which parameters to test? Please give a number:")
+    for k, v in parameter_dict.items():
+
+        print(f"{k:<2}|{v:<15}")
+    param_1 = input("Parameter 1:")
+    param_2 = input("Parameter 2:")
+
+    assert param_1 != param_2, " Parameter can't be the same!"
+    # create a mesh grid
+    nx, ny = (5, 5)
+    x = np.linspace(0, 10, nx)
+    y = np.linspace(0, 10, ny)
+    grid = np.empty((nx, ny), dtype=object)
+
+    # init simulation
+    # Add nodes to network
+    # First convert to gt
+    # Get actual criminal network
+    nx_network = NetworkReader().get_data(args.read_data)
+    logger.info(f"The data used is {nx_network.name}")
+
+    meta_sim = MetaSimulator(
+        network_name=nx_network.name,
+        ratio_honest=0.9,
+        ratio_wolf=0.01,
+        random_fit_init=True,
+    )
+    for x_i in range(0, nx):
+        for y_i in range(0, ny):
+            variable_dict = dict(
+                zip(
+                    [parameter_dict[int(param_1)], parameter_dict[int(param_2)]],
+                    [x_i, y_i],
+                )
+            )
+            simulators = SimMartVaq(
+                network=meta_sim.network,
+                **variable_dict,
+                mutation_prob=0.0001,  # only fermi function
+            )
+            network, data_collector = simulators.play(
+                network=simulators.network, rounds=3000, n_groups=1, ith_collect=3000
+            )
+
+            # Only look at the ratio and get the status with the highest ratio at the end
+            filtered_dict = {
+                k: v
+                for k, v in data_collector.items()
+                if k in ["ratio_criminal", "ratio_wolf", "ratio_honest"]
+            }
+            grid[x_i, y_i] = max(filtered_dict, key=lambda x: filtered_dict[x][-1])
+
+            plotter.plot_meshgrid()
