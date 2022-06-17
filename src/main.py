@@ -132,12 +132,12 @@ if args.sensitivity_analysis:
 
 if args.phase_diagram:
     parameter_dict = {
-        1: "beta_s",
-        2: "beta_h",
-        3: "beta_c",
-        4: "delta",
-        5: "gamma",
-        6: "tau",
+        "1": "beta_s",
+        "2": "beta_h",
+        "3": "beta_c",
+        "4": "delta",
+        "5": "gamma",
+        "6": "tau",
     }
 
     print("Which parameters to test? Please give a number:")
@@ -149,9 +149,9 @@ if args.phase_diagram:
 
     assert param_1 != param_2, " Parameter can't be the same!"
     # create a mesh grid
-    nx, ny = (5, 5)
-    x = np.linspace(0, 10, nx)
-    y = np.linspace(0, 10, ny)
+    nx, ny = (10, 10)
+    x_range = np.linspace(0, 20, nx)
+    y_range = np.linspace(0, 20, ny)
     grid = np.empty((nx, ny), dtype=object)
 
     # init simulation
@@ -171,8 +171,8 @@ if args.phase_diagram:
         for y_i in range(0, ny):
             variable_dict = dict(
                 zip(
-                    [parameter_dict[int(param_1)], parameter_dict[int(param_2)]],
-                    [x_i, y_i],
+                    [parameter_dict[param_1], parameter_dict[param_2]],
+                    [x_range[x_i], y_range[y_i]],
                 )
             )
             simulators = SimMartVaq(
@@ -190,6 +190,9 @@ if args.phase_diagram:
                 for k, v in data_collector.items()
                 if k in ["ratio_criminal", "ratio_wolf", "ratio_honest"]
             }
+            print(max(filtered_dict, key=lambda x: filtered_dict[x][-1]))
             grid[x_i, y_i] = max(filtered_dict, key=lambda x: filtered_dict[x][-1])
 
-            plotter.plot_meshgrid()
+    plotter.plot_phase_diag(
+        grid, x_range, y_range, parameter_dict[param_1], parameter_dict[param_2]
+    )

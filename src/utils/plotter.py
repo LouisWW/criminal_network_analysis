@@ -13,6 +13,7 @@ from typing import List
 
 import graph_tool.all as gt
 import matplotlib as mpl
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import powerlaw
@@ -239,3 +240,61 @@ class Plotter(ConfigParser):
         # set legend
         ax.legend()
         return ax
+
+    def plot_phase_diag(
+        self,
+        grid: np.ndarray,
+        x_range: np.ndarray,
+        y_range: np.ndarray,
+        param1: str,
+        param2: str,
+    ) -> plt.Axes:
+        """Generate a phase diagram of param1 and param2.
+
+        The colors correspond to the dominant status at the end of the run
+
+        Args:
+            grid (np.ndarray): 2-d array containing the dominant status for
+                                    each combination of param1 and param2
+            x_range (np.ndarray) : range of x
+            y_range (np.ndarray) : range of
+            param1 (str): parameter 1 of the model
+            parma2 (str): parameter 2 of the model
+
+        Returns:
+            plt.Axes: phase diagram figure
+        """
+        # translate array into rgb code
+        rgb_array = np.zeros((grid.shape[0], grid.shape[1], 3), dtype=int)
+        for x_i in range(0, grid.shape[0]):
+            for y_i in range(0, grid.shape[1]):
+                if grid[x_i, y_i] == "ratio_criminal":
+                    rgb_array[x_i, y_i, 0] = 255
+                    rgb_array[x_i, y_i, 1] = 0
+                    rgb_array[x_i, y_i, 2] = 0
+                elif grid[x_i, y_i] == "ratio_wolf":
+                    rgb_array[x_i, y_i, 0] = 0
+                    rgb_array[x_i, y_i, 1] = 0
+                    rgb_array[x_i, y_i, 2] = 255
+                elif grid[x_i, y_i] == "ratio_honest":
+                    rgb_array[x_i, y_i, 0] = 0
+                    rgb_array[x_i, y_i, 1] = 255
+                    rgb_array[x_i, y_i, 2] = 0
+
+        print(grid)
+        print(rgb_array)
+        _, ax = plt.subplots()
+        ax.imshow(
+            rgb_array, extent=[min(x_range), max(x_range), min(y_range), max(y_range)]
+        )
+
+        cmap = {1: [1, 0, 0, 1], 3: [0, 1, 0, 1], 2: [0, 0, 1, 1]}
+        labels = {1: "criminal", 3: "lone wolf", 2: "honest"}
+        # create patches as legend
+        patches = [mpatches.Patch(color=cmap[i], label=labels[i]) for i in cmap]
+
+        ax.set_xlabel(param1)
+        ax.set_ylabel(param2)
+        ax.set_title("Phase diagram")
+        plt.legend(handles=patches)
+        plt.show()
