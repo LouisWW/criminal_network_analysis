@@ -150,8 +150,8 @@ if args.phase_diagram:
     assert param_1 != param_2, " Parameter can't be the same!"
     # create a mesh grid
     nx, ny = (10, 10)
-    x_range = np.linspace(0, 20, nx)
-    y_range = np.linspace(0, 20, ny)
+    x_range = np.linspace(0, 30, nx)
+    y_range = np.linspace(0, 30, ny)
     grid = np.empty((nx, ny), dtype=object)
 
     # init simulation

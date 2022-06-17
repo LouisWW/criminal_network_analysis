@@ -285,11 +285,11 @@ class Plotter(ConfigParser):
         print(rgb_array)
         _, ax = plt.subplots()
         ax.imshow(
-            rgb_array, extent=[min(x_range), max(x_range), min(y_range), max(y_range)]
+            rgb_array, extent=[min(x_range), max(x_range), max(y_range), min(y_range)]
         )
 
         cmap = {1: [1, 0, 0, 1], 3: [0, 1, 0, 1], 2: [0, 0, 1, 1]}
-        labels = {1: "criminal", 3: "lone wolf", 2: "honest"}
+        labels = {1: "criminal", 2: "lone wolf", 3: "honest"}
         # create patches as legend
         patches = [mpatches.Patch(color=cmap[i], label=labels[i]) for i in cmap]
 
