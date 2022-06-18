@@ -33,7 +33,7 @@ class Plotter(ConfigParser):
         plt.rcParams["figure.autolayout"] = True
 
         # Change the default color list
-        mpl.rcParams["axes.prop_cycle"] = cycler(color="krbgmyc")
+        mpl.rcParams["axes.prop_cycle"] = cycler(color="gbrgmyc")
         mpl.rcParams["figure.dpi"] = 100
         mpl.rcParams["savefig.dpi"] = 300
 

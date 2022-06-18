@@ -54,25 +54,31 @@ if args.sim_mart_vaq:
         network_name=nx_network.name,
         ratio_honest=0.9,
         ratio_wolf=0.01,
-        random_fit_init=True,
+        random_fit_init=False,
     )
 
     simulators = SimMartVaq(
         network=meta_sim.network,
         delta=0.7,  # no acting for wolfs
         gamma=0.8,
-        tau=0.2,  # no fitness sharing between wolf to criminal
-        beta_s=10,
-        beta_h=10,
-        beta_c=10,
-        c_c=4,  # no benefits from criminals/ they still act
+        tau=0.1,  # no fitness sharing between wolf to criminal
+        beta_s=5,
+        beta_h=5,
+        beta_c=2,
+        c_c=1,  # no benefits from criminals/ they still act
         r_c=1,
-        c_w=5,
-        r_w=3,
+        c_w=1,
+        r_w=1,
+        r_h=1,
+        temperature=10,
         mutation_prob=0.0001,  # only fermi function
     )
-    network, data_collector = simulators.play(
-        network=simulators.network, rounds=50000, n_groups=1, ith_collect=50000
+    data_collector = simulators.avg_play(
+        network=simulators.network,
+        rounds=10000,
+        n_groups=1,
+        ith_collect=1000,
+        repetition=5,
     )
 
     ax_0 = plotter.plot_lines(
@@ -82,6 +88,7 @@ if args.sim_mart_vaq:
         title="Testing the simulation",
         xlabel="rounds",
         ylabel="ratio",
+        plot_std=True,
     )
 
     e = datetime.datetime.now()
@@ -95,12 +102,15 @@ if args.sim_mart_vaq:
     meta = PngImagePlugin.PngInfo()
     for x in simulators_str_dict:
         meta.add_text(x, simulators_str_dict[x])
+
     if args.save:
         fig_name = plotter.savig_dir + "population_ration_" + timestamp + ".png"
         plt.savefig(fig_name, dpi=300)
         # Add the meta data to it
         im = Image.open(fig_name)
         im.save(fig_name, "png", pnginfo=meta)
+    else:
+        plt.show()
 
     ax_1 = plotter.plot_lines(
         dict_data=data_collector,
@@ -117,6 +127,8 @@ if args.sim_mart_vaq:
         # Add the meta to it
         im = Image.open(fig_name)
         im.save(fig_name, "png", pnginfo=meta)
+    else:
+        plt.show()
 
 if args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
@@ -149,9 +161,9 @@ if args.phase_diagram:
 
     assert param_1 != param_2, " Parameter can't be the same!"
     # create a mesh grid
-    nx, ny = (10, 10)
-    x_range = np.linspace(0, 30, nx)
-    y_range = np.linspace(0, 30, ny)
+    nx, ny = (15, 15)
+    x_range = np.linspace(0, 1, nx)
+    y_range = np.linspace(0, 1, ny)
     grid = np.empty((nx, ny), dtype=object)
 
     # init simulation
