@@ -29,13 +29,22 @@ class Plotter(ConfigParser):
         super().__init__()
 
         # Making sure all the plots have the same parameters
+        # plt.style.use('ggplot')
         plt.rcParams["figure.figsize"] = (5, 4)
         plt.rcParams["figure.autolayout"] = True
+        plt.rcParams["xtick.direction"] = "in"
+        plt.rcParams["ytick.direction"] = "in"
+        plt.rcParams["xtick.major.size"] = 5.0
+        plt.rcParams["xtick.minor.size"] = 3.0
+        plt.rcParams["ytick.major.size"] = 5.0
+        plt.rcParams["ytick.minor.size"] = 3.0
 
         # Change the default color list
         mpl.rcParams["axes.prop_cycle"] = cycler(color="gbrgmyc")
         mpl.rcParams["figure.dpi"] = 100
         mpl.rcParams["savefig.dpi"] = 300
+        mpl.rcParams["axes.spines.top"] = False
+        mpl.rcParams["axes.spines.right"] = False
 
         path = os.path.dirname(os.path.realpath(__file__))
         par_dir = os.path.abspath(os.path.join(path, "../"))
@@ -125,6 +134,7 @@ class Plotter(ConfigParser):
         ax.legend()
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
+        plt.tight_layout()
 
         return ax
 
