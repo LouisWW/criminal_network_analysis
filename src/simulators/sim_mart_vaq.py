@@ -42,13 +42,13 @@ class SimMartVaq:
         network: gt.Graph,
         delta: float = 0.7,
         tau: float = 0.8,
-        gamma: float = 0.2,
-        beta_s: int = 10,
-        beta_h: int = 10,
-        beta_c: int = 10,
-        c_w: int = 5,
-        c_c: int = 4,
-        r_w: int = 3,
+        gamma: float = 0.1,
+        beta_s: int = 5,
+        beta_h: int = 5,
+        beta_c: int = 5,
+        c_w: int = 1,
+        c_c: int = 1,
+        r_w: int = 1,
         r_c: int = 1,
         r_h: int = 1,
         temperature: float = 10,
@@ -58,21 +58,22 @@ class SimMartVaq:
 
         Args:
             network (gt.Graph): Initial criminal network
-            delta (int, optional): Influence of criminals on the acting of the wolf. Defaults to 0.
-            tau (int, optional):Influence of the wolf's action on criminals. Defaults to 0.
+            delta (int, optional): Influence of criminals on the acting of the wolf.
+                                   Defaults to 0.7.
+            tau (int, optional):Influence of the wolf's action on criminals. Defaults to 0.8.
             gamma (float, optional): Punishment ratio for the other members of the criminal
-                                                                    organization. Defaults to 0.5.
-            beta_s (int, optional): State punishment value. Defaults to 0.
-            beta_h (int, optional): Civil punishment value. Defaults to 10.
-            beta_c (int, optional): Criminal punishment value. Defaults to 400.
+                                                                    organization. Defaults to 0.1.
+            beta_s (int, optional): State punishment value. Defaults to 5.
+            beta_h (int, optional): Civil punishment value. Defaults to 5.
+            beta_c (int, optional): Criminal punishment value. Defaults to 5.
             c_w (int, optional): Damage caused by wolf. Defaults to 1.
             c_c (int, optional): Damage caused by criminal. Defaults to 1.
             r_w (int, optional): Reward ratio for wolf. Defaults to 1.
             r_c (int, optional): Reward ratio for criminal. Defaults to 1.
-            r_h (int, optional): Bonus ratio for honest. Defaults to 0.
+            r_h (int, optional): Bonus ratio for honest. Defaults to 1.
             temperature (int, optional): Temperature used in the fermi function. Defaults to 10.
             mutation_prob (float, optional): Mutation probability to either randomly pick a
-                                new state or switch state with an other agent. Defaults to 0.3.
+                                new state or switch state with an other agent. Defaults to 0.0001.
         """
         # Define name of simulator
         self._name = "sim_mart_vaq"

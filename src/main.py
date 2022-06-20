@@ -62,9 +62,9 @@ if args.sim_mart_vaq:
         delta=0.7,  # no acting for wolfs
         gamma=0.8,
         tau=0.1,  # no fitness sharing between wolf to criminal
-        beta_s=5,
-        beta_h=5,
-        beta_c=2,
+        beta_s=1.5,
+        beta_h=1.5,
+        beta_c=1.5,
         c_c=1,  # no benefits from criminals/ they still act
         r_c=1,
         c_w=1,
@@ -75,19 +75,18 @@ if args.sim_mart_vaq:
     )
     data_collector = simulators.avg_play(
         network=simulators.network,
-        rounds=10000,
+        rounds=20000,
         n_groups=1,
-        ith_collect=1000,
+        ith_collect=2000,
         repetition=5,
     )
 
     ax_0 = plotter.plot_lines(
         dict_data=data_collector,
-        y_data_to_plot=["ratio_honest", "ratio_wolf", "ratio_criminal"],
-        x_data_to_plot="iteration",
-        title="Testing the simulation",
-        xlabel="rounds",
-        ylabel="ratio",
+        y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
+        x_data_to_plot="mean_iteration",
+        xlabel="Rounds",
+        ylabel="Ratio",
         plot_std=True,
     )
 
@@ -114,10 +113,13 @@ if args.sim_mart_vaq:
 
     ax_1 = plotter.plot_lines(
         dict_data=data_collector,
-        y_data_to_plot=["fitness_honest", "fitness_wolf", "fitness_criminal"],
-        x_data_to_plot="iteration",
-        title="Testing the simulation",
-        xlabel="rounds",
+        y_data_to_plot=[
+            "mean_fitness_honest",
+            "mean_fitness_wolf",
+            "mean_fitness_criminal",
+        ],
+        x_data_to_plot="mean_iteration",
+        xlabel="Rounds",
         ylabel="Average fitness",
     )
 
