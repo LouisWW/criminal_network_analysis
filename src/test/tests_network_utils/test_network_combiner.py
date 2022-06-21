@@ -40,6 +40,24 @@ class TestNetworkCombiner:
         if network_stats.check_if_powerlaw(node_degree_dist)[0] is False:
             warnings.warn("Network should be scale-free")
 
+    @pytest.mark.essential
+    def test_combine_by_random_attachment(self) -> None:
+        """Test if the random attachment is working."""
+        n_nodes_to_add = 100
+        network = NetworkReader().read_cunha()
+        org_network_size = network.number_of_nodes()
+        gt_network = NetworkConverter.nx_to_gt(network)
+
+        new_gt_network = NetworkCombiner.combine_by_random_attachment_faster(
+            gt_network, n_nodes_to_add, 0.5
+        )
+        assert isinstance(new_gt_network, gt.Graph), "Network wasn't created properly"
+
+        # New network should have 100 new nodes
+        assert (
+            new_gt_network.num_vertices() == org_network_size + n_nodes_to_add
+        ), "Number of new nodes is not correct!"
+
 
 if __name__ == "__main__":
     main()

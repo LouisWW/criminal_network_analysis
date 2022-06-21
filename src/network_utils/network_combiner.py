@@ -5,7 +5,9 @@ __date__   = 6/02/2022
 """
 import graph_tool.all as gt
 import numpy as np
+import random
 from tqdm import tqdm
+import itertools
 
 
 class NetworkCombiner:
@@ -46,3 +48,28 @@ class NetworkCombiner:
             for new_e in new_edges:
                 network.add_edge(network.vertex(network.num_vertices() - 1), new_e)
         return network
+    
+        
+    @staticmethod
+    def combine_by_random_attachment_faster(network: gt.Graph, new_nodes: int,prob:float) -> gt.Graph:
+        """Generate a Erdös-Rény Random Network around the given network.
+        
+        The code is based on the pseudo-code described in 
+        https://www.frontiersin.org/articles/10.3389/fncom.2011.00011/full
+        """
+        # Add new nodes
+        network.add_vertex(n=new_nodes)
+        n_number_of_nodes=network.num_vertices()
+        random_number_list = np.random.rand(((n_number_of_nodes-new_nodes)*new_nodes)+
+                                            (int((new_nodes*(new_nodes+1))/2)))
+        accepted_edges_idx = len(np.argwhere(random_number_list<prob))
+        possible_edge_list = list(itertools.product(range(0,n_number_of_nodes-new_nodes), range(n_number_of_nodes-new_nodes,n_number_of_nodes)))+\
+        list(itertools.combinations(range(n_number_of_nodes-new_nodes,n_number_of_nodes),2))
+
+        network.add_edge_list(random.sample(possible_edge_list, k=accepted_edges_idx))
+        return network
+                
+
+        
+        
+        
