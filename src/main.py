@@ -215,7 +215,6 @@ if args.phase_diagram:
             }
 
             grid[x_i, y_i] = max(filtered_dict, key=lambda x: filtered_dict[x][-1])
-            print(grid[x_i, y_i])
 
     ax = plotter.plot_phase_diag(
         grid, x_range, y_range, parameter_dict[param_x], parameter_dict[param_y]
