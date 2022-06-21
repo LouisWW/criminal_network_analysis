@@ -38,6 +38,10 @@ class Plotter(ConfigParser):
         plt.rcParams["xtick.minor.size"] = 3.0
         plt.rcParams["ytick.major.size"] = 5.0
         plt.rcParams["ytick.minor.size"] = 3.0
+        plt.rcParams["axes.labelsize"] = "x-large"
+        plt.rcParams["axes.titlesize"] = "x-large"
+        plt.rcParams["xtick.labelsize"] = "x-large"
+        plt.rcParams["ytick.labelsize"] = "x-large"
 
         # Change the default color list
         mpl.rcParams["axes.prop_cycle"] = cycler(color="gbrgmyc")
@@ -256,8 +260,8 @@ class Plotter(ConfigParser):
         grid: np.ndarray,
         x_range: np.ndarray,
         y_range: np.ndarray,
-        param1: str,
-        param2: str,
+        param_x: str,
+        param_y: str,
     ) -> plt.Axes:
         """Generate a phase diagram of param1 and param2.
 
@@ -268,8 +272,8 @@ class Plotter(ConfigParser):
                                     each combination of param1 and param2
             x_range (np.ndarray) : range of x
             y_range (np.ndarray) : range of
-            param1 (str): parameter 1 of the model
-            parma2 (str): parameter 2 of the model
+            param_x (str): parameter x of the model
+            parma_y (str): parameter y of the model
 
         Returns:
             plt.Axes: phase diagram figure
@@ -278,33 +282,36 @@ class Plotter(ConfigParser):
         rgb_array = np.zeros((grid.shape[0], grid.shape[1], 3), dtype=int)
         for x_i in range(0, grid.shape[0]):
             for y_i in range(0, grid.shape[1]):
-                if grid[x_i, y_i] == "ratio_criminal":
+                if grid[x_i, y_i] == "mean_ratio_criminal":
                     rgb_array[x_i, y_i, 0] = 255
                     rgb_array[x_i, y_i, 1] = 0
                     rgb_array[x_i, y_i, 2] = 0
-                elif grid[x_i, y_i] == "ratio_wolf":
+                elif grid[x_i, y_i] == "mean_ratio_wolf":
                     rgb_array[x_i, y_i, 0] = 0
                     rgb_array[x_i, y_i, 1] = 0
                     rgb_array[x_i, y_i, 2] = 255
-                elif grid[x_i, y_i] == "ratio_honest":
+                elif grid[x_i, y_i] == "mean_ratio_honest":
                     rgb_array[x_i, y_i, 0] = 0
                     rgb_array[x_i, y_i, 1] = 255
                     rgb_array[x_i, y_i, 2] = 0
 
-        print(grid)
-        print(rgb_array)
         _, ax = plt.subplots()
         ax.imshow(
-            rgb_array, extent=[min(x_range), max(x_range), max(y_range), min(y_range)]
+            rgb_array, extent=[min(y_range), max(y_range), max(x_range), min(x_range)]
         )
 
         cmap = {1: [1, 0, 0, 1], 3: [0, 1, 0, 1], 2: [0, 0, 1, 1]}
         labels = {1: "criminal", 2: "lone wolf", 3: "honest"}
         # create patches as legend
         patches = [mpatches.Patch(color=cmap[i], label=labels[i]) for i in cmap]
-
-        ax.set_xlabel(param1)
-        ax.set_ylabel(param2)
-        ax.set_title("Phase diagram")
         plt.legend(handles=patches)
-        plt.show()
+
+        # Add the \ to the param to print it in latex format
+        if param_x in ["beata_c", "beta_s", "beta_h", "delta", "tau", "gamma"]:
+            param_x = "\\" + param_x
+        if param_y in ["beata_c", "beta_s", "beta_h", "delta", "tau", "gamma"]:
+            param_y = "\\" + param_y
+
+        ax.set_xlabel(fr"${param_y}$")
+        ax.set_ylabel(fr"${param_x}$")
+        return ax

@@ -52,8 +52,8 @@ if args.sim_mart_vaq:
     # First convert to gt
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
-        ratio_honest=0.9,
-        ratio_wolf=0.01,
+        ratio_honest=0.33,
+        ratio_wolf=0.33,
         random_fit_init=False,
     )
 
@@ -62,13 +62,13 @@ if args.sim_mart_vaq:
         delta=0.7,  # no acting for wolfs
         gamma=0.8,
         tau=0.1,  # no fitness sharing between wolf to criminal
-        beta_s=1.5,
-        beta_h=1.5,
-        beta_c=1.5,
+        beta_s=5,
+        beta_h=5,
+        beta_c=5,
         c_c=1,  # no benefits from criminals/ they still act
-        r_c=1,
+        r_c=0,
         c_w=1,
-        r_w=1,
+        r_w=15,
         r_h=1,
         temperature=10,
         mutation_prob=0.0001,  # only fermi function
@@ -152,20 +152,25 @@ if args.phase_diagram:
         "4": "delta",
         "5": "gamma",
         "6": "tau",
+        "7": "r_w",
+        "8": "r_c",
     }
 
     print("Which parameters to test? Please give a number:")
     for k, v in parameter_dict.items():
-
         print(f"{k:<2}|{v:<15}")
-    param_1 = input("Parameter 1:")
-    param_2 = input("Parameter 2:")
+    param_x = input("Parameter 1:\n")
+    param_y = input("Parameter 2:\n")
+    x_input = input("Range of parameter 1:  example: 0,5\n")
+    x_input_tpl = tuple(int(x) for x in x_input.split(","))
+    y_input = input("Range of parameter 2:  example: 0,5\n")
+    y_input_tpl = tuple(int(x) for x in y_input.split(","))
 
-    assert param_1 != param_2, " Parameter can't be the same!"
+    assert param_x != param_y, " Parameter can't be the same!"
     # create a mesh grid
-    nx, ny = (15, 15)
-    x_range = np.linspace(0, 1, nx)
-    y_range = np.linspace(0, 1, ny)
+    nx, ny = (10, 10)
+    x_range = np.linspace(x_input_tpl[0], x_input_tpl[1], nx)
+    y_range = np.linspace(y_input_tpl[0], y_input_tpl[1], ny)
     grid = np.empty((nx, ny), dtype=object)
 
     # init simulation
@@ -177,15 +182,15 @@ if args.phase_diagram:
 
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
-        ratio_honest=0.9,
-        ratio_wolf=0.01,
-        random_fit_init=True,
+        ratio_honest=0.33,
+        ratio_wolf=0.33,
+        random_fit_init=False,
     )
     for x_i in range(0, nx):
         for y_i in range(0, ny):
             variable_dict = dict(
                 zip(
-                    [parameter_dict[param_1], parameter_dict[param_2]],
+                    [parameter_dict[param_x], parameter_dict[param_y]],
                     [x_range[x_i], y_range[y_i]],
                 )
             )
@@ -194,19 +199,54 @@ if args.phase_diagram:
                 **variable_dict,
                 mutation_prob=0.0001,  # only fermi function
             )
-            network, data_collector = simulators.play(
-                network=simulators.network, rounds=3000, n_groups=1, ith_collect=3000
+            data_collector = simulators.avg_play(
+                network=simulators.network,
+                rounds=7500,
+                n_groups=1,
+                ith_collect=7500,
+                repetition=5,
             )
 
             # Only look at the ratio and get the status with the highest ratio at the end
             filtered_dict = {
                 k: v
                 for k, v in data_collector.items()
-                if k in ["ratio_criminal", "ratio_wolf", "ratio_honest"]
+                if k in ["mean_ratio_criminal", "mean_ratio_wolf", "mean_ratio_honest"]
             }
-            print(max(filtered_dict, key=lambda x: filtered_dict[x][-1]))
-            grid[x_i, y_i] = max(filtered_dict, key=lambda x: filtered_dict[x][-1])
 
-    plotter.plot_phase_diag(
-        grid, x_range, y_range, parameter_dict[param_1], parameter_dict[param_2]
+            grid[x_i, y_i] = max(filtered_dict, key=lambda x: filtered_dict[x][-1])
+            print(grid[x_i, y_i])
+
+    ax = plotter.plot_phase_diag(
+        grid, x_range, y_range, parameter_dict[param_x], parameter_dict[param_y]
     )
+
+    if args.save:
+        e = datetime.datetime.now()
+        timestamp = e.strftime("%d-%m-%Y-%H-%M")
+        simulators_str_dict = dict(
+            {str(key): str(value) for key, value in simulators.__dict__.items()}
+        )
+        meta_str_sim = dict(
+            {str(key): str(value) for key, value in meta_sim.__dict__.items()}
+        )
+        meta = PngImagePlugin.PngInfo()
+        for x in simulators_str_dict:
+            meta.add_text(x, simulators_str_dict[x])
+
+        fig_name = (
+            plotter.savig_dir
+            + "phase_diag_"
+            + param_x
+            + "_"
+            + param_y
+            + "_"
+            + timestamp
+            + ".png"
+        )
+        plt.savefig(fig_name, dpi=300)
+        # Add the meta to it
+        im = Image.open(fig_name)
+        im.save(fig_name, "png", pnginfo=meta)
+    else:
+        plt.show()
