@@ -41,7 +41,7 @@ class TestNetworkCombiner:
             warnings.warn("Network should be scale-free")
 
     @pytest.mark.essential
-    def test_combine_by_random_attachment(self) -> None:
+    def test_combine_by_random_attachment_faster(self) -> None:
         """Test if the random attachment is working."""
         n_nodes_to_add = 100
         network = NetworkReader().read_cunha()
