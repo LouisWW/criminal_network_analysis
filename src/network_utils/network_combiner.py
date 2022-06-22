@@ -5,6 +5,9 @@ __date__   = 6/02/2022
 """
 import graph_tool.all as gt
 import numpy as np
+from network_utils.network_combiner_helper_c import (
+    combine_by_small_world_attachment_helper,
+)
 from network_utils.network_combiner_helper_c import random_attachment_c
 from tqdm import tqdm
 
@@ -62,4 +65,23 @@ class NetworkCombiner:
         n_number_of_nodes = network.num_vertices()
         accepted_edges = random_attachment_c(n_number_of_nodes, new_nodes, prob)
         network.add_edge_list(accepted_edges)
+        return network
+
+    @staticmethod
+    def combine_by_small_world_attachment(
+        network: gt.Graph, new_nodes: int, k: int, prob: float
+    ) -> gt.Graph:
+        """Generate a Watts-Strogatz Smal-World Network.
+
+        The code is based on the pseudo-code described in
+        https://www.frontiersin.org/articles/10.3389/fncom.2011.00011/full
+        """
+        # Add new nodes
+        network.add_vertex(n=new_nodes)
+        n_number_of_nodes = network.num_vertices()
+        accepted_edges = combine_by_small_world_attachment_helper(
+            n_number_of_nodes, new_nodes, k, prob
+        )
+        network.add_edge_list(accepted_edges)
+        network.remove_vertex(network.vertex(network.num_vertices() - 1))
         return network
