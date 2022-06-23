@@ -79,7 +79,7 @@ class NetworkCombiner:
         # Add new nodes
         network.add_vertex(n=new_nodes)
         n_number_of_nodes = network.num_vertices()
-        assert k <= n_number_of_nodes, "k << netowrk_size"
+        assert 4 <= k <= n_number_of_nodes, "4 << k << netowrk_size"
         accepted_edges = combine_by_small_world_attachment_helper(
             n_number_of_nodes, new_nodes, k, prob
         )
