@@ -71,7 +71,7 @@ class NetworkCombiner:
     def combine_by_small_world_attachment(
         network: gt.Graph, new_nodes: int, k: int, prob: float
     ) -> gt.Graph:
-        """Generate a Watts-Strogatz Smal-World Network.
+        """Generate a Watts-Strogatz Small-World Network.
 
         The code is based on the pseudo-code described in
         https://www.frontiersin.org/articles/10.3389/fncom.2011.00011/full
@@ -79,9 +79,9 @@ class NetworkCombiner:
         # Add new nodes
         network.add_vertex(n=new_nodes)
         n_number_of_nodes = network.num_vertices()
+        assert k <= n_number_of_nodes, "k << netowrk_size"
         accepted_edges = combine_by_small_world_attachment_helper(
             n_number_of_nodes, new_nodes, k, prob
         )
         network.add_edge_list(accepted_edges)
-        network.remove_vertex(network.vertex(network.num_vertices() - 1))
         return network
