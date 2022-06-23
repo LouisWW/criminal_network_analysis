@@ -95,7 +95,9 @@ class Plotter(ConfigParser):
             gt.graph_draw(
                 network,
                 pos=pos,
-                output=f"{self.savig_dir}{network.graph_properties.name}.png",
+                output=f"{self.savig_dir}{network.graph_properties.name}.png"
+                if self.args.save
+                else None,
             )
 
         elif self.args.draw_network == "n" and color_vertex_property is not None:
@@ -108,7 +110,9 @@ class Plotter(ConfigParser):
                 network,
                 pos=pos,
                 vertex_fill_color=network.vertex_properties[color_vertex_property],
-                output=f"{self.savig_dir}{network.graph_properties.name}.png",
+                output=f"{self.savig_dir}{network.graph_properties.name}.png"
+                if self.args.save
+                else None,
             )
 
     def plot_log_log(self, data: List[float], x_label: str, y_label: str) -> plt.Axes:
