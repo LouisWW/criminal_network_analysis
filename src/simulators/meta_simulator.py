@@ -22,14 +22,17 @@ logger = logging.getLogger("logger")
 
 
 class MetaSimulator:
-    """Encapsule all the simulators and perpares the network."""
+    """Encapsule all the simulators and prepares the network."""
 
     def __init__(
         self,
         network_name: str,
+        attachment_method: str,
         ratio_honest: float = 0.7,
         ratio_wolf: float = 0.1,
         n_new_edges: int = 2,
+        k: int = 10,
+        prob: float = 0.4,
         random_fit_init: bool = False,
     ) -> None:
         """Define the ratio of honest and criminals.
@@ -44,6 +47,7 @@ class MetaSimulator:
         """
         # Define name of simulator
         self._name = "meta_simulator"
+        self.attachment_method = attachment_method
 
         # Check if data is coherent
         assert 0 < ratio_honest < 1, "Ratio needs to be (0,1)"
@@ -67,7 +71,7 @@ class MetaSimulator:
         ) = self.compute_the_ratio(self.n_criminal)
 
         # Add the new nodes
-        self.network = self.initialise_network(self.network, n_new_edges)
+        self.network = self.initialise_network(self.network, n_new_edges, prob, k)
 
         # Init fitness
         self.network = self.init_fitness(self.network, random_fit_init)
@@ -109,15 +113,30 @@ class MetaSimulator:
         relative_ratio_wolf = 1 - relative_ratio_honest
         return new_nodes, total_number_nodes, relative_ratio_honest, relative_ratio_wolf
 
-    def initialise_network(self, network: gt.Graph, n_new_edges: int = 2) -> gt.Graph:
+    def initialise_network(
+        self, network: gt.Graph, n_new_edges: int = 2, prob: float = 0.3, k: int = 10
+    ) -> gt.Graph:
         """Add to the existing criminal network honest and lone wolfs.
 
         Thereby, the nodes are added based on the preferential attachment principle.
         Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
         """
-        new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
-            network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
-        )
+        if self.attachment_method == "preferential":
+            new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
+                network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
+            )
+        elif self.attachment_method == "random":
+            new_network = NetworkCombiner.combine_by_random_attachment_faster(
+                network, new_nodes=self.new_nodes, prob=prob
+            )
+        elif self.attachment_method == "small-world":
+            new_network = NetworkCombiner.combine_by_small_world_attachment(
+                network, new_nodes=self.new_nodes, k=k, prob=prob
+            )
+        else:
+            raise RuntimeError(
+                "Define a network attachment method : 'preferential','random','small-world'"
+            )
 
         # Get all the agents with no states
         nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, "")

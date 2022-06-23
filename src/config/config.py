@@ -39,9 +39,20 @@ class ConfigParser:
             type=str,
             default=None,
             nargs="?",
-            const="cunha",
+            const="montagna_calls",
             choices=["cunha", "montagna_calls", "montagna_meetings"],
-            help="""Defines which network to read; cunha, montagna_meetings, montagna_calls.""",
+            help="""Defines which network to read; cunha, montagna_meetings, montagna_calls.
+                    (MetaSimulator)""",
+        )
+
+        parser.add_argument(
+            "-attach-meth",
+            type=str,
+            default=None,
+            nargs="?",
+            const="preferential",
+            choices=["preferential", "random", "small-world"],
+            help="""Defines the attachment methos around the criminal network. (MetaSimuator)""",
         )
 
         parser.add_argument(
