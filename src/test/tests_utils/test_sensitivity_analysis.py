@@ -30,6 +30,7 @@ class TestSensitivityAnalyser:
         # Define network
         sa.args.read_data = "montagna_calls"
         sa.args.save = True
+        sa.args.attach_meth = "preferential"
         sa.args.n_samples = 10
 
         sobol_indices = sa.sim_mart_vaq_sa(

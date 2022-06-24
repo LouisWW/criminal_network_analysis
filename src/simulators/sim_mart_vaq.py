@@ -212,6 +212,9 @@ class SimMartVaq:
                 data_collector["fitness_criminal"].append(mean_c_fit)
                 data_collector["fitness_wolf"].append(mean_w_fit)
 
+            # if topology_measure:
+            #    # extract the criminal network
+
         return network, data_collector
 
     def avg_play(
@@ -722,7 +725,7 @@ class SimMartVaq:
         fitness_a = network.vp.fitness[network.vertex(person_a)]
         fitness_b = network.vp.fitness[network.vertex(person_b)]
 
-        # Probability that b copies a
+        # Probability that a copies b
         if self.fermi_function(fitness_b, fitness_a):
             network.vp.state[network.vertex(person_a)] = network.vp.state[
                 network.vertex(person_b)

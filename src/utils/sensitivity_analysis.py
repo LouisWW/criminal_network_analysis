@@ -115,7 +115,10 @@ class SensitivityAnalyser(ConfigParser):
         """
         # Get the network of criminal first
         meta_sim = MetaSimulator(
-            network_name=self.args.read_data, ratio_honest=0.9, ratio_wolf=0.01
+            network_name=self.args.read_data,
+            ratio_honest=0.9,
+            ratio_wolf=0.01,
+            attachment_method=self.args.attach_meth,
         )
         gt_network = meta_sim.network
 

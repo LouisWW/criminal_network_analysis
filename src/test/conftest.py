@@ -10,6 +10,8 @@ for multiple tests
 __author__ = Louis Weyland
 __date__   = 23/02/2022
 """
+from typing import List
+
 import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
@@ -101,7 +103,9 @@ def meta_simulator_network() -> gt.Graph:
     the complete network with honest and wolf nodes
     """
     np.random.seed(0)
-    meta_sim = MetaSimulator("montagna_calls", ratio_honest=0.8)
+    meta_sim = MetaSimulator(
+        "montagna_calls", ratio_honest=0.8, attachment_method="preferential"
+    )
     return meta_sim.network
 
 
@@ -127,3 +131,14 @@ def create_gt_network_session(create_networkx: nx.Graph) -> gt.Graph:
     to the same address.
     """
     return NetworkConverter.nx_to_gt(create_networkx)
+
+
+def pytest_deselected(items: List) -> None:
+    """Print deselected tests."""
+    if not items:
+        return
+    config = items[0].session.config
+    reporter = config.pluginmanager.getplugin("terminalreporter")
+    reporter.ensure_newline()
+    for item in items:
+        reporter.line(f"deselected: {item.nodeid}", yellow=True, bold=True)

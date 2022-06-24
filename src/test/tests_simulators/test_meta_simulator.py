@@ -19,7 +19,12 @@ class TestMetaSimualtor:
         ratio_honest = 0.3
         ratio_wolf = 0.1
 
-        meta_simulator = MetaSimulator("montagna_calls", ratio_honest, ratio_wolf)
+        meta_simulator = MetaSimulator(
+            "montagna_calls",
+            "random",
+            ratio_honest,
+            ratio_wolf,
+        )
 
         # Test if the obj is init correctly
         assert isinstance(
@@ -45,18 +50,42 @@ class TestMetaSimualtor:
         """Test if a wrong init triggers the assert statements."""
         # With ratio_honest == 0
         with pytest.raises(Exception):
-            assert MetaSimulator("montagna_calls", ratio_honest=0)
+            assert MetaSimulator(
+                "montagna_calls", ratio_honest=0, attachment_method="preferential"
+            )
 
         # With ratio_wolf == 1.1
         with pytest.raises(Exception):
-            assert MetaSimulator("montagna_calls", ratio_wolf=1.1)
+            assert MetaSimulator(
+                "montagna_calls", ratio_wolf=1.1, attachment_method="small-wolrd"
+            )
 
         # With ratios not adding up more than 1
         with pytest.raises(Exception):
-            assert MetaSimulator("montagna_calls", ratio_honest=0.8, ratio_wolf=0.3)
-            assert MetaSimulator("montagna_calls", ratio_honest=0.8, ratio_wolf=0.2)
-            assert MetaSimulator("montagna_calls", ratio_honest=-0.8, ratio_wolf=0.1)
-            assert MetaSimulator("montagna_calls", ratio_honest=-0.8, ratio_wolf=0.2)
+            assert MetaSimulator(
+                "montagna_calls",
+                ratio_honest=0.8,
+                ratio_wolf=0.3,
+                attachment_method="small-wolrd",
+            )
+            assert MetaSimulator(
+                "montagna_calls",
+                ratio_honest=0.8,
+                ratio_wolf=0.2,
+                attachment_method="small-wolrd",
+            )
+            assert MetaSimulator(
+                "montagna_calls",
+                ratio_honest=-0.8,
+                ratio_wolf=0.1,
+                attachment_method="small-wolrd",
+            )
+            assert MetaSimulator(
+                "montagna_calls",
+                ratio_honest=-0.8,
+                ratio_wolf=0.2,
+                attachment_method="small-wolrd",
+            )
 
     @pytest.mark.essential
     def test_initialise_network(self, gt_network: gt.Graph) -> None:
@@ -64,7 +93,12 @@ class TestMetaSimualtor:
 
         More precisely tests if the ratio of c/h/w is correct
         """
-        meta_sim = MetaSimulator("montagna_calls", ratio_honest=0.2, ratio_wolf=0.3)
+        meta_sim = MetaSimulator(
+            "montagna_calls",
+            ratio_honest=0.2,
+            ratio_wolf=0.3,
+            attachment_method="small-world",
+        )
         network = meta_sim.initialise_network(network=gt_network)
 
         # Criminal network size should be 95
@@ -85,7 +119,7 @@ class TestMetaSimualtor:
 
         Using zero fit for all the nodes.
         """
-        meta_sim = MetaSimulator("montagna_calls")
+        meta_sim = MetaSimulator("montagna_calls", attachment_method="random")
         network = meta_sim.init_fitness(gt_network, random_fit=False)
         assert network.vp.fitness, "Fitness attribute doesn't exists..."
         assert not any(network.vp.fitness), "Fitness should all be zero"
@@ -96,7 +130,7 @@ class TestMetaSimualtor:
 
         Using radnom fit for all the nodes.
         """
-        meta_sim = MetaSimulator("montagna_calls")
+        meta_sim = MetaSimulator("montagna_calls", attachment_method="random")
 
         network = meta_sim.init_fitness(gt_network, random_fit=True)
         assert network.vp.fitness, "Fitness attribute doesn't exists..."
@@ -105,7 +139,7 @@ class TestMetaSimualtor:
     @pytest.mark.essential
     def test_init_filtering(self, gt_network: gt.Graph) -> None:
         """Test if the init of the fitness attribute is done correctly."""
-        meta_sim = MetaSimulator("montagna_calls")
+        meta_sim = MetaSimulator("montagna_calls", attachment_method="preferential")
         network = meta_sim.init_filtering(gt_network)
         assert network.vp.filtering, "Filtering attribute doesn't exists..."
 
