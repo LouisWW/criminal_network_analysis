@@ -25,7 +25,7 @@ import graph_tool.all as gt
 import numpy as np
 import pandas as pd
 from network_utils.network_extractor import NetworkExtractor
-from network_utils.network_stats import NetworkStats
+from network_utils.node_stats import NodeStats
 from p_tqdm import p_umap
 from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
@@ -148,6 +148,9 @@ class SimMartVaq:
                     "fitness_honest",
                     "fitness_criminal",
                     "fitness_wolf",
+                    "security_efficiency",
+                    "flow_information",
+                    "size_of_largest_component",
                 )
             },
         )  # type: DefaultDict[str, List[Any]]
@@ -219,13 +222,13 @@ class SimMartVaq:
                     # Extract the criminal network, the filtering is done on the network object
                     NetworkExtractor.filter_criminal_network(network)
                     data_collector["security_efficiency"].append(
-                        NetworkStats.get_security_efficiency_trade_off(network)
+                        NodeStats.get_security_efficiency_trade_off(network)
                     )
                     data_collector["flow_information"].append(
-                        NetworkStats.get_flow_of_information(network)
+                        NodeStats.get_flow_of_information(network)
                     )
                     data_collector["size_of_largest_component"].append(
-                        NetworkStats.get_size_of_largest_component(network)
+                        NodeStats.get_size_of_largest_component(network)[0]
                     )
 
                     # Unfilter the network back to its initial configuration
@@ -240,6 +243,7 @@ class SimMartVaq:
         n_groups: int = 20,
         ith_collect: int = 20,
         repetition: int = 20,
+        measure_topology: bool = False,
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
@@ -266,7 +270,7 @@ class SimMartVaq:
             (
                 [
                     # arguments need to be in this order
-                    (network, rounds, n_groups, ith_collect)
+                    (network, rounds, n_groups, ith_collect, measure_topology)
                     for i in range(0, repetition)
                 ]
             ),
@@ -286,8 +290,10 @@ class SimMartVaq:
         """Help for the avg_play to return only the default dict."""
         # Set the seed each time, otherwise the simulation will be exactly the same
         random.seed()
-        network, rounds, n_groups, ith_collect = tuple_of_variable
-        _, data_collector = self.play(network, rounds, n_groups, ith_collect)
+        network, rounds, n_groups, ith_collect, measure_topology = tuple_of_variable
+        _, data_collector = self.play(
+            network, rounds, n_groups, ith_collect, measure_topology
+        )
         return data_collector
 
     def investigation_stage(

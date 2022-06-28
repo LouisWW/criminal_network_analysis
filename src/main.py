@@ -10,7 +10,9 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 from config.config import ConfigParser
+from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
+from network_utils.network_stats import NetworkStats
 from PIL import Image
 from PIL import PngImagePlugin
 from simulators.meta_simulator import MetaSimulator
@@ -76,10 +78,11 @@ if args.sim_mart_vaq:
     )
     data_collector = simulators.avg_play(
         network=simulators.network,
-        rounds=20000,
+        rounds=200,
         n_groups=1,
-        ith_collect=2000,
+        ith_collect=50,
         repetition=5,
+        measure_topology=True,
     )
 
     ax_0 = plotter.plot_lines(
@@ -250,3 +253,88 @@ if args.phase_diagram:
         im.save(fig_name, "png", pnginfo=meta)
     else:
         plt.show()
+
+
+if args.compare_simulations:
+    logger.info(f"The data used is {args.read_data}")
+
+    meta_sim_pref = MetaSimulator(
+        network_name=args.read_data,
+        ratio_honest=0.3,
+        ratio_wolf=0.3,
+        n_new_edges=2,
+        attachment_method="preferential",
+    )
+    meta_sim_rand = MetaSimulator(
+        network_name=args.read_data,
+        ratio_honest=0.3,
+        ratio_wolf=0.3,
+        prob=0.01,
+        attachment_method="random",
+    )
+    meta_sim_sw = MetaSimulator(
+        network_name=args.read_data,
+        ratio_honest=0.3,
+        ratio_wolf=0.3,
+        prob=0.6,
+        k=4,
+        attachment_method="small-world",
+    )
+
+    simulators_pref = SimMartVaq(network=meta_sim_pref.network)
+    simulators_rand = SimMartVaq(network=meta_sim_rand.network)
+    simulators_sw = SimMartVaq(network=meta_sim_sw.network)
+
+    # Get overview of the new network
+    complete_network_stats_pref = NetworkStats(
+        NetworkConverter.gt_to_nk(simulators_pref.network)
+    )
+    complete_network_stats_rand = NetworkStats(
+        NetworkConverter.gt_to_nk(simulators_rand.network)
+    )
+    complete_network_stats_sw = NetworkStats(
+        NetworkConverter.gt_to_nk(simulators_sw.network)
+    )
+
+    complete_network_stats_pref.get_overview()
+    complete_network_stats_rand.get_overview()
+    complete_network_stats_sw.get_overview()
+
+    data_collector_pref = simulators_pref.avg_play(
+        network=simulators_pref.network,
+        rounds=args.rounds,
+        n_groups=1,
+        repetition=5,
+        ith_collect=20,
+        measure_topology=True,
+    )
+    data_collector_rand = simulators_rand.avg_play(
+        network=simulators_rand.network,
+        rounds=args.rounds,
+        n_groups=1,
+        repetition=5,
+        ith_collect=20,
+        measure_topology=True,
+    )
+    data_collector_sw = simulators_sw.avg_play(
+        network=simulators_sw.network,
+        rounds=args.rounds,
+        n_groups=1,
+        repetition=5,
+        ith_collect=20,
+        measure_topology=True,
+    )
+
+    plotter.plot_lines_comparative(
+        {
+            "preferential attachment": data_collector_pref,
+            "random attachment": data_collector_rand,
+            "small world": data_collector_sw,
+        },
+        y_data_to_plot=["mean_" + "security_efficiency"],
+        x_data_to_plot="mean_iteration",
+        title="Testing the simulation",
+        xlabel="rounds",
+        ylabel="security_efficiency",
+        plot_std="True",
+    )

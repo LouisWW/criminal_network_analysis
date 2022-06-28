@@ -42,6 +42,8 @@ class Plotter(ConfigParser):
         plt.rcParams["axes.titlesize"] = "x-large"
         plt.rcParams["xtick.labelsize"] = "x-large"
         plt.rcParams["ytick.labelsize"] = "x-large"
+        mpl.rcParams["lines.linewidth"] = 2
+        mpl.rcParams["lines.markersize"] = 6
 
         # Change the default color list
         mpl.rcParams["axes.prop_cycle"] = cycler(color="gbrgmyc")
@@ -318,4 +320,54 @@ class Plotter(ConfigParser):
 
         ax.set_xlabel(fr"${param_y}$")
         ax.set_ylabel(fr"${param_x}$")
+        return ax
+
+    def plot_lines_comparative(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: List[str],
+        x_data_to_plot: str = None,
+        *args: str,
+        **kwargs: Any,
+    ) -> plt.Axes:
+        """Plot line graph from data points.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        """
+        _, ax = plt.subplots()
+        if ax is None:
+            ax = plt.gca()
+
+        line_pot_style = iter(["^k:", "r8-", "ob-."])
+        for network_type in dict_data:
+            for data in y_data_to_plot:
+                if data not in dict_data[network_type].keys():
+                    raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
+
+                if x_data_to_plot:
+                    std = data.replace("mean", "std")
+                    ax.errorbar(
+                        dict_data[network_type][x_data_to_plot],
+                        dict_data[network_type][data],
+                        yerr=dict_data[network_type][std],
+                        fmt=next(line_pot_style),
+                        capsize=5,
+                        label=network_type,
+                    )
+
+        if "title" in kwargs:
+            ax.set_title(kwargs["title"])
+        if "xlabel" in kwargs:
+            ax.set_xlabel(kwargs["xlabel"])
+        if "ylabel" in kwargs:
+            ax.set_ylabel(kwargs["ylabel"])
+
+        # set legend
+        ax.legend()
+        ax.grid(alpha=0.5, linestyle=":")
+        plt.show()
         return ax

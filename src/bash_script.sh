@@ -8,10 +8,13 @@
 
 
 # Run normal simulation
-python3 main.py -sim-mart-vaq -read-data montagna_calls -save
+python3 main.py -sim-mart-vaq -read-data montagna_calls -attach-meth preferential -save
 
 # Run the sensitivity analysis
 nohup python3 main.py -read-data montagna_meetings -sa sim-mart-vaq -n-samples 1024  -r 3000 -output-value ratio_criminal -save &
 
 # Run the phase diagram
 python3 main.py -phase-diag -read-data montagna_calls -save
+
+# Run a comparison analysis on the topology using different network configuration
+python3 main.py -read-data -compare-simulations -r 800
