@@ -80,6 +80,12 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "-compare-simulations",
+            action="store_true",
+            help="""Defines to run a comparative analysis of the different simulations.""",
+        )
+
+        parser.add_argument(
             "-n-samples",
             type=int,
             default=15,
