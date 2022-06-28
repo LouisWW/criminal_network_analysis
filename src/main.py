@@ -325,10 +325,10 @@ if args.compare_simulations:
         measure_topology=True,
     )
 
-    plotter.plot_lines_comparative(
+    ax = plotter.plot_lines_comparative(
         {
             "preferential attachment": data_collector_pref,
-            "random attachment": data_collector_rand,
+            "random attaschment": data_collector_rand,
             "small world": data_collector_sw,
         },
         y_data_to_plot=["mean_" + "security_efficiency"],
@@ -338,3 +338,5 @@ if args.compare_simulations:
         ylabel="security_efficiency",
         plot_std="True",
     )
+
+    plt.show()
