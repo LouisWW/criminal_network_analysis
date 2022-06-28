@@ -1,14 +1,13 @@
-"""This script's intention is to get the properties of all the individual nodes.
+"""This script's intention is to get the topology and properties of all the individual nodes.
 
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
+import itertools
 from typing import Sequence
 from typing import Tuple
 
 import graph_tool.all as gt
-import networkit as nk
-import numpy as np
 from graph_tool import EdgePropertyMap
 from graph_tool import VertexPropertyMap
 
@@ -16,7 +15,8 @@ from graph_tool import VertexPropertyMap
 class NodeStats:
     """Define the properties of a node.
 
-    The properties are katz,betweeness,eccentricity
+    The properties are katz,betweeness,eccentricity.
+    Additionally, compute some topology measures.
     """
 
     def __init__(self) -> None:
@@ -59,17 +59,50 @@ class NodeStats:
         central_dominace = gt.central_point_dominance(network, vertex)
         return central_dominace
 
-    def get_eccentricity(network: nk.Graph) -> Sequence[Tuple[int, int]]:
-        """Return the eccentricity of the nodes."""
-        eccentricity = np.zeros(network.numberOfNodes())
-        # to append to the right idx in the list
-        iterator = iter(range(0, network.numberOfNodes()))
+    # @staticmethod
+    # def get_eccentricity(network: nk.Graph) -> Sequence[Tuple[int, int]]:
+    #    """Return the eccentricity of the nodes."""
+    #    eccentricity = np.empty(network.numberOfNodes())
+    #    # to append to the right idx in the list
+    #    iterator = iter(range(0, network.numberOfNodes()))
+    #    for node in network.iterNodes():
+    #         eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
+    #          network, node
+    #                   )
+    #     return eccentricity
 
-        for node in network.iterNodes():
-            eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
-                network, node
+    @staticmethod
+    def get_security_efficiency_trade_off(network: gt.Graph) -> float:
+        """Return the security-efficiency trade.
+
+        Metric has been defined in https://www.nature.com/articles/srep04238
+        """
+        n_edges = network.num_edges()
+        n_nodes = network.num_vertices()
+        return (2 * n_edges) / (n_nodes * (n_nodes - 1))
+
+    @staticmethod
+    def get_flow_of_information(network: gt.Graph) -> float:
+        """Return the flow of information.
+
+        Metric has been defined in
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/
+        """
+        n_nodes = network.num_vertices()
+        shortest_dist_list = []
+        source_target = list(itertools.combinations(network.get_vertices(), 2))
+        for s, t in source_target:
+            shortest_dist_list.append(
+                gt.shortest_distance(network, source=s, target=t, directed=False)
             )
-        return eccentricity
+        sum_inv_shortest_dist = sum(1 / dist for dist in shortest_dist_list)
+        return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_shortest_dist
+
+    @staticmethod
+    def get_size_of_largest_component(network: gt.Graph) -> Tuple[int, int]:
+        """Return the size of the largest component."""
+        largest_component = gt.extract_largest_component(network)
+        return largest_component.num_vertices(), largest_component.num_edges()
 
     def get_degree(self) -> Sequence[Tuple[int, int]]:
         """Count the number of neighbor a node has."""

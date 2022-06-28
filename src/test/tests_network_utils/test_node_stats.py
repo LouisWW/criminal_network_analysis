@@ -49,3 +49,29 @@ class TestNodeStats:
             network=bigger_gt_network, betweenness=betweeness
         )
         assert central_dominance != 0, "Central dominance is zero..."
+
+    @pytest.mark.essential
+    def test_get_security_efficiency_trade_off(
+        self, create_gt_network: gt.Graph
+    ) -> None:
+        """Test if the the security_efficency trade off is computed correctly."""
+        sec_eff = NodeStats.get_security_efficiency_trade_off(network=create_gt_network)
+        assert sec_eff == 0.6, "Security-efficency score is not correct"
+
+    @pytest.mark.essential
+    def test_get_flow_of_information(self, create_gt_network: gt.Graph) -> None:
+        """Test if the the flow of information is computed correctly."""
+        flow_inf = NodeStats.get_flow_of_information(network=create_gt_network)
+        assert flow_inf == 0.4, "The flow information score is not correct"
+
+    @pytest.mark.essential
+    def test_get_size_of_largest_component(self, gt_network: gt.Graph) -> None:
+        """Test if the the size of the largest component is computed correctly."""
+        n_nodes, n_edges = NodeStats.get_size_of_largest_component(network=gt_network)
+        assert n_nodes == 84, "The size of the largest component is not correct"
+        assert (
+            n_edges == 112
+        ), "The number of edges of the largest component is not correct"
+        assert (
+            gt_network.num_vertices() == 95
+        ), "Thereby the initial network should be untouched"

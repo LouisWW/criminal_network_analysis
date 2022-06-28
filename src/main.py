@@ -52,8 +52,9 @@ if args.sim_mart_vaq:
     # First convert to gt
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
-        ratio_honest=0.33,
-        ratio_wolf=0.33,
+        attachment_method=args.attach_meth,
+        ratio_honest=0.9,
+        ratio_wolf=0.01,
         random_fit_init=False,
     )
 
@@ -66,9 +67,9 @@ if args.sim_mart_vaq:
         beta_h=5,
         beta_c=5,
         c_c=1,  # no benefits from criminals/ they still act
-        r_c=0,
+        r_c=1,
         c_w=1,
-        r_w=15,
+        r_w=1,
         r_h=1,
         temperature=10,
         mutation_prob=0.0001,  # only fermi function

@@ -24,6 +24,8 @@ from typing import Union
 import graph_tool.all as gt
 import numpy as np
 import pandas as pd
+from network_utils.network_extractor import NetworkExtractor
+from network_utils.network_stats import NetworkStats
 from p_tqdm import p_umap
 from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
@@ -125,6 +127,7 @@ class SimMartVaq:
         rounds: int = 1,
         n_groups: int = 20,
         ith_collect: int = 20,
+        measure_topology: bool = False,
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
@@ -212,8 +215,21 @@ class SimMartVaq:
                 data_collector["fitness_criminal"].append(mean_c_fit)
                 data_collector["fitness_wolf"].append(mean_w_fit)
 
-            # if topology_measure:
-            #    # extract the criminal network
+                if measure_topology:
+                    # Extract the criminal network, the filtering is done on the network object
+                    NetworkExtractor.filter_criminal_network(network)
+                    data_collector["security_efficiency"].append(
+                        NetworkStats.get_security_efficiency_trade_off(network)
+                    )
+                    data_collector["flow_information"].append(
+                        NetworkStats.get_flow_of_information(network)
+                    )
+                    data_collector["size_of_largest_component"].append(
+                        NetworkStats.get_size_of_largest_component(network)
+                    )
+
+                    # Unfilter the network back to its initial configuration
+                    NetworkExtractor.un_filter_criminal_network(network)
 
         return network, data_collector
 
