@@ -488,9 +488,9 @@ class SimMartVaq:
         person_a = slct_person
         bucket_list = list(group_members)
         bucket_list.remove(person_a)
-        person_b = random.choice(bucket_list)
-        if random.random() > self.mutation_prob:
+        if random.random() > self.mutation_prob and len(bucket_list) != 0:
             # Based on the fermi function will check if an interaction will happen
+            person_b = random.choice(bucket_list)
             network = self.interchange_roles(network, person_a, person_b)
         else:
             # Mutation will happen
