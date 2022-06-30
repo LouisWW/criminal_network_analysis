@@ -6,6 +6,7 @@ More specifically, generated data is visualized.
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
+import datetime
 import os
 from typing import Any
 from typing import DefaultDict
@@ -325,7 +326,7 @@ class Plotter(ConfigParser):
     def plot_lines_comparative(
         self,
         dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
-        y_data_to_plot: List[str],
+        y_data_to_plot: str,
         x_data_to_plot: str = None,
         *args: str,
         **kwargs: Any,
@@ -344,20 +345,18 @@ class Plotter(ConfigParser):
 
         line_pot_style = iter(["^k:", "r8-", "ob-."])
         for network_type in dict_data:
-            for data in y_data_to_plot:
-                if data not in dict_data[network_type].keys():
-                    raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
+            if y_data_to_plot not in dict_data[network_type].keys():
+                raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
 
-                if x_data_to_plot:
-                    std = data.replace("mean", "std")
-                    ax.errorbar(
-                        dict_data[network_type][x_data_to_plot],
-                        dict_data[network_type][data],
-                        yerr=dict_data[network_type][std],
-                        fmt=next(line_pot_style),
-                        capsize=5,
-                        label=network_type,
-                    )
+            std = y_data_to_plot.replace("mean", "std")
+            ax.errorbar(
+                dict_data[network_type][x_data_to_plot],
+                dict_data[network_type][y_data_to_plot],
+                yerr=dict_data[network_type][std],
+                fmt=next(line_pot_style),
+                capsize=5,
+                label=network_type,
+            )
 
         if "title" in kwargs:
             ax.set_title(kwargs["title"])
@@ -369,5 +368,14 @@ class Plotter(ConfigParser):
         # set legend
         ax.legend()
         ax.grid(alpha=0.5, linestyle=":")
-        plt.show()
-        return ax
+
+        if self.args.save:
+            e = datetime.datetime.now()
+            timestamp = e.strftime("%d-%m-%Y-%H-%M")
+
+            fig_name = self.savig_dir + y_data_to_plot + "_" + timestamp + ".png"
+            plt.savefig(fig_name, dpi=300)
+            return ax
+        else:
+            plt.show()
+            return ax

@@ -112,8 +112,8 @@ class TestPlotter:
         assert isinstance(ax, plt.Axes)
 
     @pytest.mark.essential
-    @patch("matplotlib.pyplot.show")
-    def test_plot_lines_comparative(self, mock_show: Mock) -> None:
+    # @patch("matplotlib.pyplot.show")
+    def test_plot_lines_comparative(self) -> None:
         """Test if the plotting function is wokring correctly."""
         plotter = Plotter()
 
@@ -125,20 +125,34 @@ class TestPlotter:
             data_collector["mean_security_efficiency"] = list(
                 np.random.logistic(loc, scale, 10) * np.random.randint(0, 10)
             )
+            data_collector["mean_information"] = list(np.ones(10))
+            data_collector["mean_gcs"] = list(np.ones(10) * 5)
             data_collector["mean_iteration"] = list(range(0, 10))
             data_collector["std_security_efficiency"] = list(
                 np.random.normal(1, 50, size=10)
             )
+            data_collector["std_information"] = list(np.random.normal(1, 50, size=10))
+            data_collector["std_gcs"] = list(np.random.normal(1, 50, size=10))
 
             fake_data[key] = data_collector
 
         ax = plotter.plot_lines_comparative(
             fake_data,
-            y_data_to_plot=["mean_" + "security_efficiency"],
+            y_data_to_plot="mean_" + "security_efficiency",
             x_data_to_plot="mean_iteration",
             title="Testing the simulation",
             xlabel="rounds",
             ylabel="security_efficiency",
+            plot_std="True",
+        )
+
+        ax = plotter.plot_lines_comparative(
+            fake_data,
+            y_data_to_plot="mean_" + "information",
+            x_data_to_plot="mean_iteration",
+            title="Testing the simulation",
+            xlabel="rounds",
+            ylabel="information",
             plot_std="True",
         )
 
