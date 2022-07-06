@@ -53,9 +53,7 @@ class NetworkCombiner:
             # Add the edges to the last added node network.vertex(network.num_vertices())-1
             for new_e in new_edges:
                 network.add_edge(network.vertex(network.num_vertices() - 1), new_e)
-                accepted_edges.append(
-                    ((network.vertex(network.num_vertices() - 1)), new_e)
-                )
+                accepted_edges.append((new_e, (network.num_vertices() - 1)))
 
         return network, accepted_edges
 
@@ -87,7 +85,7 @@ class NetworkCombiner:
         # Add new nodes
         network.add_vertex(n=new_nodes)
         n_number_of_nodes = network.num_vertices()
-        assert 4 <= k <= n_number_of_nodes, "4 << k << netowrk_size"
+        assert 4 <= k <= n_number_of_nodes, "4 << k << netowork_size"
         accepted_edges = combine_by_small_world_attachment_helper(
             n_number_of_nodes, new_nodes, k, prob
         )

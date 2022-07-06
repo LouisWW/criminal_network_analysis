@@ -17,6 +17,7 @@ from PIL import Image
 from PIL import PngImagePlugin
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
+from utils.animation import Animateur
 from utils.plotter import Plotter
 from utils.sensitivity_analysis import SensitivityAnalyser
 
@@ -55,7 +56,7 @@ if args.sim_mart_vaq:
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
         attachment_method=args.attach_meth,
-        ratio_honest=0.9,
+        ratio_honest=0.1,
         ratio_wolf=0.01,
         random_fit_init=False,
     )
@@ -366,3 +367,13 @@ if args.compare_simulations:
         ylabel="size_of_largest_component",
         plot_std="True",
     )
+
+if args.animate_simulation:
+    """Create an animation of the simulation."""
+    animateur = Animateur()
+    animateur.create_animation()
+
+if args.animate_attachment_process:
+    """Create an animation of the attachment process."""
+    animateur = Animateur()
+    animateur.create_animation()

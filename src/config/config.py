@@ -56,9 +56,21 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "-animate-attachment-process",
+            action="store_true",
+            help="""Create an animation of the attachment process.""",
+        )
+
+        parser.add_argument(
             "-sim-mart-vaq",
             action="store_true",
             help="""Defines if the simulation based on Martiez-Vaquero is run.""",
+        )
+
+        parser.add_argument(
+            "-animate-simulation",
+            action="store_true",
+            help="""Create an animation of the simulation.""",
         )
 
         parser.add_argument(
