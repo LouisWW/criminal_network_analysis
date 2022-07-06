@@ -24,7 +24,7 @@ class TestNetworkCombiner:
 
         new_gt_network = NetworkCombiner.combine_by_preferential_attachment_faster(
             gt_network, n_nodes_to_add, 2
-        )
+        )[0]
         assert isinstance(new_gt_network, gt.Graph), "Network wasn't created properly"
 
         # New network should have 100 new nodes
@@ -69,7 +69,7 @@ class TestNetworkCombiner:
 
         new_gt_network = NetworkCombiner.combine_by_random_attachment_faster(
             gt_network, n_nodes_to_add, 0.5
-        )
+        )[0]
         assert isinstance(new_gt_network, gt.Graph), "Network wasn't created properly"
 
         # New network should have 100 new nodes
@@ -105,7 +105,7 @@ class TestNetworkCombiner:
 
         new_gt_network = NetworkCombiner.combine_by_small_world_attachment(
             gt_network, n_nodes_to_add, 50, 0.5
-        )
+        )[0]
         assert isinstance(new_gt_network, gt.Graph), "Network wasn't created properly"
 
         # New network should have 100 new nodes

@@ -124,15 +124,15 @@ class MetaSimulator:
         if self.attachment_method == "preferential":
             new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
                 network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
-            )
+            )[0]
         elif self.attachment_method == "random":
             new_network = NetworkCombiner.combine_by_random_attachment_faster(
                 network, new_nodes=self.new_nodes, prob=prob
-            )
+            )[0]
         elif self.attachment_method == "small-world":
             new_network = NetworkCombiner.combine_by_small_world_attachment(
                 network, new_nodes=self.new_nodes, k=k, prob=prob
-            )
+            )[0]
         else:
             raise RuntimeError(
                 "Define a network attachment method : 'preferential','random','small-world'"

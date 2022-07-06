@@ -112,8 +112,8 @@ class TestPlotter:
         assert isinstance(ax, plt.Axes)
 
     @pytest.mark.essential
-    # @patch("matplotlib.pyplot.show")
-    def test_plot_lines_comparative(self) -> None:
+    @patch("matplotlib.pyplot.show")
+    def test_plot_lines_comparative(self, mock_show: Mock) -> None:
         """Test if the plotting function is wokring correctly."""
         plotter = Plotter()
 

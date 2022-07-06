@@ -3,6 +3,9 @@
 __author__ = Louis Weyland
 __date__   = 6/02/2022
 """
+from typing import List
+from typing import Tuple
+
 import graph_tool.all as gt
 import numpy as np
 from network_utils.network_combiner_helper_c import (
@@ -25,9 +28,10 @@ class NetworkCombiner:
     @staticmethod
     def combine_by_preferential_attachment_faster(
         network: gt.Graph, new_nodes: int, n_new_edges: int
-    ) -> gt.Graph:
+    ) -> Tuple[gt.Graph, List[Tuple[int, int]]]:
         """Apply preferential attachment to a existing network."""
         # Get the number of nodes of the existing network
+        accepted_edges = []
         for _ in tqdm(
             range(0, new_nodes),
             desc="Adding nodes to existing network using preferential attachment...",
@@ -49,12 +53,16 @@ class NetworkCombiner:
             # Add the edges to the last added node network.vertex(network.num_vertices())-1
             for new_e in new_edges:
                 network.add_edge(network.vertex(network.num_vertices() - 1), new_e)
-        return network
+                accepted_edges.append(
+                    ((network.vertex(network.num_vertices() - 1)), new_e)
+                )
+
+        return network, accepted_edges
 
     @staticmethod
     def combine_by_random_attachment_faster(
         network: gt.Graph, new_nodes: int, prob: float
-    ) -> gt.Graph:
+    ) -> Tuple[gt.Graph, List[Tuple[int, int]]]:
         """Generate a Erdös-Rény Random Network around the given network.
 
         The code is based on the pseudo-code described in
@@ -65,12 +73,12 @@ class NetworkCombiner:
         n_number_of_nodes = network.num_vertices()
         accepted_edges = random_attachment_c(n_number_of_nodes, new_nodes, prob)
         network.add_edge_list(accepted_edges)
-        return network
+        return network, accepted_edges
 
     @staticmethod
     def combine_by_small_world_attachment(
         network: gt.Graph, new_nodes: int, k: int, prob: float
-    ) -> gt.Graph:
+    ) -> Tuple[gt.Graph, List[Tuple[int, int]]]:
         """Generate a Watts-Strogatz Small-World Network.
 
         The code is based on the pseudo-code described in
@@ -84,4 +92,4 @@ class NetworkCombiner:
             n_number_of_nodes, new_nodes, k, prob
         )
         network.add_edge_list(accepted_edges)
-        return network
+        return network, accepted_edges
