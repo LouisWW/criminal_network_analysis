@@ -69,7 +69,11 @@ class ConfigParser:
 
         parser.add_argument(
             "-animate-simulation",
-            action="store_true",
+            type=str,
+            default=None,
+            nargs="?",
+            const="unfiltered",
+            choices=["unfiltered", "filtered"],
             help="""Create an animation of the simulation.""",
         )
 
