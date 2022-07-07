@@ -10,6 +10,10 @@ Analysing the resilience of criminal networks in an iterative fashion.
 </p>
 
 ---
+
+![Alt Text](src/results/video/simulation_preferential.gif)
+
+
 ## Setup
 ### Requirements
 * Ubuntu 20.04 / MacOS X
