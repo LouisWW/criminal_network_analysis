@@ -51,26 +51,32 @@ class Animateur(ConfigParser):
         self.network_dummy = deepcopy(self.network)
         self.n_nodes = self.network.num_vertices()
         self.new_nodes = 50
-        self.k = 6
+        self.k = 4
         self.m = 2
+        self.prob = 0.01
 
         self.count = 0
+
+        # To color the vertices
+        self.color_map = {"c": (1, 0, 0, 1), "h": (0, 0, 1, 1), "w": (0, 1, 0, 1)}
 
     def create_animation(self) -> None:
         """Simulate the adding of the node."""
         self.win = Gtk.OffscreenWindow()
         self.win.set_default_size(500, 400)
         self.pos = gt.sfdp_layout(self.network)
-        self.network, _ = self.get_color_map(
-            self.network, color_vertex_property="state_color"
-        )
+        self.color_code = self.network.new_vertex_property("vector<double>")
+        self.network.vertex_properties["state_color"] = self.color_code
+        for v in self.network.vertices():
+            self.color_code[v] = self.color_map[
+                self.network.vertex_properties["state"][v]
+            ]
         self.win.graph = gt.GraphWidget(
             self.network,
             self.pos,
             vertex_fill_color=self.network.vertex_properties["state_color"],
         )
         self.win.add(self.win.graph)
-
         if self.args.animate_attachment_process:
             if self.args.attach_meth == "preferential":
                 (
@@ -79,24 +85,25 @@ class Animateur(ConfigParser):
                 ) = NetworkCombiner.combine_by_preferential_attachment_faster(
                     self.network_dummy, self.new_nodes, self.m
                 )
+                self.accepted_edges.sort(key=lambda y: y[1])
             elif self.args.attach_meth == "random":
                 self.accepted_edges = random_attachment_c(
-                    self.n_nodes, self.new_nodes, self.prob
+                    self.n_nodes + self.new_nodes, self.new_nodes, self.prob
                 )
+                self.accepted_edges.sort(key=lambda y: y[1])
             elif self.args.attach_meth == "small-world":
                 self.accepted_edges = combine_by_small_world_attachment_helper(
-                    self.n_nodes, self.new_nodes, self.k, self.prob
+                    self.n_nodes + self.new_nodes, self.new_nodes, self.k, self.prob
                 )
+                self.accepted_edges.sort(key=lambda y: y[1])
+
             else:
                 raise KeyError(
                     "Please define which attachment method to use! -attach-meth"
                 )
-
             # Bind the function above as an 'idle' callback.
-
             self.accepted_edges = iter(self.accepted_edges)
             GLib.idle_add(self.do_animation_attachment_process)
-
         elif self.args.animate_simulation:
             pass
 
@@ -108,36 +115,47 @@ class Animateur(ConfigParser):
 
     def do_animation_attachment_process(self) -> Literal[True]:
         """Add the nodes listen in the accepted edges."""
-        v_x, v_y = next(self.accepted_edges)
-        self.network.add_edge(v_x, v_y)
-        self.network.vp.state[self.network.vertex(v_y)] = np.random.choice(
-            ["w", "h"], p=[0.7, 0.3]
-        )
-        self.pos[self.network.vertex(v_y)] = (
-            np.random.uniform(-20, 20),
-            np.random.uniform(-20, 20),
-        )
-        self.win.graph.regenerate_surface()
-        self.win.graph.queue_draw()
-        self.pixbuf = self.win.get_pixbuf()
-        self.pixbuf.savev(
-            f"{self.savig_dir}/{self.args.attach_meth}+{self.count}.png", "png", [], []
-        )
-        if self.count > self.new_nodes:
+        try:
+            v_x, v_y = next(self.accepted_edges)
+            try:
+                # Check if new node exist
+                self.network.add_edge(v_x, v_y, add_missing=False)
+            except ValueError:
+                # Otherwise add it, define its position and status and color the
+                # node
+                self.network.add_edge(v_x, v_y, add_missing=True)
+                self.pos[self.network.vertex(v_y)] = (
+                    np.random.choice(
+                        [np.random.uniform(-20, -10), np.random.uniform(10, 20)]
+                    ),
+                    np.random.choice(
+                        [np.random.uniform(-20, -10), np.random.uniform(10, 20)]
+                    ),
+                )
+                self.network.vp.state[self.network.vertex(v_y)] = np.random.choice(
+                    ["w", "h"], p=[0.6, 0.4]
+                )
+                self.color_code[self.network.vertex(v_y)] = self.color_map[
+                    self.network.vertex_properties["state"][self.network.vertex(v_y)]
+                ]
+
+            self.win.graph.regenerate_surface()
+            self.win.graph.queue_draw()
+            self.pixbuf = self.win.get_pixbuf()
+            self.pixbuf.savev(
+                f"{self.savig_dir}/{self.args.attach_meth}+{self.count}.png",
+                "png",
+                [],
+                [],
+            )
+            self.count += 1
+        except StopIteration:
+            logger.info("All the nodes with their edges have been added")
+            # Create the gif and delete the png
+            os.system(
+                f"convert -delay 20 -loop 0 results/video/*.png results/video/{self.args.attach_meth}.gif"
+            )
+            os.system("rm results/video/*.png")
             sys.exit(0)
-        self.count += 1
 
         return True
-
-    def get_color_map(
-        self, network: gt.Graph, color_vertex_property: str = None
-    ) -> gt.PropertyMap:
-        """Define the color of the vertex based on the vertex property."""
-        if color_vertex_property == "state_color":
-            # c = red, h = blue, w = green
-            color_map = {"c": (1, 0, 0, 1), "h": (0, 0, 1, 1), "w": (0, 1, 0, 1)}
-            color_code = network.new_vertex_property("vector<double>")
-            network.vertex_properties["state_color"] = color_code
-            for v in network.vertices():
-                color_code[v] = color_map[network.vertex_properties["state"][v]]
-            return network, color_code
