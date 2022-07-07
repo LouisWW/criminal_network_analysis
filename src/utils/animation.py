@@ -153,7 +153,8 @@ class Animateur(ConfigParser):
             logger.info("All the nodes with their edges have been added")
             # Create the gif and delete the png
             os.system(
-                f"convert -delay 20 -loop 0 results/video/*.png results/video/{self.args.attach_meth}.gif"
+                f"convert -delay 20 -loop 0 results/video/*.png \
+                results/video/{self.args.attach_meth}.gif"
             )
             os.system("rm results/video/*.png")
             sys.exit(0)
