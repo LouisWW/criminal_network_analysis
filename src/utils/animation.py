@@ -60,13 +60,13 @@ class Animateur(ConfigParser):
         )
         self.simulator = SimMartVaq(
             network=self.meta_sim.network,
-            delta=0.7,  # no acting for wolfs
-            gamma=0.8,
-            tau=0.1,  # no fitness sharing between wolf to criminal
+            delta=0.4,  # no acting for wolfs
+            gamma=0.1,
+            tau=0.8,  # no fitness sharing between wolf to criminal
             beta_s=1,
             beta_h=1,
             beta_c=15,
-            c_c=1,  # no benefits from criminals/ they still act
+            c_c=10,  # no benefits from criminals/ they still act
             r_c=10,
             c_w=1,
             r_w=1,
@@ -81,7 +81,7 @@ class Animateur(ConfigParser):
         self.m = 2
         self.prob = 0.01
         self.count = 0
-        self.rounds = 200
+        self.rounds = 600
         # To color the vertices
         self.color_map = {"c": (1, 0, 0, 1), "h": (0, 0, 1, 1), "w": (0, 1, 0, 1)}
 
@@ -186,7 +186,7 @@ class Animateur(ConfigParser):
         self.win.graph.queue_draw()
         self.pixbuf = self.win.get_pixbuf()
         self.pixbuf.savev(
-            f"{self.savig_dir}/simulation+{self.args.attach_meth}+{self.count}.png",
+            f"{self.savig_dir}/simulation+{self.args.animate_simulation}+{self.args.attach_meth}+{self.count}.png",
             "png",
             [],
             [],
@@ -201,7 +201,7 @@ class Animateur(ConfigParser):
             # Create the gif and delete the png
             os.system(
                 f"convert -delay 20 -loop 0 results/video/*.png \
-                results/video/simulation_{self.args.attach_meth}.gif"
+                results/video/simulation_{self.args.animate_simulation}_{self.args.attach_meth}.gif"
             )
             os.system("rm results/video/*.png")
             sys.exit(0)
