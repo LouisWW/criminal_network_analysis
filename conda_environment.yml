@@ -36,3 +36,6 @@ dependencies:
     - fitter
     - SALib
     - pycallgraph
+    - graphviz
+    - gprof2dot
+    - statsmodel

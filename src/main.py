@@ -20,6 +20,7 @@ from simulators.sim_mart_vaq import SimMartVaq
 from utils.animation import Animateur
 from utils.plotter import Plotter
 from utils.sensitivity_analysis import SensitivityAnalyser
+from utils.stats import compare_time_series
 
 # Catch the flags
 args = ConfigParser().args
@@ -40,7 +41,6 @@ logger.propagate = False
 
 if args.verbose:
     logger.setLevel(logging.INFO)
-
 
 if args.sim_mart_vaq:
     """Simulate the simulation form
@@ -255,28 +255,33 @@ if args.phase_diagram:
     else:
         plt.show()
 
-
 if args.compare_simulations:
     logger.info(f"The data used is {args.read_data}")
 
+    ratio_honest = 0.2
+    ratio_wolf = 0.2
+    n_groups = 1
+    repetition = 6
+    ith_collect = 250
+
     meta_sim_pref = MetaSimulator(
         network_name=args.read_data,
-        ratio_honest=0.9,
-        ratio_wolf=0.01,
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
         n_new_edges=2,
         attachment_method="preferential",
     )
     meta_sim_rand = MetaSimulator(
         network_name=args.read_data,
-        ratio_honest=0.9,
-        ratio_wolf=0.01,
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
         prob=0.0034,
         attachment_method="random",
     )
     meta_sim_sw = MetaSimulator(
         network_name=args.read_data,
-        ratio_honest=0.9,
-        ratio_wolf=0.01,
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
         prob=0.6,
         k=6,
         attachment_method="small-world",
@@ -304,28 +309,35 @@ if args.compare_simulations:
     data_collector_pref = simulators_pref.avg_play(
         network=simulators_pref.network,
         rounds=args.rounds,
-        n_groups=1,
-        repetition=50,
-        ith_collect=250,
+        n_groups=n_groups,
+        repetition=repetition,
+        ith_collect=ith_collect,
         measure_topology=True,
     )
     data_collector_rand = simulators_rand.avg_play(
         network=simulators_rand.network,
         rounds=args.rounds,
-        n_groups=1,
-        repetition=50,
-        ith_collect=250,
+        n_groups=n_groups,
+        repetition=repetition,
+        ith_collect=ith_collect,
         measure_topology=True,
     )
     data_collector_sw = simulators_sw.avg_play(
         network=simulators_sw.network,
         rounds=args.rounds,
-        n_groups=1,
-        repetition=50,
-        ith_collect=250,
+        n_groups=n_groups,
+        repetition=repetition,
+        ith_collect=ith_collect,
         measure_topology=True,
     )
 
+    compare_time_series(
+        {
+            "preferential attachment": data_collector_pref,
+            "random attachment": data_collector_rand,
+            "small world": data_collector_sw,
+        }
+    )
     ax = plotter.plot_lines_comparative(
         {
             "preferential attachment": data_collector_pref,

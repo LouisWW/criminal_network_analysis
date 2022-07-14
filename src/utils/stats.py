@@ -9,6 +9,8 @@ from typing import List
 from typing import Union
 
 import numpy as np
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
 
 
 def get_mean_std_over_list(
@@ -46,3 +48,29 @@ def get_mean_std_over_list(
         data_collector["std_" + key] = np.std(m, axis=0)
 
     return data_collector
+
+
+def compare_time_series(
+    time_series: DefaultDict[str, DefaultDict[str, List[int]]]
+) -> None:
+    """Compare the time series by fitting a model and perform a anova-test on it."""
+    attachment_methods = list(time_series.keys())
+    metrics = [
+        metric
+        for metric in list(time_series[attachment_methods[0]].keys())
+        if metric.startswith("mean_")
+        if "fitness" not in metric
+        if "ratio" not in metric
+    ]
+
+    for metric in metrics:
+        print("----" + metric + "----")
+        models = [
+            ols(metric + "~mean_iteration", data=time_series[attachment_method]).fit()
+            for attachment_method in attachment_methods
+        ]
+
+        table = sm.stats.anova_lm(
+            models[0], models[1], models[2], typ=1
+        )  # Type 2 Anova DataFrame
+        print(table)

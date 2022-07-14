@@ -4,10 +4,13 @@ __author__ = Louis
 __date__ = 10/05/2022
 """
 from collections import defaultdict
+from typing import DefaultDict
+from typing import List
 from unittest import main
 
 import numpy as np
 import pytest
+from utils.stats import compare_time_series
 from utils.stats import get_mean_std_over_list
 
 
@@ -60,6 +63,14 @@ class TestStats:
                 atol=1e-03,
             )
         ).all(), "Mean is not computed correctly"
+
+    @pytest.mark.essential
+    def test_compare_time_series(
+        self, fake_topological_data: DefaultDict[str, DefaultDict[str, List[int]]]
+    ) -> None:
+        """Test if the time-series comparison/anova test is working."""
+        compare_time_series(fake_topological_data)
+        assert 0
 
 
 if __name__ == "__main__":
