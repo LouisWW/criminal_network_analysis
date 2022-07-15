@@ -3,14 +3,17 @@
 __author__ = Louis Weyland
 __date__ = 10/09/2022
 """
+import itertools
 from typing import Any
 from typing import DefaultDict
 from typing import List
 from typing import Union
 
 import numpy as np
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
+import pandas as pd
+import similaritymeasures
+from scipy import stats
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
 
 def get_mean_std_over_list(
@@ -46,15 +49,17 @@ def get_mean_std_over_list(
         # Get mean and std
         data_collector["mean_" + key] = np.mean(m, axis=0)
         data_collector["std_" + key] = np.std(m, axis=0)
+        data_collector["m_" + key] = m
 
     return data_collector
 
 
 def compare_time_series(
-    time_series: DefaultDict[str, DefaultDict[str, List[int]]]
+    time_series: DefaultDict[str, DefaultDict[str, List[Any]]]
 ) -> None:
     """Compare the time series by fitting a model and perform a anova-test on it."""
     attachment_methods = list(time_series.keys())
+    attachment_methods_comb = list(itertools.combinations(attachment_methods, 2))
     metrics = [
         metric
         for metric in list(time_series[attachment_methods[0]].keys())
@@ -65,12 +70,70 @@ def compare_time_series(
 
     for metric in metrics:
         print("----" + metric + "----")
-        models = [
-            ols(metric + "~mean_iteration", data=time_series[attachment_method]).fit()
-            for attachment_method in attachment_methods
-        ]
+        for method in ["pcm", "frechet_dist", "area_between_two_curves", "dtw"]:
+            for comb in attachment_methods_comb:
 
-        table = sm.stats.anova_lm(
-            models[0], models[1], models[2], typ=1
-        )  # Type 2 Anova DataFrame
-        print(table)
+                time_serie_a = np.zeros((len(time_series[comb[0]][metric]), 2))
+                time_serie_a[:, 0] = time_series[comb[0]][metric]
+                time_serie_a[:, 1] = time_series[comb[0]]["mean_iteration"]
+
+                time_serie_b = np.zeros((len(time_series[comb[1]][metric]), 2))
+                time_serie_b[:, 0] = time_series[comb[1]][metric]
+                time_serie_b[:, 1] = time_series[comb[1]]["mean_iteration"]
+
+                if method == "pmc":
+                    print(
+                        f"{str(comb):50} : {'pcm':12} {similaritymeasures.pcm(time_serie_a,time_serie_b)}"
+                    )
+                elif method == "frechet_dist":
+                    print(
+                        f"{str(comb):50} : {'frechet_dist':12} {similaritymeasures.frechet_dist(time_serie_a,time_serie_b)}"
+                    )
+                elif method == "area_between_two_curves":
+                    print(
+                        f"{str(comb):50} : {'area':12} {similaritymeasures.area_between_two_curves(time_serie_a,time_serie_b)}"
+                    )
+                elif method == "dtw":
+                    print(
+                        f"{str(comb):50} : {'dtw':12} {similaritymeasures.dtw(time_serie_a,time_serie_b)[0]}"
+                    )
+        print(30 * "-")
+
+        # stats f_oneway functions takes the groups as input and returns F and P-value
+        fvalue, pvalue = stats.f_oneway(
+            time_series["preferential attachment"][metric.replace("mean", "m")][:, -1],
+            time_series["random attachment"][metric.replace("mean", "m")][:, -1],
+            time_series["small world"][metric.replace("mean", "m")][:, -1],
+        )
+        print(
+            f"Results of ANOVA test:\nThe F-statistic is: {fvalue}\nThe p-value is: {pvalue}"
+        )
+
+        df_pref = pd.DataFrame(
+            {
+                "score": time_series["preferential attachment"][
+                    metric.replace("mean", "m")
+                ][:, -1],
+                "group": "preferential attachment",
+            }
+        )
+        df_rand = pd.DataFrame(
+            {
+                "score": time_series["random attachment"][metric.replace("mean", "m")][
+                    :, -1
+                ],
+                "group": "random attachment",
+            }
+        )
+        df_sw = pd.DataFrame(
+            {
+                "score": time_series["small world"][metric.replace("mean", "m")][:, -1],
+                "group": "small world",
+            }
+        )
+
+        df = pd.concat([df_pref, df_rand, df_sw])
+        # perform Tukey's test
+        tukey = pairwise_tukeyhsd(endog=df["score"], groups=df["group"], alpha=0.05)
+        print(tukey)
+        print("\n")

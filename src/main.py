@@ -258,11 +258,11 @@ if args.phase_diagram:
 if args.compare_simulations:
     logger.info(f"The data used is {args.read_data}")
 
-    ratio_honest = 0.2
-    ratio_wolf = 0.2
+    ratio_honest = 0.9
+    ratio_wolf = 0.01
     n_groups = 1
-    repetition = 6
-    ith_collect = 250
+    repetition = 15
+    ith_collect = 1000
 
     meta_sim_pref = MetaSimulator(
         network_name=args.read_data,
