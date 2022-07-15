@@ -143,6 +143,64 @@ class TestMetaSimualtor:
         network = meta_sim.init_filtering(gt_network)
         assert network.vp.filtering, "Filtering attribute doesn't exists..."
 
+    @pytest.mark.essential
+    def test_create_population(self) -> None:
+        """Checks if the create populatio creates different graph each time."""
+        # Keep the ratio small so the test will be faster
+        # by adding less nodes
+        ratio_honest = 0.3
+        ratio_wolf = 0.1
+
+        # Test all the different attachment_method
+        meta_simulator_pref = MetaSimulator(
+            "montagna_calls",
+            "preferential",
+            ratio_honest,
+            ratio_wolf,
+        )
+        meta_simulator_rand = MetaSimulator(
+            "montagna_calls",
+            "random",
+            ratio_honest,
+            ratio_wolf,
+        )
+        meta_simulator_sw = MetaSimulator(
+            "montagna_calls",
+            "small-world",
+            ratio_honest,
+            ratio_wolf,
+        )
+        population_1_pref = meta_simulator_pref.create_population(
+            meta_simulator_pref.criminal_network
+        )
+        population_2_pref = meta_simulator_pref.create_population(
+            meta_simulator_pref.criminal_network
+        )
+        population_1_rand = meta_simulator_pref.create_population(
+            meta_simulator_rand.criminal_network
+        )
+        population_2_rand = meta_simulator_pref.create_population(
+            meta_simulator_rand.criminal_network
+        )
+        population_1_sw = meta_simulator_pref.create_population(
+            meta_simulator_sw.criminal_network
+        )
+        population_2_sw = meta_simulator_pref.create_population(
+            meta_simulator_sw.criminal_network
+        )
+
+        assert not gt.isomorphism(
+            population_1_pref, population_2_pref
+        ), "Should not be the same network"
+
+        assert not gt.isomorphism(
+            population_1_rand, population_2_rand
+        ), "Should not be the same network"
+
+        assert not gt.isomorphism(
+            population_1_sw, population_2_sw
+        ), "Should not be the same network"
+
 
 if __name__ == "__main__":
     main()

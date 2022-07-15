@@ -8,6 +8,7 @@ __author__ = Louis Weyland
 __date__ = 17/05/2022
 """
 import logging
+from copy import deepcopy
 from typing import Tuple
 
 import graph_tool.all as gt
@@ -58,11 +59,13 @@ class MetaSimulator:
         self.ratio_wolf = ratio_wolf
         self.ratio_criminal = 1 - self.ratio_honest - self.ratio_wolf
 
-        self.network = self.prepare_network(network_name)
-        self.network_name = self.network.gp.name
+        self.criminal_network = self.prepare_network(network_name)
+        self.network_name = self.criminal_network.gp.name
 
         # Network needs to have a base criminal network
-        self.n_criminal = len(gt.find_vertex(self.network, self.network.vp.state, "c"))
+        self.n_criminal = len(
+            gt.find_vertex(self.criminal_network, self.criminal_network.vp.state, "c")
+        )
         (
             self.new_nodes,
             self.total_number_nodes,
@@ -70,14 +73,13 @@ class MetaSimulator:
             self.relative_ratio_wolf,
         ) = self.compute_the_ratio(self.n_criminal)
 
-        # Add the new nodes
-        self.network = self.initialise_network(self.network, n_new_edges, prob, k)
+        # network property
+        self.n_new_edges = n_new_edges
+        self.k = k
+        self.prob = prob
+        self.random_fit_init = random_fit_init
 
-        # Init fitness
-        self.network = self.init_fitness(self.network, random_fit_init)
-
-        # Init filtering
-        self.network = self.init_filtering(self.network)
+        self.network = self.create_population(self.criminal_network)
 
     @property
     def name(self) -> str:
@@ -94,6 +96,18 @@ class MetaSimulator:
         gt_network = NetworkConverter.nx_to_gt(nx_network)
         assert gt_network.vp.state, "Network has no attribute state"
         return gt_network
+
+    def create_population(self, network: gt.Graph) -> gt.Graph:
+        """Create the population."""
+        # Add the new nodes
+        network = self.initialise_network(network, self.n_new_edges, self.prob, self.k)
+        # Init fitness
+        network = self.init_fitness(network, self.random_fit_init)
+        # Init age
+        network = self.init_age(network)
+        # Init filtering
+        network = self.init_filtering(network)
+        return network
 
     def compute_the_ratio(self, n_criminal: int) -> Tuple[int, int, float, float]:
         """Compute the number of nodes to add given the number of criminals.
@@ -121,17 +135,18 @@ class MetaSimulator:
         Thereby, the nodes are added based on the preferential attachment principle.
         Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
         """
+        new_network = deepcopy(network)
         if self.attachment_method == "preferential":
             new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
-                network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
+                new_network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
             )[0]
         elif self.attachment_method == "random":
             new_network = NetworkCombiner.combine_by_random_attachment_faster(
-                network, new_nodes=self.new_nodes, prob=prob
+                new_network, new_nodes=self.new_nodes, prob=prob
             )[0]
         elif self.attachment_method == "small-world":
             new_network = NetworkCombiner.combine_by_small_world_attachment(
-                network, new_nodes=self.new_nodes, k=k, prob=prob
+                new_network, new_nodes=self.new_nodes, k=k, prob=prob
             )[0]
         else:
             raise RuntimeError(
@@ -163,6 +178,15 @@ class MetaSimulator:
             if random_fit:
                 fitness.a = np.random.uniform(-50, 50, network.num_vertices())
             network.vertex_properties["fitness"] = fitness
+        return network
+
+    def init_age(self, network: gt.Graph) -> gt.Graph:
+        """Add the attribute age to the network."""
+        if "age" in network.vp:
+            return network
+        else:
+            age = network.new_vertex_property("double")
+            network.vertex_properties["age"] = age
         return network
 
     def init_filtering(self, network: gt.Graph) -> gt.Graph:
