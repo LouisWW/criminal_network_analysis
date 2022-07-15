@@ -98,9 +98,16 @@ class ConfigParser:
         parser.add_argument(
             "-compare-simulations",
             action="store_true",
-            help="""Defines to run a comparative analysis of the different simulations.""",
+            help="""Defines to run a comparative analysis of the different simulations.
+                    Thereby, for each repetition the same network is used """,
         )
 
+        parser.add_argument(
+            "-entirely-compare-simulations",
+            action="store_true",
+            help="""Defines to run a comparative analysis of the different simulations.
+                    Thereby, for each repetition an new network is created """,
+        )
         parser.add_argument(
             "-n-samples",
             type=int,

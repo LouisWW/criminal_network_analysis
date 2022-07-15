@@ -380,6 +380,125 @@ if args.compare_simulations:
         plot_std="True",
     )
 
+
+if args.entirely_compare_simulations:
+    logger.info(f"The data used is {args.read_data}")
+
+    ratio_honest = 0.9
+    ratio_wolf = 0.01
+    n_groups = 1
+    repetition = 15
+    ith_collect = 100
+
+    meta_sim_pref = MetaSimulator(
+        network_name=args.read_data,
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
+        n_new_edges=2,
+        attachment_method="preferential",
+    )
+    meta_sim_rand = MetaSimulator(
+        network_name=args.read_data,
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
+        prob=0.0034,
+        attachment_method="random",
+    )
+    meta_sim_sw = MetaSimulator(
+        network_name=args.read_data,
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
+        prob=0.6,
+        k=6,
+        attachment_method="small-world",
+    )
+
+    # Get overview of the new network
+    complete_network_stats_pref = NetworkStats(
+        NetworkConverter.gt_to_nk(meta_sim_pref.network)
+    )
+    complete_network_stats_rand = NetworkStats(
+        NetworkConverter.gt_to_nk(meta_sim_rand.network)
+    )
+    complete_network_stats_sw = NetworkStats(
+        NetworkConverter.gt_to_nk(meta_sim_sw.network)
+    )
+
+    complete_network_stats_pref.get_overview()
+    complete_network_stats_rand.get_overview()
+    complete_network_stats_sw.get_overview()
+
+    data_collector_pref = meta_sim_pref.avg_play(
+        rounds=args.rounds,
+        n_groups=n_groups,
+        repetition=repetition,
+        ith_collect=ith_collect,
+        measure_topology=True,
+    )
+    data_collector_rand = meta_sim_rand.avg_play(
+        rounds=args.rounds,
+        n_groups=n_groups,
+        repetition=repetition,
+        ith_collect=ith_collect,
+        measure_topology=True,
+    )
+    data_collector_sw = meta_sim_sw.avg_play(
+        rounds=args.rounds,
+        n_groups=n_groups,
+        repetition=repetition,
+        ith_collect=ith_collect,
+        measure_topology=True,
+    )
+
+    compare_time_series(
+        {
+            "preferential attachment": data_collector_pref,
+            "random attachment": data_collector_rand,
+            "small world": data_collector_sw,
+        }
+    )
+    ax = plotter.plot_lines_comparative(
+        {
+            "preferential attachment": data_collector_pref,
+            "random attachment": data_collector_rand,
+            "small world": data_collector_sw,
+        },
+        y_data_to_plot="mean_" + "security_efficiency",
+        x_data_to_plot="mean_iteration",
+        title="Running the analysis on different networks for each repetition",
+        xlabel="rounds",
+        ylabel="security_efficiency",
+        plot_std="True",
+    )
+
+    ax = plotter.plot_lines_comparative(
+        {
+            "preferential attachment": data_collector_pref,
+            "random attachment": data_collector_rand,
+            "small world": data_collector_sw,
+        },
+        y_data_to_plot="mean_" + "flow_information",
+        x_data_to_plot="mean_iteration",
+        title="Running the analysis on different networks for each repetition",
+        xlabel="rounds",
+        ylabel="flow_information",
+        plot_std="True",
+    )
+
+    ax = plotter.plot_lines_comparative(
+        {
+            "preferential attachment": data_collector_pref,
+            "random attachment": data_collector_rand,
+            "small world": data_collector_sw,
+        },
+        y_data_to_plot="mean_" + "size_of_largest_component",
+        x_data_to_plot="mean_iteration",
+        title="Running the analysis on different networks for each repetition",
+        xlabel="rounds",
+        ylabel="size_of_largest_component",
+        plot_std="True",
+    )
+
 if args.animate_simulation:
     """Create an animation of the simulation."""
     animateur = Animateur()

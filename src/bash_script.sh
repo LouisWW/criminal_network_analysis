@@ -17,4 +17,9 @@ nohup python3 main.py -read-data montagna_meetings -sa sim-mart-vaq -n-samples 1
 python3 main.py -phase-diag -read-data montagna_calls -save
 
 # Run a comparison analysis on the topology using different network configuration
+# Thereby, for each indv simulation, the same network is used
 python3 main.py -read-data -compare-simulations -r 800
+
+# Run a comparison analysis on the topology using different network configruation
+# Thereby, for each indv simulation a new network is created
+python3 main.py -read-data -entirely-compare-simulations -r 800
