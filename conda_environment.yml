@@ -39,3 +39,4 @@ dependencies:
     - graphviz
     - gprof2dot
     - statsmodel
+    - similaritymeasures
