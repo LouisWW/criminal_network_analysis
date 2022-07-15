@@ -7,6 +7,8 @@ from collections import defaultdict
 from typing import DefaultDict
 from typing import List
 from unittest import main
+from unittest.mock import Mock
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -65,12 +67,18 @@ class TestStats:
         ).all(), "Mean is not computed correctly"
 
     @pytest.mark.essential
+    @patch("builtins.print")
     def test_compare_time_series(
-        self, fake_topological_data: DefaultDict[str, DefaultDict[str, List[int]]]
+        self,
+        mocked_print: Mock,
+        fake_topological_data: DefaultDict[str, DefaultDict[str, List[int]]],
     ) -> None:
         """Test if the time-series comparison/anova test is working."""
         compare_time_series(fake_topological_data)
-        assert 0
+        assert (
+            "('preferential attachment', 'small world')         : frechet_dist"
+            in mocked_print.mock_calls[1].args[0]
+        )
 
 
 if __name__ == "__main__":

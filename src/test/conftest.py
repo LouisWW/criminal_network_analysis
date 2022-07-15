@@ -11,6 +11,7 @@ __author__ = Louis Weyland
 __date__   = 23/02/2022
 """
 from collections import defaultdict
+from typing import Any
 from typing import DefaultDict
 from typing import Dict
 from typing import List
@@ -137,18 +138,24 @@ def create_gt_network_session(create_networkx: nx.Graph) -> gt.Graph:
 
 
 @pytest.fixture(scope="session")
-def fake_topological_data() -> Dict[str, DefaultDict[str, List[int]]]:
+def fake_topological_data() -> Dict[str, DefaultDict[str, List[Any]]]:
     """Create fake topological data."""
     # create fake data
     fake_data = {}
-    for key in ["preferential_attachment", "small-world", "random attachment"]:
-        data_collector = defaultdict(list)  # type: DefaultDict[str, List[int]]
+    for key in ["preferential attachment", "small world", "random attachment"]:
+        data_collector = defaultdict(list)  # type: DefaultDict[str, Any]
         loc, scale = np.random.randint(0, 10), np.random.randint(0, 10)
         data_collector["mean_security_efficiency"] = list(
             np.random.logistic(loc, scale, 10) * np.random.randint(0, 10)
         )
+        data_collector["m_security_efficiency"] = np.random.random((10, 10))
+
         data_collector["mean_information"] = list(np.ones(10))
+        data_collector["m_information"] = np.random.random((10, 10))
+
         data_collector["mean_gcs"] = list(np.ones(10) * 5)
+        data_collector["m_gcs"] = np.random.random((10, 10))
+
         data_collector["mean_iteration"] = list(range(0, 10))
         data_collector["std_security_efficiency"] = list(
             np.random.normal(1, 50, size=10)
