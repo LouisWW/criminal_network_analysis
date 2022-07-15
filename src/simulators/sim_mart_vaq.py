@@ -128,6 +128,7 @@ class SimMartVaq:
         n_groups: int = 20,
         ith_collect: int = 20,
         measure_topology: bool = False,
+        measure_likelihood_corr:bool = False
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
@@ -151,6 +152,7 @@ class SimMartVaq:
                     "security_efficiency",
                     "flow_information",
                     "size_of_largest_component",
+                    "age"
                 )
             },
         )  # type: DefaultDict[str, List[Any]]
@@ -194,6 +196,9 @@ class SimMartVaq:
                 network = self.evolutionary_stage(
                     network, slct_pers_evol, group_members_evol
                 )
+                
+            if measure_likelihood_corr:
+                network =self.update_age(network)
 
             # Collect the data
             if i % ith_collect == 0 or i == 1:
@@ -233,6 +238,11 @@ class SimMartVaq:
 
                     # Unfilter the network back to its initial configuration
                     NetworkExtractor.un_filter_criminal_network(network)
+           
+                
+        # Add a df with the likelihood of being a criminal and the node centrality
+        if measure_likelihood_corr:
+            data_collector["likelihood_corr_df"] = self.create_likelihood_corr_df(network)
 
         return network, data_collector
 
@@ -763,7 +773,47 @@ class SimMartVaq:
         else:
             return True
         return None
+    
+    def update_age(self, network:gt.Graph) -> np.array:
+        """Update the age of a criminal node.
+        
+        Basically, count how many rounds a node has a criminal status criminal
+        """
+        for node in range(0,network.num_vertices()):
+            if network.vp.state[network.vertex(node)] == 'c':
+                network.vp.age[network.vertex(node)] += 1
 
+
+    def create_likelihood_corr_df(self, network:gt.Graph) -> pd.DataFrame:
+        """Create a DataFrame of nodes likhelihood of being a criminal and its characterisitcs."""
+        network,_ = NodeStats.get_eigenvector_centrality(network)
+        network,_ = NodeStats.get_betweenness(network)
+        network,_ = NodeStats.get_closeness(network)
+        network,_ = NodeStats.get_katz(network)
+        
+        df = pd.DataFrame(columns=['criminal_likelihood',
+                                    'degree',
+                                    'betweenness',
+                                    'katz',
+                                    'closeness',
+                                    eigen_v]) 
+        
+        for node in range(0,network.num_vertices()):
+            age = network.vp.age[network.vertex(node)]
+            degree = network.get_total_degrees(network.vertex(node))
+            btw = network.vp.betweenness[network.vertex(node)]
+            cls = network.vp.closeness[network.vertex(node)]
+            katz= network.vp.katz[network.vertex(node)]
+            eign_v = network.vp.eigen_v[network.vertex(node)]
+            
+            df.append({'criminal_likelihood': age, 
+                        'degree': degree,
+                        'betweenness': btw,
+                        'katz': katz,
+                        'closeness':cls,
+                        'eigen_v':eign_v}, ignore_index=True)
+        
+        
     def mean_group_size(self, radius: int, min_grp: int, max_grp: int) -> int:
         """Compute the mean average groupe size."""
         group_size_data_collector = defaultdict(
