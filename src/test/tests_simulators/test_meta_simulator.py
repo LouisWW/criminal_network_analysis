@@ -2,6 +2,7 @@
 from unittest import main
 
 import graph_tool.all as gt
+import numpy as np
 import pytest
 from simulators.meta_simulator import MetaSimulator
 
@@ -200,6 +201,44 @@ class TestMetaSimualtor:
         assert not gt.isomorphism(
             population_1_sw, population_2_sw
         ), "Should not be the same network"
+
+    @pytest.mark.essential
+    def test_avg_play(self) -> None:
+        """Test if avg_play function is working correctly."""
+        ratio_honest = 0.3
+        ratio_wolf = 0.1
+        rounds = 20
+
+        # Test all the different attachment_method
+        meta_simulator_pref = MetaSimulator(
+            "montagna_calls",
+            "random",
+            ratio_honest,
+            ratio_wolf,
+        )
+        data = meta_simulator_pref.avg_play(rounds=rounds, repetition=10, ith_collect=1)
+
+        assert "mean_ratio_criminal" in data.keys(), "Key not found"
+        assert "mean_ratio_honest" in data.keys(), "Key not found"
+        assert "mean_ratio_wolf" in data.keys(), "Key not found"
+        assert "std_ratio_criminal" in data.keys(), "Key not found"
+        assert "std_ratio_honest" in data.keys(), "Key not found"
+        assert "std_ratio_wolf" in data.keys(), "Key not found"
+
+        assert len(data["mean_ratio_criminal"]) != 0, "Key not found"
+        assert len(data["mean_ratio_honest"]) != 0, "Key not found"
+        assert len(data["mean_ratio_wolf"]) != 0, "Key not found"
+        assert len(data["std_ratio_criminal"]) != 0, "Key not found"
+        assert len(data["std_ratio_honest"]) != 0, "Key not found"
+        assert len(data["std_ratio_wolf"]) != 0, "Key not found"
+
+        sim_1 = data["0"]["ratio_criminal"]
+        sim_2 = data["2"]["ratio_criminal"]
+        assert not np.array_equal(
+            np.array(sim_1), np.array(sim_2)
+        ), "Two simulations were identical...."
+
+        assert 0
 
 
 if __name__ == "__main__":

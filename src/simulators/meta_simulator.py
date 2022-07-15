@@ -8,15 +8,25 @@ __author__ = Louis Weyland
 __date__ = 17/05/2022
 """
 import logging
+import multiprocessing
+import random
+from collections import defaultdict
 from copy import deepcopy
+from typing import Any
+from typing import DefaultDict
+from typing import List
 from typing import Tuple
+from typing import Union
 
 import graph_tool.all as gt
 import numpy as np
 from network_utils.network_combiner import NetworkCombiner
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
+from p_tqdm import p_umap
+from simulators.sim_mart_vaq import SimMartVaq
 from tqdm import tqdm
+from utils.stats import get_mean_std_over_list
 
 
 logger = logging.getLogger("logger")
@@ -200,3 +210,88 @@ class MetaSimulator:
             filtering = network.new_vertex_property("bool")
             network.vertex_properties["filtering"] = filtering
         return network
+
+    def avg_play(
+        self,
+        rounds: int = 1,
+        n_groups: int = 20,
+        ith_collect: int = 20,
+        repetition: int = 20,
+        measure_topology: bool = False,
+    ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
+        """Get the average results of the simulation given the parameters.
+
+        Same as the avg_play function from sim_mart_vaq.py
+        The difference is that instead of running the simulation n (number of repetition) times
+        on the same network, the simulation is run once on n (number of repetition) networks
+        Args:
+            rounds (int, optional): Rounds to play in the simulation. Defaults to 1.
+            n_groups (int,optional): Number of groups to form each round
+            repetition (int, optional): number of repetition of the simulation. Defaults to 20.
+
+        Returns:
+            DefaultDict[Union[int, str], Union[DefaultDict,List[Any]]]:
+                                                            Returns network and collected data.
+        """
+        # Running multiprocessing
+        # If repetition are less than number of cores
+        # then don't use all the cores
+        if repetition < multiprocessing.cpu_count() - 1:
+            num_cpus = repetition
+        else:
+            num_cpus = multiprocessing.cpu_count() - 1
+
+        results = p_umap(
+            self.avg_play_help,
+            (
+                [
+                    # arguments need to be in this order
+                    (rounds, n_groups, ith_collect, measure_topology)
+                    for i in range(0, repetition)
+                ]
+            ),
+            **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
+        )
+
+        # merge results in a dict
+        data_collector = defaultdict(list)
+        for i, k in enumerate(results):
+            data_collector[str(i)] = k
+
+        # Data over the different rounds is averaged and std is computed
+        averaged_dict = get_mean_std_over_list(data_collector)
+        return averaged_dict
+
+    def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
+        """Help for the avg_play to return only the default dict."""
+        # Set the seed each time, otherwise the simulation will be exactly the same
+        random.seed()
+        np.random.seed()
+        rounds, n_groups, ith_collect, measure_topology = tuple_of_variable
+
+        network = self.create_population(self.criminal_network)
+        print(
+            f"density {(2*network.num_edges())/(network.num_vertices()*(network.num_vertices()-1))}"
+        )
+        assert not network == self.criminal_network, "Shouldn't be the same network"
+        simulators = SimMartVaq(
+            network=network,
+            delta=0.7,  # no acting for wolfs
+            gamma=0.8,
+            tau=0.1,  # no fitness sharing between wolf to criminal
+            beta_s=5,
+            beta_h=5,
+            beta_c=5,
+            c_c=1,  # no benefits from criminals/ they still act
+            r_c=1,
+            c_w=1,
+            r_w=1,
+            r_h=1,
+            temperature=10,
+            mutation_prob=0.0001,  # only fermi function
+        )
+
+        _, data_collector = simulators.play(
+            simulators.network, rounds, n_groups, ith_collect, measure_topology
+        )
+        return data_collector
