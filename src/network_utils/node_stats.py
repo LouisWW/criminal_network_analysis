@@ -28,36 +28,43 @@ class NodeStats:
         """Get the katz score for each node."""
         # Initialize algorithm
         katz = gt.katz(network)
-        return katz
+        network.vertex_properties["katz"] = katz
+        return network, katz
 
     @staticmethod
     def get_betweenness(network: gt.Graph) -> Tuple[VertexPropertyMap, EdgePropertyMap]:
         """Return betweeness centrality."""
-        btwn = gt.betweenness(network)
-        return btwn
+        btwn, _ = gt.betweenness(network)
+        network.vertex_properties["betweenness"] = btwn
+        return network, btwn
 
     @staticmethod
     def get_closeness(network: gt.Graph) -> VertexPropertyMap:
         """Return the closeness of a node."""
-        closness = gt.closeness(network)
-        return closness
+        closeness = gt.closeness(network)
+        network.vertex_properties["closeness"] = closeness
+        return network, closeness
 
     @staticmethod
     def get_eigenvector_centrality(
         network: gt.Graph,
     ) -> Tuple[float, VertexPropertyMap]:
         """Get the eigenvector centrality of a node."""
-        eigen_v = gt.eigenvector(network)
-        return eigen_v
+        (
+            _,
+            eigen_v,
+        ) = gt.eigenvector(network)
+        network.vertex_properties["eigen_v"] = eigen_v
+        return network, eigen_v
 
     @staticmethod
     def get_central_dominance(
         network: gt.GraphPropertyMap, betweenness: VertexPropertyMap
     ) -> float:
         """Get the central point dominace."""
-        vertex, _ = betweenness
-        central_dominace = gt.central_point_dominance(network, vertex)
-        return central_dominace
+        vertex = betweenness
+        central_dominance = gt.central_point_dominance(network, vertex)
+        return central_dominance
 
     # @staticmethod
     # def get_eccentricity(network: nk.Graph) -> Sequence[Tuple[int, int]]:
