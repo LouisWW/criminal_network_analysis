@@ -41,7 +41,10 @@ def get_mean_std_over_list(
         raise
 
     repetition = len(data_collector.keys())
-    for key in data_collector["0"].keys():
+    keys = list(data_collector["0"].keys())
+    if "df" in keys:
+        keys.remove("df")
+    for key in keys:
         m = np.zeros((repetition, len(data_collector["0"][key])))
         for i in range(0, repetition):
             # Matrix repetition x rounds
@@ -50,6 +53,31 @@ def get_mean_std_over_list(
         data_collector["mean_" + key] = np.mean(m, axis=0)
         data_collector["std_" + key] = np.std(m, axis=0)
         data_collector["m_" + key] = m
+
+    return data_collector
+
+
+def concat_df(
+    data_collector: DefaultDict,
+) -> DefaultDict[str, Union[DefaultDict, List[Any]]]:
+    """Concates the different pandasDataFrame to one.
+
+    Args:
+        data_collector (DefaultDict): Contains all the data,each main key respresent the
+                                        repetition number. In other words, the data is
+                                        averaged over all the repetition.
+
+    Returns:
+        DefaultDict[Union[int, str], Union[DefaultDict, List[Any]]]:
+                            Returns next to the data also the mean and float for each data
+    """
+    repetition = len(data_collector.keys())
+    if len(data_collector["0"]["df"]) > 0:
+        list_of_dfs = []
+        for i in range(0, repetition):
+            list_of_dfs.append(data_collector[str(i)]["df"])
+        df_total = pd.concat(list_of_dfs)
+        data_collector["df_total"] = df_total
 
     return data_collector
 
@@ -83,19 +111,23 @@ def compare_time_series(
 
                 if method == "pmc":
                     print(
-                        f"{str(comb):50} : {'pcm':12} {similaritymeasures.pcm(time_serie_a,time_serie_b)}"
+                        f"{str(comb):50} : {'pcm':12} \
+                        {similaritymeasures.pcm(time_serie_a,time_serie_b)}"
                     )
                 elif method == "frechet_dist":
                     print(
-                        f"{str(comb):50} : {'frechet_dist':12} {similaritymeasures.frechet_dist(time_serie_a,time_serie_b)}"
+                        f"{str(comb):50} : {'frechet_dist':12} \
+                            {similaritymeasures.frechet_dist(time_serie_a,time_serie_b)}"
                     )
                 elif method == "area_between_two_curves":
                     print(
-                        f"{str(comb):50} : {'area':12} {similaritymeasures.area_between_two_curves(time_serie_a,time_serie_b)}"
+                        f"{str(comb):50} : {'area':12} \
+                            {similaritymeasures.area_between_two_curves(time_serie_a,time_serie_b)}"
                     )
                 elif method == "dtw":
                     print(
-                        f"{str(comb):50} : {'dtw':12} {similaritymeasures.dtw(time_serie_a,time_serie_b)[0]}"
+                        f"{str(comb):50} : {'dtw':12} \
+                            {similaritymeasures.dtw(time_serie_a,time_serie_b)[0]}"
                     )
         print(30 * "-")
 

@@ -10,6 +10,9 @@
 # Run normal simulation
 python3 main.py -sim-mart-vaq -read-data montagna_calls -attach-meth preferential -save
 
+# Run normal simulation, each repetition on a new network
+python3 main.py -entirely-sim-mart-vaq -read-data montagna_calls -attach-meth preferential -save
+
 # Run the sensitivity analysis
 nohup python3 main.py -read-data montagna_meetings -sa sim-mart-vaq -n-samples 1024  -r 3000 -output-value ratio_criminal -save &
 

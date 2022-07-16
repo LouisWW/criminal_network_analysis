@@ -737,6 +737,35 @@ class TestSimMartVaq:
         ), "Collectors keep collecting same value..."
 
     @pytest.mark.essential
+    def test_play_likelihood_collect(self, meta_simulator_network: gt.Graph) -> None:
+        """Test if the play function is working while collecting likelihood."""
+        # Play the simulation
+        rounds = 100
+        simulator = SimMartVaq(meta_simulator_network)
+        network, data_collector = simulator.play(
+            simulator.network,
+            rounds=rounds,
+            ith_collect=1,
+            measure_likelihood_corr=True,
+        )
+
+        # check if the dataframe is correct
+        assert {
+                "criminal_likelihood",
+                "degree",
+                "betweenness",
+                "katz",
+                "closeness",
+                "eigen_v",
+        }.issubset(data_collector["df"].columns)
+
+        assert not (data_collector["df"]["criminal_likelihood"] == 0).all()
+        assert not data_collector["df"]["degree"].isnull().values.any()
+        assert not data_collector["df"]["betweenness"].isnull().values.any()
+        assert not data_collector["df"]["katz"].isnull().values.any()
+        assert not data_collector["df"]["closeness"].isnull().values.any()
+
+    @pytest.mark.essential
     def test_avg_play(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the play function is working."""
         # Play the simulation

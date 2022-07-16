@@ -32,6 +32,7 @@ graphviz = "*"
 gprof2dot = "*"
 statsmodel = "*"
 similaritymeasures = "*"
+statsmodels = "*"
 
 [dev-packages]
 ipykernel = "*"

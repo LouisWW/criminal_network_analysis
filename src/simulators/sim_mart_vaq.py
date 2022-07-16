@@ -29,6 +29,7 @@ from network_utils.node_stats import NodeStats
 from p_tqdm import p_umap
 from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
+from utils.stats import concat_df
 from utils.stats import get_mean_std_over_list
 
 # suppress warnings
@@ -52,7 +53,7 @@ class SimMartVaq:
         c_c: int = 1,
         r_w: int = 1,
         r_c: int = 1,
-        r_h: int = 1,
+        r_h: int = 0,
         temperature: float = 10,
         mutation_prob: float = 0.0001,
     ) -> None:
@@ -128,7 +129,7 @@ class SimMartVaq:
         n_groups: int = 20,
         ith_collect: int = 20,
         measure_topology: bool = False,
-        measure_likelihood_corr:bool = False
+        measure_likelihood_corr: bool = False,
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
@@ -152,7 +153,7 @@ class SimMartVaq:
                     "security_efficiency",
                     "flow_information",
                     "size_of_largest_component",
-                    "age"
+                    "df",
                 )
             },
         )  # type: DefaultDict[str, List[Any]]
@@ -196,9 +197,9 @@ class SimMartVaq:
                 network = self.evolutionary_stage(
                     network, slct_pers_evol, group_members_evol
                 )
-                
+
             if measure_likelihood_corr:
-                network =self.update_age(network)
+                network = self.update_age(network)
 
             # Collect the data
             if i % ith_collect == 0 or i == 1:
@@ -238,27 +239,27 @@ class SimMartVaq:
 
                     # Unfilter the network back to its initial configuration
                     NetworkExtractor.un_filter_criminal_network(network)
-           
-                
+
         # Add a df with the likelihood of being a criminal and the node centrality
         if measure_likelihood_corr:
-            data_collector["likelihood_corr_df"] = self.create_likelihood_corr_df(network)
+            data_collector["df"] = self.create_likelihood_corr_df(network)
 
         return network, data_collector
 
     def avg_play(
         self,
-        network: gt.Graph,
+        network: Union[gt.Graph, List[gt.Graph]],
         rounds: int = 1,
         n_groups: int = 20,
         ith_collect: int = 20,
         repetition: int = 20,
         measure_topology: bool = False,
+        measure_likelihood_corr: bool = False,
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
         Args:
-            network (gt.Graph): criminal network
+            network (gt.Graph, List): population or list of population
             rounds (int, optional): Rounds to play in the simulation. Defaults to 1.
             n_groups (int,optional): Number of groups to form each round
             repetition (int, optional): number of repetition of the simulation. Defaults to 20.
@@ -275,18 +276,44 @@ class SimMartVaq:
         else:
             num_cpus = multiprocessing.cpu_count() - 1
 
-        results = p_umap(
-            self.avg_play_help,
-            (
-                [
-                    # arguments need to be in this order
-                    (network, rounds, n_groups, ith_collect, measure_topology)
-                    for i in range(0, repetition)
-                ]
-            ),
-            **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
-        )
-
+        if isinstance(network, gt.Graph):
+            results = p_umap(
+                self.avg_play_help,
+                (
+                    [
+                        # arguments need to be in this order
+                        (
+                            network,
+                            rounds,
+                            n_groups,
+                            ith_collect,
+                            measure_topology,
+                            measure_likelihood_corr,
+                        )
+                        for i in range(0, repetition)
+                    ]
+                ),
+                **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
+            )
+        elif isinstance(network, list):
+            results = p_umap(
+                self.avg_play_help,
+                (
+                    [
+                        # arguments need to be in this order
+                        (
+                            network[i],
+                            rounds,
+                            n_groups,
+                            ith_collect,
+                            measure_topology,
+                            measure_likelihood_corr,
+                        )
+                        for i in range(0, repetition)
+                    ]
+                ),
+                **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
+            )
         # merge results in a dict
         data_collector = defaultdict(list)
         for i, k in enumerate(results):
@@ -294,15 +321,28 @@ class SimMartVaq:
 
         # Data over the different rounds is averaged and std is computed
         averaged_dict = get_mean_std_over_list(data_collector)
+        averaged_dict = concat_df(averaged_dict)
         return averaged_dict
 
     def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
         """Help for the avg_play to return only the default dict."""
         # Set the seed each time, otherwise the simulation will be exactly the same
         random.seed()
-        network, rounds, n_groups, ith_collect, measure_topology = tuple_of_variable
+        (
+            network,
+            rounds,
+            n_groups,
+            ith_collect,
+            measure_topology,
+            measure_likelihood_corr,
+        ) = tuple_of_variable
         _, data_collector = self.play(
-            network, rounds, n_groups, ith_collect, measure_topology
+            network,
+            rounds,
+            n_groups,
+            ith_collect,
+            measure_topology,
+            measure_likelihood_corr,
         )
         return data_collector
 
@@ -773,47 +813,57 @@ class SimMartVaq:
         else:
             return True
         return None
-    
-    def update_age(self, network:gt.Graph) -> np.array:
+
+    def update_age(self, network: gt.Graph) -> gt.Graph:
         """Update the age of a criminal node.
-        
+
         Basically, count how many rounds a node has a criminal status criminal
         """
-        for node in range(0,network.num_vertices()):
-            if network.vp.state[network.vertex(node)] == 'c':
+        for node in range(0, network.num_vertices()):
+            if network.vp.state[network.vertex(node)] == "c":
                 network.vp.age[network.vertex(node)] += 1
 
+        return network
 
-    def create_likelihood_corr_df(self, network:gt.Graph) -> pd.DataFrame:
+    def create_likelihood_corr_df(self, network: gt.Graph) -> pd.DataFrame:
         """Create a DataFrame of nodes likhelihood of being a criminal and its characterisitcs."""
-        network,_ = NodeStats.get_eigenvector_centrality(network)
-        network,_ = NodeStats.get_betweenness(network)
-        network,_ = NodeStats.get_closeness(network)
-        network,_ = NodeStats.get_katz(network)
-        
-        df = pd.DataFrame(columns=['criminal_likelihood',
-                                    'degree',
-                                    'betweenness',
-                                    'katz',
-                                    'closeness',
-                                    eigen_v]) 
-        
-        for node in range(0,network.num_vertices()):
+        network, _ = NodeStats.get_eigenvector_centrality(network)
+        network, _ = NodeStats.get_betweenness(network)
+        network, _ = NodeStats.get_closeness(network)
+        network, _ = NodeStats.get_katz(network)
+
+        df = pd.DataFrame(
+            columns=[
+                "criminal_likelihood",
+                "degree",
+                "betweenness",
+                "katz",
+                "closeness",
+                "eigen_v",
+            ]
+        )
+
+        for node in range(0, network.num_vertices()):
             age = network.vp.age[network.vertex(node)]
-            degree = network.get_total_degrees(network.vertex(node))
+            degree = network.get_total_degrees([network.vertex(node)])[0]
             btw = network.vp.betweenness[network.vertex(node)]
             cls = network.vp.closeness[network.vertex(node)]
-            katz= network.vp.katz[network.vertex(node)]
+            katz = network.vp.katz[network.vertex(node)]
             eign_v = network.vp.eigen_v[network.vertex(node)]
-            
-            df.append({'criminal_likelihood': age, 
-                        'degree': degree,
-                        'betweenness': btw,
-                        'katz': katz,
-                        'closeness':cls,
-                        'eigen_v':eign_v}, ignore_index=True)
-        
-        
+
+            df = df.append(
+                {
+                    "criminal_likelihood": age,
+                    "degree": degree,
+                    "betweenness": btw,
+                    "katz": katz,
+                    "closeness": cls,
+                    "eigen_v": eign_v,
+                },
+                ignore_index=True,
+            )
+        return df
+
     def mean_group_size(self, radius: int, min_grp: int, max_grp: int) -> int:
         """Compute the mean average groupe size."""
         group_size_data_collector = defaultdict(

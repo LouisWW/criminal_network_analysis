@@ -56,7 +56,7 @@ if args.sim_mart_vaq:
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
         attachment_method=args.attach_meth,
-        ratio_honest=0.1,
+        ratio_honest=0.9,
         ratio_wolf=0.01,
         random_fit_init=False,
     )
@@ -66,24 +66,24 @@ if args.sim_mart_vaq:
         delta=0.7,  # no acting for wolfs
         gamma=0.8,
         tau=0.1,  # no fitness sharing between wolf to criminal
-        beta_s=5,
-        beta_h=5,
+        beta_s=1,
+        beta_h=2,
         beta_c=5,
         c_c=1,  # no benefits from criminals/ they still act
         r_c=1,
         c_w=1,
         r_w=1,
-        r_h=1,
+        r_h=0,
         temperature=10,
         mutation_prob=0.0001,  # only fermi function
     )
     data_collector = simulators.avg_play(
         network=simulators.network,
-        rounds=200,
+        rounds=2000,
         n_groups=1,
-        ith_collect=50,
-        repetition=5,
-        measure_topology=True,
+        ith_collect=100,
+        repetition=150,
+        measure_topology=False,
     )
 
     ax_0 = plotter.plot_lines(
@@ -106,6 +106,82 @@ if args.sim_mart_vaq:
     meta = PngImagePlugin.PngInfo()
     for x in simulators_str_dict:
         meta.add_text(x, simulators_str_dict[x])
+
+    if args.save:
+        fig_name = plotter.savig_dir + "population_ration_" + timestamp + ".png"
+        plt.savefig(fig_name, dpi=300)
+        # Add the meta data to it
+        im = Image.open(fig_name)
+        im.save(fig_name, "png", pnginfo=meta)
+    else:
+        plt.show()
+
+    ax_1 = plotter.plot_lines(
+        dict_data=data_collector,
+        y_data_to_plot=[
+            "mean_fitness_honest",
+            "mean_fitness_wolf",
+            "mean_fitness_criminal",
+        ],
+        x_data_to_plot="mean_iteration",
+        xlabel="Rounds",
+        ylabel="Average fitness",
+    )
+
+    if args.save:
+        fig_name = plotter.savig_dir + "fitness_evol_" + timestamp + ".png"
+        plt.savefig(fig_name, dpi=300)
+        # Add the meta to it
+        im = Image.open(fig_name)
+        im.save(fig_name, "png", pnginfo=meta)
+    else:
+        plt.show()
+
+if args.entirely_sim_mart_vaq:
+    """Simulate the simulation form
+    Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
+    Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
+    """
+    # Get actual criminal network
+    nx_network = NetworkReader().get_data(args.read_data)
+    logger.info(f"The data used is {nx_network.name}")
+
+    # Add nodes to network
+    # First convert to gt
+    meta_sim = MetaSimulator(
+        network_name=nx_network.name,
+        attachment_method=args.attach_meth,
+        ratio_honest=0.9,
+        ratio_wolf=0.01,
+        random_fit_init=False,
+    )
+
+    data_collector = meta_sim.avg_play(
+        rounds=2000,
+        n_groups=1,
+        ith_collect=100,
+        repetition=15,
+        measure_topology=False,
+    )
+
+    ax_0 = plotter.plot_lines(
+        dict_data=data_collector,
+        y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
+        x_data_to_plot="mean_iteration",
+        xlabel="Rounds",
+        ylabel="Ratio",
+        plot_std=True,
+    )
+
+    e = datetime.datetime.now()
+    timestamp = e.strftime("%d-%m-%Y-%H-%M")
+
+    meta_str_sim = dict(
+        {str(key): str(value) for key, value in meta_sim.__dict__.items()}
+    )
+    meta = PngImagePlugin.PngInfo()
+    for x in meta_str_sim:
+        meta.add_text(x, meta_str_sim[x])
 
     if args.save:
         fig_name = plotter.savig_dir + "population_ration_" + timestamp + ".png"
