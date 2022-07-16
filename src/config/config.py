@@ -64,7 +64,15 @@ class ConfigParser:
         parser.add_argument(
             "-sim-mart-vaq",
             action="store_true",
-            help="""Defines if the simulation based on Martiez-Vaquero is run.""",
+            help="""Defines if the simulation based on Martiez-Vaquero is run.
+                    Thereby, for each repetition the same network is used.""",
+        )
+
+        parser.add_argument(
+            "-entirely-sim-mart-vaq",
+            action="store_true",
+            help="""Defines if the simulation based on Martiez-Vaquero is run.
+                    Thereby, for each repetition an new network is created.""",
         )
 
         parser.add_argument(
@@ -99,14 +107,14 @@ class ConfigParser:
             "-compare-simulations",
             action="store_true",
             help="""Defines to run a comparative analysis of the different simulations.
-                    Thereby, for each repetition the same network is used """,
+                    Thereby, for each repetition the same network is used.""",
         )
 
         parser.add_argument(
             "-entirely-compare-simulations",
             action="store_true",
             help="""Defines to run a comparative analysis of the different simulations.
-                    Thereby, for each repetition an new network is created """,
+                    Thereby, for each repetition an new network is created.""",
         )
         parser.add_argument(
             "-n-samples",

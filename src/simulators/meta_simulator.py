@@ -8,7 +8,6 @@ __author__ = Louis Weyland
 __date__ = 17/05/2022
 """
 import logging
-import multiprocessing
 import random
 from collections import defaultdict
 from copy import deepcopy
@@ -236,10 +235,7 @@ class MetaSimulator:
         # Running multiprocessing
         # If repetition are less than number of cores
         # then don't use all the cores
-        if repetition < multiprocessing.cpu_count() - 1:
-            num_cpus = repetition
-        else:
-            num_cpus = multiprocessing.cpu_count() - 1
+        num_cpus = 1
 
         results = p_umap(
             self.avg_play_help,
@@ -270,9 +266,6 @@ class MetaSimulator:
         rounds, n_groups, ith_collect, measure_topology = tuple_of_variable
 
         network = self.create_population(self.criminal_network)
-        print(
-            f"density {(2*network.num_edges())/(network.num_vertices()*(network.num_vertices()-1))}"
-        )
         assert not network == self.criminal_network, "Shouldn't be the same network"
         simulators = SimMartVaq(
             network=network,

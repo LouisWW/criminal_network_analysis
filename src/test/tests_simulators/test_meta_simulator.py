@@ -238,8 +238,6 @@ class TestMetaSimualtor:
             np.array(sim_1), np.array(sim_2)
         ), "Two simulations were identical...."
 
-        assert 0
-
 
 if __name__ == "__main__":
     main()
