@@ -8,7 +8,6 @@ __author__ = Louis Weyland
 __date__ = 17/05/2022
 """
 import logging
-
 from copy import deepcopy
 from typing import Any
 from typing import DefaultDict

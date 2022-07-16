@@ -10,6 +10,7 @@ from hypothesis import assume
 from hypothesis import given
 from hypothesis import strategies as st
 from simulators.sim_mart_vaq import SimMartVaq
+from src.simulators.meta_simulator import MetaSimulator
 
 
 class TestSimMartVaq:
@@ -751,12 +752,12 @@ class TestSimMartVaq:
 
         # check if the dataframe is correct
         assert {
-                "criminal_likelihood",
-                "degree",
-                "betweenness",
-                "katz",
-                "closeness",
-                "eigen_v",
+            "criminal_likelihood",
+            "degree",
+            "betweenness",
+            "katz",
+            "closeness",
+            "eigen_v",
         }.issubset(data_collector["df"].columns)
 
         assert not (data_collector["df"]["criminal_likelihood"] == 0).all()
@@ -794,6 +795,23 @@ class TestSimMartVaq:
         assert not np.array_equal(
             np.array(sim_1), np.array(sim_2)
         ), "Two simulations were identical...."
+
+    @pytest.mark.essential
+    def test_avg_play_likelihood_collect(self, meta_simulator: MetaSimulator) -> None:
+        """Test if the play function is working."""
+        # Play the simulation
+        rounds = 20
+        repetition = 5
+        simulator = SimMartVaq(meta_simulator.network)
+        networks = [
+            meta_simulator.create_population(meta_simulator.criminal_network)
+            for i in range(0, repetition)
+        ]
+
+        data = simulator.avg_play(
+            networks, rounds=rounds, repetition=repetition, ith_collect=1
+        )
+        assert len(data["df_total"]) == simulator.network.num_vertices() * repetition
 
     @pytest.mark.essential
     def test_scenario_1(self, meta_simulator_network: gt.Graph) -> None:

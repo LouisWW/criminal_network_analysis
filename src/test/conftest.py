@@ -114,6 +114,20 @@ def meta_simulator_network() -> gt.Graph:
 
 
 @pytest.fixture(scope="function")
+def meta_simulator() -> gt.Graph:
+    """Return the graph from the MetaSimulator obj.
+
+    In comparison to the gt_network_function, it will return
+    the complete network with honest and wolf nodes
+    """
+    np.random.seed(0)
+    meta_sim = MetaSimulator(
+        "montagna_calls", ratio_honest=0.8, attachment_method="preferential"
+    )
+    return meta_sim
+
+
+@pytest.fixture(scope="function")
 def bigger_gt_network(random_network: nk.Graph) -> gt.Graph:
     """Return a bigger gt network."""
     gt_network = NetworkConverter.nk_to_gt(random_network)
