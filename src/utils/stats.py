@@ -40,7 +40,7 @@ def get_mean_std_over_list(
         print("Wrong keys were given to the function.")
         raise
 
-    repetition = len(data_collector.keys())
+    repetition = len([s for s in data_collector.keys() if s.isdigit()])
     keys = list(data_collector["0"].keys())
     if "df" in keys:
         keys.remove("df")
@@ -58,7 +58,7 @@ def get_mean_std_over_list(
 
 
 def concat_df(
-    data_collector: DefaultDict,
+    data_collector: DefaultDict, rounds: int
 ) -> DefaultDict[str, Union[DefaultDict, List[Any]]]:
     """Concates the different pandasDataFrame to one.
 
@@ -71,7 +71,10 @@ def concat_df(
         DefaultDict[Union[int, str], Union[DefaultDict, List[Any]]]:
                             Returns next to the data also the mean and float for each data
     """
-    repetition = len(data_collector.keys())
+    # Get the number of repetition
+    repetition = len([s for s in data_collector.keys() if s.isdigit()])
+
+    # Check if the df is not empty
     if len(data_collector["0"]["df"]) > 0:
         list_of_dfs = []
         for i in range(0, repetition):
@@ -79,6 +82,8 @@ def concat_df(
         df_total = pd.concat(list_of_dfs)
         data_collector["df_total"] = df_total
 
+    # divide the criminal_likelihood by the number of rounds
+    data_collector["df_total"]["criminal_likelihood"].div(rounds)
     return data_collector
 
 

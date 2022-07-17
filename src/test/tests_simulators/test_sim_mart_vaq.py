@@ -808,10 +808,23 @@ class TestSimMartVaq:
             for i in range(0, repetition)
         ]
 
-        data = simulator.avg_play(
-            networks, rounds=rounds, repetition=repetition, ith_collect=1
+        data_collector = simulator.avg_play(
+            networks,
+            rounds=rounds,
+            repetition=repetition,
+            ith_collect=1,
+            measure_likelihood_corr=True,
         )
-        assert len(data["df_total"]) == simulator.network.num_vertices() * repetition
+        assert (
+            len(data_collector["df_total"])
+            == simulator.network.num_vertices() * repetition
+        )
+
+        assert not (data_collector["df_total"]["criminal_likelihood"] == 0).all()
+        assert not data_collector["df_total"]["degree"].isnull().values.any()
+        assert not data_collector["df_total"]["betweenness"].isnull().values.any()
+        assert not data_collector["df_total"]["katz"].isnull().values.any()
+        assert not data_collector["df_total"]["closeness"].isnull().values.any()
 
     @pytest.mark.essential
     def test_scenario_1(self, meta_simulator_network: gt.Graph) -> None:

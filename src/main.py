@@ -9,12 +9,14 @@ import logging
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from config.config import ConfigParser
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
 from PIL import Image
 from PIL import PngImagePlugin
+from scipy.stats import pearsonr
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 from utils.animation import Animateur
@@ -212,6 +214,47 @@ if args.entirely_sim_mart_vaq:
         im.save(fig_name, "png", pnginfo=meta)
     else:
         plt.show()
+
+if args.criminal_likelihood_corr:
+    """Simulate the simulation form
+    Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
+    Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
+
+    Defines if a correlation can be found in the likelihood of a node and it's node centrality
+    """
+    # Get actual criminal network
+    nx_network = NetworkReader().get_data(args.read_data)
+    logger.info(f"The data used is {nx_network.name}")
+
+    # Add nodes to network
+    # First convert to gt
+    meta_sim = MetaSimulator(
+        network_name=nx_network.name,
+        attachment_method=args.attach_meth,
+        ratio_honest=0.1,
+        ratio_wolf=0.1,
+        random_fit_init=False,
+    )
+
+    data_collector = meta_sim.avg_play(
+        rounds=2000,
+        n_groups=1,
+        ith_collect=21000,
+        repetition=15,
+        measure_topology=False,
+        measure_likelihood_corr=True,
+    )
+    # only look at the criminal_likelihood
+    corr = data_collector["df_total"].corr()
+    pval = data_collector["df_total"].corr(
+        method=lambda x, y: pearsonr(x, y)[1]
+    ) - np.eye(*corr.shape)
+    p = pval.applymap(lambda x: "".join(["*" for t in [0.01, 0.05, 0.1] if x <= t]))
+    corr_with_p = corr.round(2).astype(str) + p
+    print(corr_with_p[["criminal_likelihood"]])
+    sns.heatmap(corr[["criminal_likelihood"]], annot=True)
+    plt.show()
+
 
 if args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""

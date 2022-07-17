@@ -11,6 +11,7 @@ __author__ = Louis Weyland
 __date__   = 23/02/2022
 """
 from collections import defaultdict
+from copy import deepcopy
 from typing import Any
 from typing import DefaultDict
 from typing import Dict
@@ -122,9 +123,9 @@ def meta_simulator() -> gt.Graph:
     """
     np.random.seed(0)
     meta_sim = MetaSimulator(
-        "montagna_calls", ratio_honest=0.8, attachment_method="preferential"
+        "montagna_calls", ratio_honest=0.3, attachment_method="preferential"
     )
-    return meta_sim
+    return deepcopy(meta_sim)
 
 
 @pytest.fixture(scope="function")

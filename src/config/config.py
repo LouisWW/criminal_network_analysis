@@ -69,6 +69,11 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "-criminal-likelihood-corr",
+            action="store_true",
+            help="""Defines if a correlation between criminal and node centrality exists.""",
+        )
+        parser.add_argument(
             "-entirely-sim-mart-vaq",
             action="store_true",
             help="""Defines if the simulation based on Martiez-Vaquero is run.

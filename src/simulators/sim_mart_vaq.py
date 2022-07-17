@@ -321,7 +321,7 @@ class SimMartVaq:
 
         # Data over the different rounds is averaged and std is computed
         averaged_dict = get_mean_std_over_list(data_collector)
-        averaged_dict = concat_df(averaged_dict)
+        averaged_dict = concat_df(averaged_dict, rounds)
         return averaged_dict
 
     def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
@@ -862,6 +862,7 @@ class SimMartVaq:
                 },
                 ignore_index=True,
             )
+        df = df.astype(float)
         return df
 
     def mean_group_size(self, radius: int, min_grp: int, max_grp: int) -> int:

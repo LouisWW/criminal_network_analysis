@@ -33,6 +33,7 @@ gprof2dot = "*"
 statsmodel = "*"
 similaritymeasures = "*"
 statsmodels = "*"
+seaborn = "*"
 
 [dev-packages]
 ipykernel = "*"
