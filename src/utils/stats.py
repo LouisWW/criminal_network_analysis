@@ -81,9 +81,9 @@ def concat_df(
             list_of_dfs.append(data_collector[str(i)]["df"])
         df_total = pd.concat(list_of_dfs)
         data_collector["df_total"] = df_total
+        # divide the criminal_likelihood by the number of rounds
+        data_collector["df_total"]["criminal_likelihood"].div(rounds)
 
-    # divide the criminal_likelihood by the number of rounds
-    data_collector["df_total"]["criminal_likelihood"].div(rounds)
     return data_collector
 
 
