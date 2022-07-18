@@ -83,5 +83,5 @@ class NetworkReader:
             return self.read_montagna_meetings()
         else:
             raise RuntimeError(
-                "Define a network please :'cunha','montagna_calls','montagana_meetings'"
+                "Define a network please :'cunha','montagna_calls','montagna_meetings'"
             )

@@ -60,17 +60,22 @@ if args.sim_mart_vaq:
         attachment_method=args.attach_meth,
         ratio_honest=0.9,
         ratio_wolf=0.01,
+        prob=0.0034,  # 0.0034 for random
+        k=6,
         random_fit_init=False,
     )
+
+    complete_network_stats = NetworkStats(NetworkConverter.gt_to_nk(meta_sim.network))
+    complete_network_stats.get_overview()
 
     simulators = SimMartVaq(
         network=meta_sim.network,
         delta=0.7,  # no acting for wolfs
         gamma=0.8,
         tau=0.1,  # no fitness sharing between wolf to criminal
-        beta_s=1,
-        beta_h=2,
-        beta_c=5,
+        beta_s=3,
+        beta_h=3,
+        beta_c=3,
         c_c=1,  # no benefits from criminals/ they still act
         r_c=1,
         c_w=1,
@@ -81,10 +86,10 @@ if args.sim_mart_vaq:
     )
     data_collector = simulators.avg_play(
         network=simulators.network,
-        rounds=2000,
+        rounds=30000,
         n_groups=1,
-        ith_collect=100,
-        repetition=150,
+        ith_collect=10,
+        repetition=30,
         measure_topology=False,
     )
 
@@ -159,10 +164,10 @@ if args.entirely_sim_mart_vaq:
     )
 
     data_collector = meta_sim.avg_play(
-        rounds=2000,
+        rounds=30000,
         n_groups=1,
-        ith_collect=100,
-        repetition=15,
+        ith_collect=1000,
+        repetition=30,
         measure_topology=False,
     )
 
@@ -231,16 +236,16 @@ if args.criminal_likelihood_corr:
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
         attachment_method=args.attach_meth,
-        ratio_honest=0.1,
-        ratio_wolf=0.1,
+        ratio_honest=0.9,
+        ratio_wolf=0.01,
         random_fit_init=False,
     )
 
     data_collector = meta_sim.avg_play(
-        rounds=2000,
+        rounds=30000,
         n_groups=1,
-        ith_collect=21000,
-        repetition=15,
+        ith_collect=31000,
+        repetition=30,
         measure_topology=False,
         measure_likelihood_corr=True,
     )
