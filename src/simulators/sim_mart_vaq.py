@@ -150,7 +150,7 @@ class SimMartVaq:
                     "fitness_honest",
                     "fitness_criminal",
                     "fitness_wolf",
-                    "security_efficiency",
+                    "density",
                     "flow_information",
                     "size_of_largest_component",
                     "df",
@@ -227,9 +227,7 @@ class SimMartVaq:
                 if measure_topology:
                     # Extract the criminal network, the filtering is done on the network object
                     NetworkExtractor.filter_criminal_network(network)
-                    data_collector["security_efficiency"].append(
-                        NodeStats.get_security_efficiency_trade_off(network)
-                    )
+                    data_collector["density"].append(NodeStats.get_density(network))
                     data_collector["flow_information"].append(
                         NodeStats.get_flow_of_information(network)
                     )

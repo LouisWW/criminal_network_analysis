@@ -79,8 +79,8 @@ class NodeStats:
     #     return eccentricity
 
     @staticmethod
-    def get_security_efficiency_trade_off(network: gt.Graph) -> float:
-        """Return the security-efficiency trade.
+    def get_density(network: gt.Graph) -> float:
+        """Return the density.
 
         Metric has been defined in https://www.nature.com/articles/srep04238
         """

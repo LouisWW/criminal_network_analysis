@@ -237,6 +237,25 @@ class MetaSimulator:
         # init simulator and use a place holder population
         simulator = SimMartVaq(list_of_population[0])
 
+        if self.attachment_method == "random":
+            print("Random will have a specific parameter")
+            simulator = SimMartVaq(
+                list_of_population[0],
+                delta=1,
+                tau=0,
+                gamma=1,
+                beta_s=400,
+                beta_h=400,
+                beta_c=0,
+                c_w=1,
+                c_c=1,
+                r_w=1,
+                r_c=1,
+                r_h=1,
+                temperature=10,
+                mutation_prob=0.0001,
+            )
+
         data_collector = simulator.avg_play(
             list_of_population,
             rounds=rounds,

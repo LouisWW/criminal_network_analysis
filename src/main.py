@@ -385,8 +385,8 @@ if args.compare_simulations:
     ratio_honest = 0.9
     ratio_wolf = 0.01
     n_groups = 1
-    repetition = 15
-    ith_collect = 1000
+    repetition = 8
+    ith_collect = 50
 
     meta_sim_pref = MetaSimulator(
         network_name=args.read_data,
@@ -468,11 +468,11 @@ if args.compare_simulations:
             "random attachment": data_collector_rand,
             "small world": data_collector_sw,
         },
-        y_data_to_plot="mean_" + "security_efficiency",
+        y_data_to_plot="mean_" + "density",
         x_data_to_plot="mean_iteration",
         title="Testing the simulation",
         xlabel="rounds",
-        ylabel="security_efficiency",
+        ylabel="density",
         plot_std="True",
     )
 
@@ -511,8 +511,8 @@ if args.entirely_compare_simulations:
     ratio_honest = 0.9
     ratio_wolf = 0.01
     n_groups = 1
-    repetition = 15
-    ith_collect = 100
+    repetition = 10
+    ith_collect = 50
 
     meta_sim_pref = MetaSimulator(
         network_name=args.read_data,
@@ -581,17 +581,18 @@ if args.entirely_compare_simulations:
             "small world": data_collector_sw,
         }
     )
+
     ax = plotter.plot_lines_comparative(
         {
             "preferential attachment": data_collector_pref,
             "random attachment": data_collector_rand,
             "small world": data_collector_sw,
         },
-        y_data_to_plot="mean_" + "security_efficiency",
+        y_data_to_plot="mean_" + "density",
         x_data_to_plot="mean_iteration",
         title="Running the analysis on different networks for each repetition",
         xlabel="rounds",
-        ylabel="security_efficiency",
+        ylabel="density",
         plot_std="True",
     )
 
@@ -603,7 +604,6 @@ if args.entirely_compare_simulations:
         },
         y_data_to_plot="mean_" + "flow_information",
         x_data_to_plot="mean_iteration",
-        title="Running the analysis on different networks for each repetition",
         xlabel="rounds",
         ylabel="flow_information",
         plot_std="True",
@@ -617,7 +617,6 @@ if args.entirely_compare_simulations:
         },
         y_data_to_plot="mean_" + "size_of_largest_component",
         x_data_to_plot="mean_iteration",
-        title="Running the analysis on different networks for each repetition",
         xlabel="rounds",
         ylabel="size_of_largest_component",
         plot_std="True",

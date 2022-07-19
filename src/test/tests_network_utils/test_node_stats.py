@@ -51,12 +51,10 @@ class TestNodeStats:
         assert central_dominance != 0, "Central dominance is zero..."
 
     @pytest.mark.essential
-    def test_get_security_efficiency_trade_off(
-        self, create_gt_network: gt.Graph
-    ) -> None:
-        """Test if the the security_efficency trade off is computed correctly."""
-        sec_eff = NodeStats.get_security_efficiency_trade_off(network=create_gt_network)
-        assert sec_eff == 0.6, "Security-efficency score is not correct"
+    def test_get_density(self, create_gt_network: gt.Graph) -> None:
+        """Test if the the density is computed correctly."""
+        sec_eff = NodeStats.get_density(network=create_gt_network)
+        assert sec_eff == 0.6, "Density is not correct"
 
     @pytest.mark.essential
     def test_get_flow_of_information(self, create_gt_network: gt.Graph) -> None:

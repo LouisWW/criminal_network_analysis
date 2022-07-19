@@ -796,7 +796,6 @@ class TestSimMartVaq:
             np.array(sim_1), np.array(sim_2)
         ), "Two simulations were identical...."
 
-    @pytest.mark.essential
     def test_avg_play_likelihood_collect(self, meta_simulator: MetaSimulator) -> None:
         """Test if the play function is working."""
         # Play the simulation
