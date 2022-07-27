@@ -1,6 +1,6 @@
 # Visualisation
 
-The population is created based on 3 different methods (preferential/random/small-world). Thereby, the base network/criminal network is preserved; the links between criminals are not modified. Only links to honest and lone actors are created.
+The population is created based on 3 different methods (preferential/random/small-world). Thereby, the base network/criminal network is preserved; the links between criminals are not modified. Only links to honests and lone actors are created.
 
     Visualising the preferential attachment
 ![Alt Text](preferential.gif)
@@ -13,11 +13,11 @@ The population is created based on 3 different methods (preferential/random/smal
 
 
 Once the population is created the simulation is run, where nodes interact and modify their state.
-    Visualising the simulation once the population is created
+
 ![Alt Text](simulation_preferential.gif)
 
 During the simulation, attention is paid to the change in the criminal organization. From the population, only the criminal nodes and the link to each other are filtered out, resulting in the following sub-network. Thus, the topological changes of that sub-network are analyzed
-### Filtering out the criminal network from the previously shown population
+
 ![Alt Text](simulation_filtered_preferential.gif)
 
 ---
