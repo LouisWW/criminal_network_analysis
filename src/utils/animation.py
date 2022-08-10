@@ -28,7 +28,7 @@ from network_utils.network_extractor import NetworkExtractor
 from network_utils.network_reader import NetworkReader
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
-from src.utils.tools import DirectoryFinder
+from utils.tools import DirectoryFinder
 
 logger = logging.getLogger("logger")
 

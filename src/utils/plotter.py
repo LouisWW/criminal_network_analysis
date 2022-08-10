@@ -191,7 +191,7 @@ class Plotter(ConfigParser):
             if x_data_to_plot:
                 ax.plot(dict_data[x_data_to_plot], dict_data[data], label=data)
             else:
-                ax.plot(dict_data[data], label=data)
+                ax.plot(dict_data[data], label=data.replace("_", " "))
             if "plot_std" in kwargs:
                 std = data.replace("mean", "std")
                 if x_data_to_plot:

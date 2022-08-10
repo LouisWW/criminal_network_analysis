@@ -101,12 +101,10 @@ if args.sim_mart_vaq:
         y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
         x_data_to_plot="mean_iteration",
         xlabel="Rounds",
-        ylabel="Ratio",
+        ylabel="Ratio (%)",
         plot_std=True,
     )
 
-    e = datetime.datetime.now()
-    timestamp = e.strftime("%d-%m-%Y-%H-%M")
     simulators_str_dict = dict(
         {str(key): str(value) for key, value in simulators.__dict__.items()}
     )
@@ -118,7 +116,7 @@ if args.sim_mart_vaq:
         meta.add_text(x, simulators_str_dict[x])
 
     if args.save:
-        fig_name = plotter.savig_dir + "population_ration_" + timestamp + ".png"
+        fig_name = plotter.savig_dir + "population_ration_" + timestamp() + ".png"
         plt.savefig(fig_name, dpi=300)
         # Add the meta data to it
         im = Image.open(fig_name)
@@ -139,7 +137,7 @@ if args.sim_mart_vaq:
     )
 
     if args.save:
-        fig_name = plotter.savig_dir + "fitness_evol_" + timestamp + ".png"
+        fig_name = plotter.savig_dir + "fitness_evol_" + timestamp() + ".png"
         plt.savefig(fig_name, dpi=300)
         # Add the meta to it
         im = Image.open(fig_name)
@@ -179,12 +177,9 @@ if args.entirely_sim_mart_vaq:
         y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
         x_data_to_plot="mean_iteration",
         xlabel="Rounds",
-        ylabel="Ratio",
+        ylabel="Ratio (%)",
         plot_std=True,
     )
-
-    e = datetime.datetime.now()
-    timestamp = e.strftime("%d-%m-%Y-%H-%M")
 
     meta_str_sim = dict(
         {str(key): str(value) for key, value in meta_sim.__dict__.items()}
@@ -194,7 +189,7 @@ if args.entirely_sim_mart_vaq:
         meta.add_text(x, meta_str_sim[x])
 
     if args.save:
-        fig_name = plotter.savig_dir + "population_ration_" + timestamp + ".png"
+        fig_name = plotter.savig_dir + "population_ration_" + timestamp() + ".png"
         plt.savefig(fig_name, dpi=300)
         # Add the meta data to it
         im = Image.open(fig_name)
@@ -215,7 +210,7 @@ if args.entirely_sim_mart_vaq:
     )
 
     if args.save:
-        fig_name = plotter.savig_dir + "fitness_evol_" + timestamp + ".png"
+        fig_name = plotter.savig_dir + "fitness_evol_" + timestamp() + ".png"
         plt.savefig(fig_name, dpi=300)
         # Add the meta to it
         im = Image.open(fig_name)
@@ -262,7 +257,6 @@ if args.criminal_likelihood_corr:
     print(corr_with_p[["criminal_likelihood"]])
     sns.heatmap(corr[["criminal_likelihood"]], annot=True)
     plt.show()
-
 
 if args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
@@ -507,7 +501,6 @@ if args.compare_simulations:
         plot_std="True",
     )
 
-
 if args.entirely_compare_simulations:
     logger.info(f"The data used is {args.read_data}")
 
@@ -634,7 +627,6 @@ if args.animate_attachment_process:
     """Create an animation of the attachment process."""
     animateur = Animateur()
     animateur.create_animation()
-
 
 if args.get_network_stats:
     """Return the mean/standard deviation of a population structure.
