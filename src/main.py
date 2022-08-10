@@ -5,6 +5,7 @@ __author__ = Louis Weyland
 __date__   = 22/02/2022
 """
 import datetime
+import json
 import logging
 
 import matplotlib.pyplot as plt
@@ -23,6 +24,9 @@ from utils.animation import Animateur
 from utils.plotter import Plotter
 from utils.sensitivity_analysis import SensitivityAnalyser
 from utils.stats import compare_time_series
+from utils.stats import dict_mean
+from utils.tools import DirectoryFinder
+from utils.tools import timestamp
 
 # Catch the flags
 args = ConfigParser().args
@@ -34,7 +38,7 @@ logger = logging.getLogger("logger")
 logger_handler = logging.StreamHandler()  # Handler for the logger
 logger_handler.setFormatter(
     logging.Formatter(
-        "[%(levelname)s]\n\t %(message)-100s ---- (%(asctime)s.%(msecs)03d) %(filename)s",
+        "[%(levelname)s]\t %(message)-100s ---- (%(asctime)s.%(msecs)03d) %(filename)s",
         datefmt="%H:%M:%S",
     )
 )
@@ -51,7 +55,6 @@ if args.sim_mart_vaq:
     """
     # Get actual criminal network
     nx_network = NetworkReader().get_data(args.read_data)
-    logger.info(f"The data used is {nx_network.name}")
 
     # Add nodes to network
     # First convert to gt
@@ -631,3 +634,86 @@ if args.animate_attachment_process:
     """Create an animation of the attachment process."""
     animateur = Animateur()
     animateur.create_animation()
+
+
+if args.get_network_stats:
+    """Return the mean/standard deviation of a population structure.
+
+    The strucutre is either preferential,random or small-world
+    """
+
+    nx_network = NetworkReader().get_data(args.read_data)
+    ratio_honest = 0.9
+    ratio_wolf = 0.01
+    logger.info(f"Ration : {ratio_honest=}, {ratio_wolf=}")
+
+    # Preferential
+    meta_sim_pref = MetaSimulator(
+        network_name=nx_network.name,
+        attachment_method="preferential",
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
+        n_new_edges=2,
+        random_fit_init=False,
+    )
+
+    # Random
+    meta_sim_rnd = MetaSimulator(
+        network_name=nx_network.name,
+        attachment_method="random",
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
+        prob=0.0034,  # 0.0034 for random
+        random_fit_init=False,
+    )
+
+    # Small-world
+    meta_sim_sw = MetaSimulator(
+        network_name=nx_network.name,
+        attachment_method="small-world",
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
+        k=6,
+        random_fit_init=False,
+    )
+
+    # Create populations
+    list_of_populations_pref = meta_sim_pref.create_list_of_populations(
+        repetition=args.n_samples
+    )
+    list_of_populations_rnd = meta_sim_rnd.create_list_of_populations(
+        repetition=args.n_samples
+    )
+    list_of_populations_sw = meta_sim_sw.create_list_of_populations(
+        repetition=args.n_samples
+    )
+
+    list_of_network_stats_pref = [
+        NetworkStats(NetworkConverter.gt_to_nk(network)).get_overview()
+        for network in list_of_populations_pref
+    ]
+    list_of_network_stats_rnd = [
+        NetworkStats(NetworkConverter.gt_to_nk(network)).get_overview()
+        for network in list_of_populations_rnd
+    ]
+    list_of_network_stats_sw = [
+        NetworkStats(NetworkConverter.gt_to_nk(network)).get_overview()
+        for network in list_of_populations_sw
+    ]
+
+    mean_dict_of_network_stats_pref = dict_mean(list_of_network_stats_pref)
+    mean_dict_of_network_stats_rnd = dict_mean(list_of_network_stats_rnd)
+    mean_dict_of_network_stats_sw = dict_mean(list_of_network_stats_sw)
+
+    with open(
+        DirectoryFinder().result_dir_data + f"result_{timestamp()}.json", "w"
+    ) as fp:
+        json.dump(
+            {
+                "preferential": mean_dict_of_network_stats_pref,
+                "random": mean_dict_of_network_stats_rnd,
+                "small-world": mean_dict_of_network_stats_sw,
+            },
+            fp,
+            indent=4,
+        )
