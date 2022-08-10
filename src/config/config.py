@@ -35,6 +35,13 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "-get-network-stats",
+            action="store_true",
+            help="""Returns the mean characteristis of a population
+                    (preferential/random/small-world)""",
+        )
+
+        parser.add_argument(
             "-read-data",
             type=str,
             default=None,
