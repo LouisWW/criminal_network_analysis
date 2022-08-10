@@ -13,6 +13,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 from utils.stats import compare_time_series
+from utils.stats import dict_mean
 from utils.stats import get_mean_std_over_list
 
 
@@ -79,6 +80,17 @@ class TestStats:
             "('preferential attachment', 'small world')         : frechet_dist"
             in mocked_print.mock_calls[1].args[0]
         )
+
+    def test_dict_mean(self) -> None:
+        """Test if the dict mean function is working correctly."""
+        dicts = [
+            {"X": 5, "value": 200},
+            {"X": -2, "value": 100},
+            {"X": 3, "value": 400},
+        ]
+        value = dict_mean(dicts)
+        assert value["X"] == 2.0
+        assert pytest.approx(value["value"]) == 233.333333
 
 
 if __name__ == "__main__":

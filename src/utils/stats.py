@@ -6,6 +6,7 @@ __date__ = 10/09/2022
 import itertools
 from typing import Any
 from typing import DefaultDict
+from typing import Dict
 from typing import List
 from typing import Union
 
@@ -174,3 +175,13 @@ def compare_time_series(
         tukey = pairwise_tukeyhsd(endog=df["score"], groups=df["group"], alpha=0.05)
         print(tukey)
         print("\n")
+
+
+def dict_mean(dict_list: Dict) -> Dict[str, Union[int, float]]:
+    """Return an average/std value of a list of dictionaries."""
+    mean_dict = {}
+    for key in dict_list[0].keys():
+        mean_dict[key + "_mean"] = np.mean([d[key] for d in dict_list], axis=0)
+        mean_dict[key + "_std"] = 1.96 * np.std([d[key] for d in dict_list], axis=0)
+
+    return mean_dict
