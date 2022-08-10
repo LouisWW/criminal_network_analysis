@@ -4,8 +4,10 @@ __author__ = Louis Weyland
 __date__   = 5/02/2022
 """
 import logging
+from typing import Dict
 from typing import List
 from typing import Tuple
+from typing import Union
 
 import networkit as nk
 import numpy as np
@@ -24,20 +26,34 @@ class NetworkStats:
         assert isinstance(network, nk.Graph), "Given network type is not Networkit"
         self.network = network
 
-    def get_overview(self) -> None:
+    def get_overview(self) -> Dict[str, Union[int, float]]:
         """Get an overview of the network."""
-        print("----------------------------")
-        nk.overview(self.network)
-        nk.community.detectCommunities(self.network)
-        self.get_connected_components()
-        self.check_if_powerlaw()
-        self.get_density()
-        self.get_relative_density()
-        self.get_diameter()
-        self.get_radius()
-        self.get_degree_dispersion()
+        if logging.getLevelName(logger.level) == "INFO":
+            print("----------------------------")
+            nk.overview(self.network)
+            nk.community.detectCommunities(self.network)
+
+        overview = {
+            "component": int(self.get_connected_components()),
+            "is_powerlaw": self.check_if_powerlaw()[0],
+            "density": self.get_density(),
+            "nodes": int(self.network.numberOfNodes()),
+            "edges": int(self.network.numberOfEdges()),
+            "avg_degree": sum(
+                nk.centrality.DegreeCentrality(self.network).run().scores()
+            )
+            / self.network.numberOfNodes(),
+            "clustering_coeff": self.get_clustering_coefficient(),
+            "relative_density": self.get_relative_density(),
+            "diameter": int(self.get_diameter()),
+            "radius": int(self.get_radius()),
+            "dispersion": self.get_degree_dispersion(),
+        }
         # self.get_efficiency()
-        print("----------------------------")
+        if logging.getLevelName(logger.level) == "INFO":
+            print("----------------------------")
+
+        return overview
 
     def get_connected_components(self) -> int:
         """Return the number of connected components."""
@@ -187,3 +203,10 @@ class NetworkStats:
 
         logger.info(f"Efficiency = {efficiency}")
         return efficiency
+
+    def get_clustering_coefficient(self) -> float:
+        """Return the global clustering coefficient."""
+        lcc = (
+            nk.centrality.LocalClusteringCoefficient(self.network, True).run().scores()
+        )
+        return sum(lcc) / self.network.numberOfNodes()
