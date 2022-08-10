@@ -5,11 +5,9 @@ The SensitivityAnalyser is based on the SALib library.
 __author__ = Louis Weyland
 __date__   = 5/05/2022
 """
-import datetime
 import functools
 import logging
 import multiprocessing
-import os
 from collections import OrderedDict
 from typing import Any
 from typing import Callable
@@ -26,6 +24,8 @@ from SALib.analyze import sobol
 from SALib.sample import saltelli
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
+from utils.tools import DirectoryFinder
+from utils.tools import timestamp
 
 logger = logging.getLogger("logger")
 
@@ -50,17 +50,8 @@ class SensitivityAnalyser(ConfigParser):
             value = func(self, *args, **kwargs)
             # Save results
             if self.args.save:
-                # Get timestamp
-                e = datetime.datetime.now()
-                timestamp = e.strftime("%d-%m-%Y-%H-%M")
-                # Get the saving directory
-                # Get directory first
-                path = os.path.dirname(os.path.realpath(__file__))
-                par_dir = os.path.abspath(os.path.join(path, "../"))
-                # par_dir = ../src/
-                savig_dir = par_dir + "/results/data/sensitivity_analysis/"
                 file_name = (
-                    savig_dir
+                    DirectoryFinder().result_dir_data_sa
                     + func.__name__
                     + "_"
                     + str(kwargs["output_value"])
@@ -69,7 +60,7 @@ class SensitivityAnalyser(ConfigParser):
                     + "_n_s_"
                     + str(kwargs["n_samples"])
                     + "_"
-                    + timestamp
+                    + timestamp()
                 )
 
                 df_list = value.to_df()

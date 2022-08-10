@@ -8,7 +8,7 @@ __author__ = Louis Weyland
 __date__   = 6/72/2022
 """
 import logging
-import os.path
+import os
 import sys
 from copy import deepcopy
 from typing import Literal
@@ -28,6 +28,7 @@ from network_utils.network_extractor import NetworkExtractor
 from network_utils.network_reader import NetworkReader
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
+from src.utils.tools import DirectoryFinder
 
 logger = logging.getLogger("logger")
 
@@ -39,10 +40,7 @@ class Animateur(ConfigParser):
         """Set the save path and network."""
         super().__init__()
 
-        path = os.path.dirname(os.path.realpath(__file__))
-        par_dir = os.path.abspath(os.path.join(path, "../"))
-        # par_dir = ../src/
-        self.savig_dir = par_dir + "/results/video/"
+        self.savig_dir = DirectoryFinder().result_dir_video
 
         # network and metasimulator
         # Get actual criminal network

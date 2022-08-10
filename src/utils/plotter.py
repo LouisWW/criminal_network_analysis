@@ -6,8 +6,6 @@ More specifically, generated data is visualized.
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
-import datetime
-import os
 from typing import Any
 from typing import DefaultDict
 from typing import List
@@ -20,6 +18,8 @@ import numpy as np
 import powerlaw
 from config.config import ConfigParser
 from cycler import cycler
+from utils.tools import DirectoryFinder
+from utils.tools import timestamp
 
 
 class Plotter(ConfigParser):
@@ -52,11 +52,6 @@ class Plotter(ConfigParser):
         mpl.rcParams["savefig.dpi"] = 300
         mpl.rcParams["axes.spines.top"] = False
         mpl.rcParams["axes.spines.right"] = False
-
-        path = os.path.dirname(os.path.realpath(__file__))
-        par_dir = os.path.abspath(os.path.join(path, "../"))
-        # par_dir = ../src/
-        self.savig_dir = par_dir + "/results/figures/"
 
     def draw_network(
         self,
@@ -98,7 +93,7 @@ class Plotter(ConfigParser):
             gt.graph_draw(
                 network,
                 pos=pos,
-                output=f"{self.savig_dir}{network.graph_properties.name}.png"
+                output=f"{DirectoryFinder().result_dir_fig}{network.graph_properties.name}.png"
                 if self.args.save
                 else None,
             )
@@ -113,7 +108,7 @@ class Plotter(ConfigParser):
                 network,
                 pos=pos,
                 vertex_fill_color=network.vertex_properties[color_vertex_property],
-                output=f"{self.savig_dir}{network.graph_properties.name}.png"
+                output=f"{DirectoryFinder().result_dir_fig}{network.graph_properties.name}.png"
                 if self.args.save
                 else None,
             )
@@ -370,10 +365,13 @@ class Plotter(ConfigParser):
         ax.grid(alpha=0.5, linestyle=":")
 
         if self.args.save:
-            e = datetime.datetime.now()
-            timestamp = e.strftime("%d-%m-%Y-%H-%M")
-
-            fig_name = self.savig_dir + y_data_to_plot + "_" + timestamp + ".png"
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + y_data_to_plot
+                + "_"
+                + timestamp()
+                + ".png"
+            )
             plt.savefig(fig_name, dpi=300)
             return ax
         else:
