@@ -203,6 +203,31 @@ class TestMetaSimualtor:
         ), "Should not be the same network"
 
     @pytest.mark.essential
+    @pytest.mark.parametrize(
+        "structure", [("preferential"), ("random"), ("small-world")]
+    )
+    def test_create_list_of_populations(self, structure: str) -> None:
+        """Test if the list of populations are working."""
+        ratio_honest = 0.3
+        ratio_wolf = 0.1
+
+        # Test all the different attachment_method
+        meta_simulator = MetaSimulator(
+            "montagna_calls",
+            structure,
+            ratio_honest,
+            ratio_wolf,
+        )
+
+        repetition = 10
+        candidates = np.random.choice(range(repetition), 10, replace=False)
+
+        list_of_population = meta_simulator.create_list_of_populations(repetition)
+        assert not gt.isomorphism(
+            list_of_population[candidates[0]], list_of_population[candidates[1]]
+        ), "Should not be the same network"
+
+    @pytest.mark.essential
     def test_avg_play(self) -> None:
         """Test if avg_play function is working correctly."""
         ratio_honest = 0.3

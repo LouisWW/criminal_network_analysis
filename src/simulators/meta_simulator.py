@@ -206,6 +206,13 @@ class MetaSimulator:
             network.vertex_properties["filtering"] = filtering
         return network
 
+    def create_list_of_populations(self, repetition: int) -> List[gt.Graph]:
+        """Create a list of n different populations."""
+        list_of_population = []
+        for _ in range(0, repetition):
+            list_of_population.append(self.create_population(self.criminal_network))
+        return list_of_population
+
     def avg_play(
         self,
         rounds: int = 1,
@@ -230,31 +237,10 @@ class MetaSimulator:
                                                             Returns network and collected data.
         """
         # create n different populations
-        list_of_population = []
-        for _ in range(0, repetition):
-            list_of_population.append(self.create_population(self.criminal_network))
+        list_of_population = self.create_list_of_populations(repetition)
 
         # init simulator and use a place holder population
         simulator = SimMartVaq(list_of_population[0])
-
-        if self.attachment_method == "random":
-            print("Random will have a specific parameter")
-            simulator = SimMartVaq(
-                list_of_population[0],
-                delta=1,
-                tau=0,
-                gamma=1,
-                beta_s=400,
-                beta_h=400,
-                beta_c=0,
-                c_w=1,
-                c_c=1,
-                r_w=1,
-                r_c=1,
-                r_h=1,
-                temperature=10,
-                mutation_prob=0.0001,
-            )
 
         data_collector = simulator.avg_play(
             list_of_population,
