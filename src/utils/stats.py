@@ -53,6 +53,7 @@ def get_mean_std_over_list(
         # Get mean and std
         data_collector["mean_" + key] = np.mean(m, axis=0)
         data_collector["std_" + key] = np.std(m, axis=0)
+        data_collector["sem_" + key] = stats.sem(m, axis=0)
         data_collector["m_" + key] = m
 
     return data_collector

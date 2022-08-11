@@ -44,7 +44,7 @@ class Plotter(ConfigParser):
         plt.rcParams["xtick.labelsize"] = "x-large"
         plt.rcParams["ytick.labelsize"] = "x-large"
         mpl.rcParams["lines.linewidth"] = 2
-        mpl.rcParams["lines.markersize"] = 6
+        mpl.rcParams["lines.markersize"] = 4
 
         # Change the default color list
         mpl.rcParams["axes.prop_cycle"] = cycler(color="gbrgmyc")
@@ -189,23 +189,31 @@ class Plotter(ConfigParser):
                 raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
 
             if x_data_to_plot:
-                ax.plot(dict_data[x_data_to_plot], dict_data[data], label=data)
+                ax.plot(
+                    dict_data[x_data_to_plot],
+                    dict_data[data],
+                    label=data.replace("_", " "),
+                )
             else:
                 ax.plot(dict_data[data], label=data.replace("_", " "))
-            if "plot_std" in kwargs:
-                std = data.replace("mean", "std")
+            if "plot_deviation" in kwargs:
+                if kwargs["plot_deviation"] == "std":  # standard deviation
+                    dev = data.replace("mean", "std")
+                elif kwargs["plot_deviation"] == "sem":  # standard error of the mean
+                    dev = data.replace("mean", "sem")
+
                 if x_data_to_plot:
                     ax.fill_between(
                         dict_data[x_data_to_plot],
-                        np.array(dict_data[data]) - np.array(dict_data[std]),
-                        np.array(dict_data[data]) + np.array(dict_data[std]),
+                        np.array(dict_data[data]) - np.array(dict_data[dev]),
+                        np.array(dict_data[data]) + np.array(dict_data[dev]),
                         alpha=0.5,
                     )
                 else:
                     ax.fill_between(
                         range(0, len(dict_data[data])),
-                        np.array(dict_data[data]) - np.array(dict_data[std]),
-                        np.array(dict_data[data]) + np.array(dict_data[std]),
+                        np.array(dict_data[data]) - np.array(dict_data[dev]),
+                        np.array(dict_data[data]) + np.array(dict_data[dev]),
                         alpha=0.5,
                     )
 
@@ -343,11 +351,11 @@ class Plotter(ConfigParser):
             if y_data_to_plot not in dict_data[network_type].keys():
                 raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
 
-            std = y_data_to_plot.replace("mean", "std")
+            deviation = y_data_to_plot.replace("mean", "sem")
             ax.errorbar(
                 dict_data[network_type][x_data_to_plot],
                 dict_data[network_type][y_data_to_plot],
-                yerr=dict_data[network_type][std],
+                yerr=dict_data[network_type][deviation],
                 fmt=next(line_pot_style),
                 capsize=5,
                 label=network_type,

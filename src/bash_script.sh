@@ -28,4 +28,8 @@ python3 main.py -read-data -compare-simulations -r 800
 
 # Run a comparison analysis on the topology using different network configruation
 # Thereby, for each indv simulation a new network is created
-python3 main.py -read-data -entirely-compare-simulations -r 800
+python3 main.py -read-data montagna_calls -entirely-compare-simulations -r 800
+
+
+# Run a comparsion analysis on the characterisitcs of a network
+python3 main.py -read-data montagna_calls -get-network-stats -n-samples 50

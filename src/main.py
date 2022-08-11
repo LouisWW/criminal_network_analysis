@@ -61,7 +61,7 @@ if args.sim_mart_vaq:
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
         attachment_method=args.attach_meth,
-        ratio_honest=0.9,
+        ratio_honest=0.96,
         ratio_wolf=0.01,
         prob=0.0034,  # 0.0034 for random
         k=6,
@@ -76,9 +76,9 @@ if args.sim_mart_vaq:
         delta=0.7,  # no acting for wolfs
         gamma=0.8,
         tau=0.1,  # no fitness sharing between wolf to criminal
-        beta_s=3,
-        beta_h=3,
-        beta_c=3,
+        beta_s=1,
+        beta_h=1,
+        beta_c=1,
         c_c=1,  # no benefits from criminals/ they still act
         r_c=1,
         c_w=1,
@@ -89,10 +89,10 @@ if args.sim_mart_vaq:
     )
     data_collector = simulators.avg_play(
         network=simulators.network,
-        rounds=30000,
+        rounds=300000,
         n_groups=1,
-        ith_collect=10,
-        repetition=30,
+        ith_collect=20000,
+        repetition=10,
         measure_topology=False,
     )
 
@@ -152,14 +152,13 @@ if args.entirely_sim_mart_vaq:
     """
     # Get actual criminal network
     nx_network = NetworkReader().get_data(args.read_data)
-    logger.info(f"The data used is {nx_network.name}")
 
     # Add nodes to network
     # First convert to gt
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
         attachment_method=args.attach_meth,
-        ratio_honest=0.9,
+        ratio_honest=0.96,
         ratio_wolf=0.01,
         random_fit_init=False,
     )
@@ -167,8 +166,8 @@ if args.entirely_sim_mart_vaq:
     data_collector = meta_sim.avg_play(
         rounds=30000,
         n_groups=1,
-        ith_collect=1000,
-        repetition=30,
+        ith_collect=3000,
+        repetition=10,
         measure_topology=False,
     )
 
@@ -178,7 +177,7 @@ if args.entirely_sim_mart_vaq:
         x_data_to_plot="mean_iteration",
         xlabel="Rounds",
         ylabel="Ratio (%)",
-        plot_std=True,
+        plot_deviation="std",
     )
 
     meta_str_sim = dict(
@@ -468,9 +467,9 @@ if args.compare_simulations:
         y_data_to_plot="mean_" + "density",
         x_data_to_plot="mean_iteration",
         title="Testing the simulation",
-        xlabel="rounds",
-        ylabel="density",
-        plot_std="True",
+        xlabel="Rounds",
+        ylabel="Density (a.u.)",
+        plot_deviation="sem",
     )
 
     ax = plotter.plot_lines_comparative(
@@ -483,8 +482,8 @@ if args.compare_simulations:
         x_data_to_plot="mean_iteration",
         title="Testing the simulation",
         xlabel="rounds",
-        ylabel="flow_information",
-        plot_std="True",
+        ylabel="Flow of information (a.u.)",
+        plot_deviation="sem",
     )
 
     ax = plotter.plot_lines_comparative(
@@ -496,9 +495,9 @@ if args.compare_simulations:
         y_data_to_plot="mean_" + "size_of_largest_component",
         x_data_to_plot="mean_iteration",
         title="Testing the simulation",
-        xlabel="rounds",
-        ylabel="size_of_largest_component",
-        plot_std="True",
+        xlabel="Rounds",
+        ylabel="Size of largest component",
+        plot_deviation="sem",
     )
 
 if args.entirely_compare_simulations:
@@ -587,9 +586,9 @@ if args.entirely_compare_simulations:
         y_data_to_plot="mean_" + "density",
         x_data_to_plot="mean_iteration",
         title="Running the analysis on different networks for each repetition",
-        xlabel="rounds",
-        ylabel="density",
-        plot_std="True",
+        xlabel="Rounds",
+        ylabel="Density (a.u.)",
+        plot_deviation="sem",
     )
 
     ax = plotter.plot_lines_comparative(
@@ -600,9 +599,9 @@ if args.entirely_compare_simulations:
         },
         y_data_to_plot="mean_" + "flow_information",
         x_data_to_plot="mean_iteration",
-        xlabel="rounds",
-        ylabel="flow_information",
-        plot_std="True",
+        xlabel="Rounds",
+        ylabel="Flow of information (a.u.)",
+        plot_deviation="sem",
     )
 
     ax = plotter.plot_lines_comparative(
@@ -613,9 +612,9 @@ if args.entirely_compare_simulations:
         },
         y_data_to_plot="mean_" + "size_of_largest_component",
         x_data_to_plot="mean_iteration",
-        xlabel="rounds",
-        ylabel="size_of_largest_component",
-        plot_std="True",
+        xlabel="Rounds",
+        ylabel="Size of largest component",
+        plot_deviation="sem",
     )
 
 if args.animate_simulation:

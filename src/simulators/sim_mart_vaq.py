@@ -46,9 +46,9 @@ class SimMartVaq:
         delta: float = 0.7,
         tau: float = 0.1,
         gamma: float = 0.8,
-        beta_s: int = 3,
-        beta_h: int = 3,
-        beta_c: int = 3,
+        beta_s: int = 1,
+        beta_h: int = 1,
+        beta_c: int = 1,
         c_w: int = 1,
         c_c: int = 1,
         r_w: int = 1,
@@ -200,6 +200,8 @@ class SimMartVaq:
 
             if measure_likelihood_corr:
                 network = self.update_age(network)
+
+            network = self.update_fitness(network)
 
             # Collect the data
             if i % ith_collect == 0 or i == 1:
@@ -821,6 +823,13 @@ class SimMartVaq:
             if network.vp.state[network.vertex(node)] == "c":
                 network.vp.age[network.vertex(node)] += 1
 
+        return network
+
+    def update_fitness(self, network: gt.Graph) -> gt.Graph:
+        """Update the fitness in a decay fashion."""
+        update_fitness = network.new_vertex_property("double")
+        update_fitness.a = network.vp.fitness.a * 0.666
+        network.vertex_properties["fitness"] = update_fitness
         return network
 
     def create_likelihood_corr_df(self, network: gt.Graph) -> pd.DataFrame:
