@@ -164,9 +164,9 @@ if args.entirely_sim_mart_vaq:
     )
 
     data_collector = meta_sim.avg_play(
-        rounds=30000,
+        rounds=300000,
         n_groups=1,
-        ith_collect=3000,
+        ith_collect=30000,
         repetition=10,
         measure_topology=False,
     )
@@ -226,22 +226,58 @@ if args.criminal_likelihood_corr:
     """
     # Get actual criminal network
     nx_network = NetworkReader().get_data(args.read_data)
-    logger.info(f"The data used is {nx_network.name}")
+
+    ratio_honest = 0.96
+    ratio_wolf = 0.01
 
     # Add nodes to network
     # First convert to gt
-    meta_sim = MetaSimulator(
+    meta_sim_pref = MetaSimulator(
         network_name=nx_network.name,
-        attachment_method=args.attach_meth,
-        ratio_honest=0.9,
-        ratio_wolf=0.01,
+        attachment_method="preferential",
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
         random_fit_init=False,
     )
 
-    data_collector = meta_sim.avg_play(
-        rounds=30000,
+    meta_sim_rnd = MetaSimulator(
+        network_name=nx_network.name,
+        attachment_method="random",
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
+        random_fit_init=False,
+    )
+
+    meta_sim_sw = MetaSimulator(
+        network_name=nx_network.name,
+        attachment_method="small-world",
+        ratio_honest=ratio_honest,
+        ratio_wolf=ratio_wolf,
+        random_fit_init=False,
+    )
+
+    data_collector_pref = meta_sim_pref.avg_play(
+        rounds=args.rounds,
         n_groups=1,
-        ith_collect=31000,
+        ith_collect=args.rounds + 1,  # don't need to collect this information
+        repetition=30,
+        measure_topology=False,
+        measure_likelihood_corr=True,
+    )
+
+    data_collector_rnd = meta_sim_rnd.avg_play(
+        rounds=args.rounds,
+        n_groups=1,
+        ith_collect=args.rounds + 1,  # don't need to collect this information
+        repetition=30,
+        measure_topology=False,
+        measure_likelihood_corr=True,
+    )
+
+    data_collector_sw = meta_sim_sw.avg_play(
+        rounds=args.rounds,
+        n_groups=1,
+        ith_collect=args.rounds + 1,  # don't need to collect this information
         repetition=30,
         measure_topology=False,
         measure_likelihood_corr=True,

@@ -18,6 +18,7 @@ import numpy as np
 import powerlaw
 from config.config import ConfigParser
 from cycler import cycler
+from utils.stats import get_correlation
 from utils.tools import DirectoryFinder
 from utils.tools import timestamp
 
@@ -346,7 +347,7 @@ class Plotter(ConfigParser):
         if ax is None:
             ax = plt.gca()
 
-        line_pot_style = iter(["^k:", "r8-", "ob-."])
+        line_plot_style = iter(["^k:", "r8-", "ob-."])
         for network_type in dict_data:
             if y_data_to_plot not in dict_data[network_type].keys():
                 raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
@@ -356,7 +357,7 @@ class Plotter(ConfigParser):
                 dict_data[network_type][x_data_to_plot],
                 dict_data[network_type][y_data_to_plot],
                 yerr=dict_data[network_type][deviation],
-                fmt=next(line_pot_style),
+                fmt=next(line_plot_style),
                 capsize=5,
                 label=network_type,
             )
@@ -376,6 +377,69 @@ class Plotter(ConfigParser):
             fig_name = (
                 DirectoryFinder().result_dir_fig
                 + y_data_to_plot
+                + "_"
+                + timestamp()
+                + ".png"
+            )
+            plt.savefig(fig_name, dpi=300)
+            return ax
+        else:
+            plt.show()
+            return ax
+
+    def plot_lines_correlation(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: str,
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -> plt.Axes:
+        """Plot line graph from correlation points with correlatio factor.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        """
+        keys = list(dict_data.keys())
+
+        _, axs = plt.subplots(1, len(y_data_to_plot))
+        if axs is None:
+            axs = plt.gca()
+
+        for centrality_measure, ax in zip(y_data_to_plot, axs):
+
+            line_plot_style = iter(["k-", "b-", "o-"])
+            for key in keys:
+                corr = get_correlation(
+                    dict_data[key]["df_total"][x_data_to_plot],
+                    dict_data[key]["df_total"][centrality_measure],
+                )
+
+                m, b = np.polyfit(
+                    dict_data[key]["df_total"][x_data_to_plot],
+                    dict_data[key]["df_total"][centrality_measure],
+                    1,
+                )
+
+                ax.plot(
+                    dict_data[key]["df_total"][x_data_to_plot],
+                    m * dict_data[key]["df_total"][x_data_to_plot] + b,
+                    next(line_plot_style),
+                    label=key + f" --- {corr=}",
+                )
+                ax.set_xlabel("criminal likelihood")
+                ax.set_ylabel(centrality_measure.capitalize())
+                ax.legend(loc="upper left")
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + "correlation_fig"
                 + "_"
                 + timestamp()
                 + ".png"

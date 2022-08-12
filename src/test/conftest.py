@@ -21,6 +21,7 @@ import graph_tool.all as gt
 import networkit as nk
 import networkx as nx
 import numpy as np
+import pandas as pd
 import pytest
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_generator import NetworkGenerator
@@ -177,6 +178,40 @@ def fake_topological_data() -> Dict[str, DefaultDict[str, List[Any]]]:
         )
         data_collector["std_information"] = list(np.random.normal(1, 50, size=10))
         data_collector["std_gcs"] = list(np.random.normal(1, 50, size=10))
+
+        fake_data[key] = data_collector
+
+    return fake_data
+
+
+@pytest.fixture(scope="session")
+def fake_correlation_data() -> Dict[str, DefaultDict[str, List[Any]]]:
+    """Create fake correlation data."""
+    fake_data = {}
+
+    for key in ["preferential attachment", "small world", "random attachment"]:
+        # create fake data
+        # The desired covariance matrix.
+        num_samples = 40
+        # The desired mean values of the sample.
+        mu = np.array([5.0, 0.0, 10.0])
+        r = np.array([[3.40, -2.75, -2.00], [-2.75, 5.50, 1.50], [-2.00, 1.50, 1.25]])
+        # Generate the random samples.
+        rng = np.random.default_rng()
+        y = rng.multivariate_normal(mu * np.random.uniform(), r, size=num_samples)
+
+        data_collector = defaultdict(list)  # type: DefaultDict[str, Any]
+
+        data_collector["df_total"] = pd.DataFrame(
+            {
+                "criminal_likelihood": y[:, 0],
+                "degree": y[:, 1],
+                "betweenness": y[:, 2],
+                "katz": y[:, 2],
+                "closeness": y[:, 2],
+                "eigen vector": y[:, 2],
+            }
+        )
 
         fake_data[key] = data_collector
 

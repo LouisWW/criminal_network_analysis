@@ -14,13 +14,14 @@ import numpy as np
 import pandas as pd
 import similaritymeasures
 from scipy import stats
+from scipy.stats import pearsonr
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
 
 def get_mean_std_over_list(
     data_collector: DefaultDict,
 ) -> DefaultDict[str, Union[DefaultDict, List[Any]]]:
-    """Take the average and mean over multiple lists from a defaultdict(list).
+    """Take the average and st/sem over multiple lists from a defaultdict(list).
 
     Args:
         data_collector (DefaultDict): Contains all the data,each main key respresent the
@@ -87,6 +88,16 @@ def concat_df(
         data_collector["df_total"]["criminal_likelihood"].div(rounds)
 
     return data_collector
+
+
+def get_correlation(x: List[Union[float, int]], y: List[Union[float, int]]) -> str:
+    """Get the correlation between x and y."""
+    # only look at the criminal_likelihood
+    corr, p_val = pearsonr(x, y)
+
+    p_star = "".join(["*" for t in [0.01, 0.05, 0.1] if p_val <= t])
+    corr_with_p = corr.round(2).astype(str) + p_star
+    return corr_with_p
 
 
 def compare_time_series(

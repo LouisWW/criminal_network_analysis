@@ -201,6 +201,7 @@ class SimMartVaq:
             if measure_likelihood_corr:
                 network = self.update_age(network)
 
+            # update fitness decay
             network = self.update_fitness(network)
 
             # Collect the data
@@ -846,7 +847,7 @@ class SimMartVaq:
                 "betweenness",
                 "katz",
                 "closeness",
-                "eigen_v",
+                "eigen vector",
             ]
         )
 
@@ -865,7 +866,7 @@ class SimMartVaq:
                     "betweenness": btw,
                     "katz": katz,
                     "closeness": cls,
-                    "eigen_v": eign_v,
+                    "eigen vector": eign_v,
                 },
                 ignore_index=True,
             )

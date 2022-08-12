@@ -2,6 +2,7 @@
 from collections import defaultdict
 from typing import Any
 from typing import DefaultDict
+from typing import Dict
 from typing import List
 from unittest import main
 from unittest.mock import Mock
@@ -128,11 +129,11 @@ class TestPlotter:
             data_collector["mean_information"] = list(np.ones(10))
             data_collector["mean_gcs"] = list(np.ones(10) * 5)
             data_collector["mean_iteration"] = list(range(0, 10))
-            data_collector["std_security_efficiency"] = list(
+            data_collector["sem_security_efficiency"] = list(
                 np.random.normal(1, 50, size=10)
             )
-            data_collector["std_information"] = list(np.random.normal(1, 50, size=10))
-            data_collector["std_gcs"] = list(np.random.normal(1, 50, size=10))
+            data_collector["sem_information"] = list(np.random.normal(1, 50, size=10))
+            data_collector["sem_gcs"] = list(np.random.normal(1, 50, size=10))
 
             fake_data[key] = data_collector
 
@@ -157,6 +158,27 @@ class TestPlotter:
         )
 
         assert isinstance(ax, plt.Axes)
+
+    @pytest.mark.essential
+    @patch("matplotlib.pyplot.show")
+    def test_plot_lines_correlation(
+        self,
+        mock_show: Mock,
+        fake_correlation_data: Dict[str, DefaultDict[str, List[Any]]],
+    ) -> None:
+        """Test if the plt lines correlation function works."""
+        plotter = Plotter()
+        plotter.plot_lines_correlation(
+            dict_data=fake_correlation_data,
+            y_data_to_plot=[
+                "degree",
+                "betweenness",
+                "katz",
+                "closeness",
+                "eigen vector",
+            ],
+            x_data_to_plot="criminal_likelihood",
+        )
 
 
 if __name__ == "__main__":

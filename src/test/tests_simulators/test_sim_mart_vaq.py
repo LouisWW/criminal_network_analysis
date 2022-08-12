@@ -757,7 +757,7 @@ class TestSimMartVaq:
             "betweenness",
             "katz",
             "closeness",
-            "eigen_v",
+            "eigen vector",
         }.issubset(data_collector["df"].columns)
 
         assert not (data_collector["df"]["criminal_likelihood"] == 0).all()
