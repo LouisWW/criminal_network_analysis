@@ -14,7 +14,7 @@ python3 main.py -sim-mart-vaq -read-data montagna_calls -attach-meth preferentia
 python3 main.py -entirely-sim-mart-vaq -read-data montagna_calls -attach-meth preferential -save
 
 # Run an anlysis on the criminal likelihood
-python3 main.py -read-data montagna_calls -attach-meth preferential -criminal-likelihood-corr
+python3 main.py -read-data montagna_calls -criminal-likelihood-corr -r 1000 -n-samples 30 -save
 
 # Run the sensitivity analysis
 nohup python3 main.py -read-data montagna_meetings -sa sim-mart-vaq -n-samples 1024  -r 3000 -output-value ratio_criminal -save &

@@ -10,14 +10,12 @@ import logging
 
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 from config.config import ConfigParser
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
 from PIL import Image
 from PIL import PngImagePlugin
-from scipy.stats import pearsonr
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 from utils.animation import Animateur
@@ -260,7 +258,7 @@ if args.criminal_likelihood_corr:
         rounds=args.rounds,
         n_groups=1,
         ith_collect=args.rounds + 1,  # don't need to collect this information
-        repetition=30,
+        repetition=args.n_samples,
         measure_topology=False,
         measure_likelihood_corr=True,
     )
@@ -269,7 +267,7 @@ if args.criminal_likelihood_corr:
         rounds=args.rounds,
         n_groups=1,
         ith_collect=args.rounds + 1,  # don't need to collect this information
-        repetition=30,
+        repetition=args.n_samples,
         measure_topology=False,
         measure_likelihood_corr=True,
     )
@@ -278,20 +276,26 @@ if args.criminal_likelihood_corr:
         rounds=args.rounds,
         n_groups=1,
         ith_collect=args.rounds + 1,  # don't need to collect this information
-        repetition=30,
+        repetition=args.n_samples,
         measure_topology=False,
         measure_likelihood_corr=True,
     )
-    # only look at the criminal_likelihood
-    corr = data_collector["df_total"].corr()
-    pval = data_collector["df_total"].corr(
-        method=lambda x, y: pearsonr(x, y)[1]
-    ) - np.eye(*corr.shape)
-    p = pval.applymap(lambda x: "".join(["*" for t in [0.01, 0.05, 0.1] if x <= t]))
-    corr_with_p = corr.round(2).astype(str) + p
-    print(corr_with_p[["criminal_likelihood"]])
-    sns.heatmap(corr[["criminal_likelihood"]], annot=True)
-    plt.show()
+
+    ax = plotter.plot_lines_correlation(
+        {
+            "preferential attachment": data_collector_pref,
+            "random attachment": data_collector_rnd,
+            "small world": data_collector_sw,
+        },
+        y_data_to_plot=[
+            "degree",
+            "betweenness",
+            "katz",
+            "closeness",
+            "eigen vector",
+        ],
+        x_data_to_plot="criminal_likelihood",
+    )
 
 if args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
