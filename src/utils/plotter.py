@@ -439,7 +439,7 @@ class Plotter(ConfigParser):
         if self.args.save:
             fig_name = (
                 DirectoryFinder().result_dir_fig
-                + "correlation_fig"
+                + "_correlation_fig"
                 + "_"
                 + timestamp()
                 + ".png"

@@ -428,7 +428,7 @@ if args.compare_simulations:
         network_name=args.read_data,
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        n_new_edges=2,
+        k=2,
         attachment_method="preferential",
     )
     meta_sim_rand = MetaSimulator(
@@ -553,7 +553,7 @@ if args.entirely_compare_simulations:
         network_name=args.read_data,
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        n_new_edges=2,
+        k=2,
         attachment_method="preferential",
     )
     meta_sim_rand = MetaSimulator(
@@ -674,7 +674,7 @@ if args.get_network_stats:
     """
 
     nx_network = NetworkReader().get_data(args.read_data)
-    ratio_honest = 0.9
+    ratio_honest = 0.95
     ratio_wolf = 0.01
     logger.info(f"Ration : {ratio_honest=}, {ratio_wolf=}")
 
@@ -684,7 +684,7 @@ if args.get_network_stats:
         attachment_method="preferential",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        n_new_edges=2,
+        k=2,
         random_fit_init=False,
     )
 
@@ -694,7 +694,7 @@ if args.get_network_stats:
         attachment_method="random",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        prob=0.0034,  # 0.0034 for random
+        prob=2,  # 0.0034 for random
         random_fit_init=False,
     )
 
@@ -737,7 +737,8 @@ if args.get_network_stats:
     mean_dict_of_network_stats_sw = dict_mean(list_of_network_stats_sw)
 
     with open(
-        DirectoryFinder().result_dir_data + f"result_{timestamp()}.json", "w"
+        DirectoryFinder().result_dir_data_network_stats + f"_result_{timestamp()}.json",
+        "w",
     ) as fp:
         json.dump(
             {

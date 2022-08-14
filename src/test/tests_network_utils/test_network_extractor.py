@@ -28,7 +28,7 @@ class TestNetworkExtractor:
             network_name=network_name,
             ratio_honest=0.8,
             ratio_wolf=0.1,
-            n_new_edges=2,
+            k=2,
             attachment_method="random",
         )
 
@@ -50,7 +50,7 @@ class TestNetworkExtractor:
             network_name=network_name,
             ratio_honest=0.8,
             ratio_wolf=0.1,
-            n_new_edges=2,
+            k=2,
             attachment_method="random",
         )
 

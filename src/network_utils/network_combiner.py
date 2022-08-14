@@ -27,7 +27,7 @@ class NetworkCombiner:
 
     @staticmethod
     def combine_by_preferential_attachment_faster(
-        network: gt.Graph, new_nodes: int, n_new_edges: int
+        network: gt.Graph, new_nodes: int, k: int
     ) -> Tuple[gt.Graph, List[Tuple[int, int]]]:
         """Apply preferential attachment to a existing network."""
         # Get the number of nodes of the existing network
@@ -45,9 +45,7 @@ class NetworkCombiner:
             node_degr = network.get_out_degrees(network.get_vertices())
             nodes_probs = node_degr / (2 * n_edges)
 
-            new_edges = np.random.choice(
-                network.get_vertices(), size=n_new_edges, p=nodes_probs
-            )
+            new_edges = np.random.choice(network.get_vertices(), size=k, p=nodes_probs)
 
             network.add_vertex(1)
             # Add the edges to the last added node network.vertex(network.num_vertices())-1
@@ -59,7 +57,7 @@ class NetworkCombiner:
 
     @staticmethod
     def combine_by_random_attachment_faster(
-        network: gt.Graph, new_nodes: int, prob: float
+        network: gt.Graph, new_nodes: int, k: int
     ) -> Tuple[gt.Graph, List[Tuple[int, int]]]:
         """Generate a Erdös-Rény Random Network around the given network.
 
@@ -69,7 +67,7 @@ class NetworkCombiner:
         # Add new nodes
         network.add_vertex(n=new_nodes)
         n_number_of_nodes = network.num_vertices()
-        accepted_edges = random_attachment_c(n_number_of_nodes, new_nodes, prob)
+        accepted_edges = random_attachment_c(n_number_of_nodes, new_nodes, k)
         network.add_edge_list(accepted_edges)
         return network, accepted_edges
 

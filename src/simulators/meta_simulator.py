@@ -36,8 +36,7 @@ class MetaSimulator:
         attachment_method: str,
         ratio_honest: float = 0.7,
         ratio_wolf: float = 0.1,
-        n_new_edges: int = 2,
-        k: int = 10,
+        k: int = 2,
         prob: float = 0.4,
         random_fit_init: bool = False,
     ) -> None:
@@ -47,7 +46,7 @@ class MetaSimulator:
             network_name (str): _description_
             ratio_honest (float, optional): Honest ratio. Defaults to 0.7.
             ratio_wolf (float, optional): Wolf ratio. Defaults to 0.1.
-            n_new_edges (int, optional): Number of edges to add for preferential attachement.
+            k (int, optional): Number of edges to add for preferential attachment/rnd/sw..
                                                             Defaults to 2.
             random_fit_init (bool, optional): Init random fintess. Defaults to False.
         """
@@ -79,7 +78,6 @@ class MetaSimulator:
         ) = self.compute_the_ratio(self.n_criminal)
 
         # network property
-        self.n_new_edges = n_new_edges
         self.k = k
         self.prob = prob
         self.random_fit_init = random_fit_init
@@ -105,7 +103,7 @@ class MetaSimulator:
     def create_population(self, network: gt.Graph) -> gt.Graph:
         """Create the population."""
         # Add the new nodes
-        network = self.initialise_network(network, self.n_new_edges, self.prob, self.k)
+        network = self.initialise_network(network, self.prob, self.k)
         # Init fitness
         network = self.init_fitness(network, self.random_fit_init)
         # Init age
@@ -133,7 +131,7 @@ class MetaSimulator:
         return new_nodes, total_number_nodes, relative_ratio_honest, relative_ratio_wolf
 
     def initialise_network(
-        self, network: gt.Graph, n_new_edges: int = 2, prob: float = 0.3, k: int = 10
+        self, network: gt.Graph, prob: float = 0.3, k: int = 2
     ) -> gt.Graph:
         """Add to the existing criminal network honest and lone wolfs.
 
@@ -143,11 +141,11 @@ class MetaSimulator:
         new_network = deepcopy(network)
         if self.attachment_method == "preferential":
             new_network = NetworkCombiner.combine_by_preferential_attachment_faster(
-                new_network, new_nodes=self.new_nodes, n_new_edges=n_new_edges
+                new_network, new_nodes=self.new_nodes, k=k
             )[0]
         elif self.attachment_method == "random":
             new_network = NetworkCombiner.combine_by_random_attachment_faster(
-                new_network, new_nodes=self.new_nodes, prob=prob
+                new_network, new_nodes=self.new_nodes, k=k
             )[0]
         elif self.attachment_method == "small-world":
             new_network = NetworkCombiner.combine_by_small_world_attachment(

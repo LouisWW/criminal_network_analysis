@@ -20,7 +20,7 @@ class NetworkReader:
     def read_cunha(self) -> nx.Graph:
         """Get data from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/ ."""
         data = pd.read_csv(
-            self.directory + "/Cunha2018.csv",
+            self.directory + "Cunha2018.csv",
             delimiter=";",
             names=["vertex1", "vertex2"],
         )
@@ -38,7 +38,7 @@ class NetworkReader:
     def read_montagna_meetings(self) -> nx.Graph:
         """Get data from https://zenodo.org/record/3938818#.Yf64mPso9FE ."""
         data = pd.read_csv(
-            self.directory + "/Montagna_Meetings_Edgelist.csv", sep="\\s+"
+            self.directory + "Montagna_Meetings_Edgelist.csv", sep="\\s+"
         )
 
         graph_obj = nx.from_pandas_edgelist(
@@ -56,7 +56,7 @@ class NetworkReader:
     def read_montagna_phone_calls(self) -> nx.Graph:
         """Get data from https://zenodo.org/record/3938818#.Yf64mPso9FE ."""
         data = pd.read_csv(
-            self.directory + "/Montagna_Phone_Calls_Edgelist.csv", sep=","
+            self.directory + "Montagna_Phone_Calls_Edgelist.csv", sep=","
         )
 
         graph_obj = nx.from_pandas_edgelist(

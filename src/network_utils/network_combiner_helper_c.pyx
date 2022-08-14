@@ -9,7 +9,7 @@ import itertools
 
 @cython.boundscheck(False) # turn off bounds-checking for entire function
 @cython.wraparound(False)
-cpdef list random_attachment_c(int network_size,int n_new_nodes,float prob):
+cpdef list random_attachment_c(int network_size,int n_new_nodes,int k):
     """Generate a Erdös-Rény Random Network around the given network.
 
         The code is based on the pseudo-code described in
@@ -21,17 +21,16 @@ cpdef list random_attachment_c(int network_size,int n_new_nodes,float prob):
         list possible_links
 
     possible_links = []
-    for i in range(0,network_size- n_new_nodes):
-        for j in range(network_size-n_new_nodes,network_size):
-            if prob > drand48():
-                possible_links.append((i,j))
+    number_list = list(range(1,network_size+1))
 
     for i in range(network_size- n_new_nodes,network_size):
-        for j in range(i+1,network_size):
-            if prob > drand48():
-                possible_links.append((i,j))
+        for j in range(0,k):
+            vertice =  random.choice(number_list)
+            while vertice == i:
+                vertice =  random.choice(number_list)
+            possible_links.append((i,vertice))
 
-    return possible_links
+    return list(set(map(tuple,map(sorted,possible_links)))) # remove possible duplicates
 
 
 cdef extern from "stdlib.h":

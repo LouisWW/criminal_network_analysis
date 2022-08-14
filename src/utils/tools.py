@@ -22,13 +22,14 @@ class DirectoryFinder:
         self.main_dir = os.path.abspath(os.path.join(path, "../"))  # par_dir = ../src/
 
         # Results
-        self.result_dir = self.main_dir + "/results"
-        self.result_dir_data = self.result_dir + "/data"
-        self.result_dir_data_sa = self.result_dir_data + "/sensitivity_analysis/"
+        self.result_dir = self.main_dir + "/results/"
+        self.result_dir_data = self.result_dir + "data/"
+        self.result_dir_data_sa = self.result_dir_data + "sensitivity_analysis/"
+        self.result_dir_data_network_stats = self.result_dir_data + "network_stats/"
 
         # Criminal Data
-        self.criminal_data_dir = self.main_dir + "/data"
+        self.criminal_data_dir = self.main_dir + "/data/"
 
         # Saving dir
-        self.result_dir_fig = self.result_dir + "/figures"
-        self.result_dir_video = self.result_dir + "/video"
+        self.result_dir_fig = self.result_dir + "figures/"
+        self.result_dir_video = self.result_dir + "video/"

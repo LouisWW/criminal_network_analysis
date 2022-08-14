@@ -99,8 +99,9 @@ class TestMetaSimualtor:
             ratio_honest=0.2,
             ratio_wolf=0.3,
             attachment_method="small-world",
+            k=5,
         )
-        network = meta_sim.initialise_network(network=gt_network)
+        network = meta_sim.initialise_network(network=gt_network, k=5)
 
         # Criminal network size should be 95
         # Honest and Wolf ratio should be within a range given the init is stochastic
@@ -166,10 +167,7 @@ class TestMetaSimualtor:
             ratio_wolf,
         )
         meta_simulator_sw = MetaSimulator(
-            "montagna_calls",
-            "small-world",
-            ratio_honest,
-            ratio_wolf,
+            "montagna_calls", "small-world", ratio_honest, ratio_wolf, k=5
         )
         population_1_pref = meta_simulator_pref.create_population(
             meta_simulator_pref.criminal_network
@@ -213,10 +211,7 @@ class TestMetaSimualtor:
 
         # Test all the different attachment_method
         meta_simulator = MetaSimulator(
-            "montagna_calls",
-            structure,
-            ratio_honest,
-            ratio_wolf,
+            "montagna_calls", structure, ratio_honest, ratio_wolf, k=5
         )
 
         repetition = 10
