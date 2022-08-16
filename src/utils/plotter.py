@@ -32,7 +32,7 @@ class Plotter(ConfigParser):
 
         # Making sure all the plots have the same parameters
         # plt.style.use('ggplot')
-        plt.rcParams["figure.figsize"] = (5, 4)
+        plt.rcParams["figure.figsize"] = (15, 13)
         plt.rcParams["figure.autolayout"] = True
         plt.rcParams["xtick.direction"] = "in"
         plt.rcParams["ytick.direction"] = "in"
@@ -204,17 +204,25 @@ class Plotter(ConfigParser):
                     dev = data.replace("mean", "sem")
 
                 if x_data_to_plot:
+                    upper_dev = np.array(dict_data[data]) + np.array(dict_data[dev])
+                    lower_dev = np.array(dict_data[data]) - np.array(dict_data[dev])
+
+                    # if values are above 1 or below 0 is not possible
+                    if "mean_ratio" in data:
+                        upper_dev = np.where(upper_dev > 1, 1, upper_dev)
+                        lower_dev = np.where(lower_dev < 0, 0, lower_dev)
+
                     ax.fill_between(
                         dict_data[x_data_to_plot],
-                        np.array(dict_data[data]) - np.array(dict_data[dev]),
-                        np.array(dict_data[data]) + np.array(dict_data[dev]),
+                        lower_dev,
+                        upper_dev,
                         alpha=0.5,
                     )
                 else:
                     ax.fill_between(
                         range(0, len(dict_data[data])),
-                        np.array(dict_data[data]) - np.array(dict_data[dev]),
-                        np.array(dict_data[data]) + np.array(dict_data[dev]),
+                        lower_dev,
+                        upper_dev,
                         alpha=0.5,
                     )
 
@@ -405,13 +413,17 @@ class Plotter(ConfigParser):
         """
         keys = list(dict_data.keys())
 
+        mpl.rcParams["axes.spines.top"] = True
+        mpl.rcParams["axes.spines.right"] = True
+
         _, axs = plt.subplots(1, len(y_data_to_plot))
+
         if axs is None:
             axs = plt.gca()
 
         for centrality_measure, ax in zip(y_data_to_plot, axs):
 
-            line_plot_style = iter(["k-", "b-", "o-"])
+            line_plot_style = iter(["k-", "k--", "k.-"])
             for key in keys:
                 corr = get_correlation(
                     dict_data[key]["df_total"][x_data_to_plot],
@@ -430,21 +442,24 @@ class Plotter(ConfigParser):
                     next(line_plot_style),
                     label=key + f" --- {corr=}",
                 )
-                ax.set_xlabel("criminal likelihood")
-                ax.set_ylabel(centrality_measure.capitalize())
-                ax.legend(loc="upper left")
+                ax.set_xlabel("Criminal likelihood", weight="bold")
+                ax.set_ylabel(centrality_measure.capitalize(), weight="bold")
+                ax.patch.set_edgecolor("black")
+                ax.patch.set_linewidth("2")
+                ax.set_aspect(1.5 * np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+                ax.legend(loc="upper right", fontsize="x-small")
 
         plt.tight_layout()
 
         if self.args.save:
             fig_name = (
                 DirectoryFinder().result_dir_fig
-                + "_correlation_fig"
+                + "correlation_fig"
                 + "_"
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300)
+            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
             return ax
         else:
             plt.show()
