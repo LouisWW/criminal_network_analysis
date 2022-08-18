@@ -66,7 +66,7 @@ class TestPlotter:
             xlabel="rounds",
             ylabel="ratio (per)",
             title="This is a test",
-            plot_std="std",
+            plot_deviation="std",
         )
         assert isinstance(ax, plt.Axes)
 

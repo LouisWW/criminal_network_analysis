@@ -171,7 +171,7 @@ class Plotter(ConfigParser):
         self,
         dict_data: DefaultDict[str, List[int]],
         y_data_to_plot: List[str],
-        x_data_to_plot: str = None,
+        x_data_to_plot: str,
         *args: str,
         **kwargs: Any,
     ) -> plt.Axes:
@@ -192,42 +192,32 @@ class Plotter(ConfigParser):
             if data not in dict_data.keys():
                 raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
 
-            if x_data_to_plot:
-                ax.plot(
-                    dict_data[x_data_to_plot],
-                    dict_data[data],
-                    label=data.replace("_", " ").capitalize(),
-                )
-            else:
-                ax.plot(dict_data[data], label=data.replace("_", " ").capitalize())
+            ax.plot(
+                dict_data[x_data_to_plot],
+                dict_data[data],
+                label=data.replace("_", " ").capitalize(),
+            )
+
             if "plot_deviation" in kwargs:
                 if kwargs["plot_deviation"] == "std":  # standard deviation
                     dev = data.replace("mean", "std")
                 elif kwargs["plot_deviation"] == "sem":  # standard error of the mean
                     dev = data.replace("mean", "sem")
 
-                if x_data_to_plot:
-                    upper_dev = np.array(dict_data[data]) + np.array(dict_data[dev])
-                    lower_dev = np.array(dict_data[data]) - np.array(dict_data[dev])
+                upper_dev = np.array(dict_data[data]) + np.array(dict_data[dev])
+                lower_dev = np.array(dict_data[data]) - np.array(dict_data[dev])
 
-                    # if values are above 1 or below 0 is not possible
-                    if "mean_ratio" in data:
-                        upper_dev = np.where(upper_dev > 1, 1, upper_dev)
-                        lower_dev = np.where(lower_dev < 0, 0, lower_dev)
+                # if values are above 1 or below 0 is not possible
+                if "mean_ratio" in data:
+                    upper_dev = np.where(upper_dev > 1, 1, upper_dev)
+                    lower_dev = np.where(lower_dev < 0, 0, lower_dev)
 
-                    ax.fill_between(
-                        dict_data[x_data_to_plot],
-                        lower_dev,
-                        upper_dev,
-                        alpha=0.5,
-                    )
-                else:
-                    ax.fill_between(
-                        range(0, len(dict_data[data])),
-                        lower_dev,
-                        upper_dev,
-                        alpha=0.5,
-                    )
+                ax.fill_between(
+                    dict_data[x_data_to_plot],
+                    lower_dev,
+                    upper_dev,
+                    alpha=0.5,
+                )
 
         if "title" in kwargs:
             ax.set_title(kwargs["title"].replace("_", " ").capitalize())
@@ -331,6 +321,8 @@ class Plotter(ConfigParser):
         y_range: np.ndarray,
         param_x: str,
         param_y: str,
+        *args: str,
+        **kwargs: Any,
     ) -> plt.Axes:
         """Generate a phase diagram of param1 and param2.
 
@@ -383,7 +375,37 @@ class Plotter(ConfigParser):
 
         ax.set_xlabel(fr"${param_y}$")
         ax.set_ylabel(fr"${param_x}$")
-        return ax
+
+        if self.args.save:
+
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + +"phase_diag_"
+                + param_x
+                + "_"
+                + param_y
+                + "_"
+                + timestamp()
+                + ".png"
+            )
+            plt.savefig(fig_name, dpi=300)
+            if "simulators" in kwargs:
+                simulators_str_dict = dict(
+                    {
+                        str(key): str(value)
+                        for key, value in kwargs["simulators"].__dict__.items()
+                    }
+                )
+                meta = PngImagePlugin.PngInfo()
+                for x in simulators_str_dict:
+                    meta.add_text(x, simulators_str_dict[x])
+
+                # Add the meta to it
+                im = Image.open(fig_name)
+                im.save(fig_name, "png", pnginfo=meta)
+        else:
+            plt.show()
+            return ax
 
     def plot_lines_comparative(
         self,

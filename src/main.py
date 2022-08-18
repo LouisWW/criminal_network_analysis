@@ -4,18 +4,14 @@ This script contains regroups all the functions and pipelines needed to recreate
 __author__ = Louis Weyland
 __date__   = 22/02/2022
 """
-import datetime
 import json
 import logging
 
-import matplotlib.pyplot as plt
 import numpy as np
 from config.config import ConfigParser
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
-from PIL import Image
-from PIL import PngImagePlugin
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 from utils.animation import Animateur
@@ -87,86 +83,10 @@ if args.sim_mart_vaq:
     )
     data_collector = simulators.avg_play(
         network=simulators.network,
-        rounds=300000,
+        rounds=args.rounds,
         n_groups=1,
-        ith_collect=20000,
-        repetition=10,
-        measure_topology=False,
-    )
-
-    ax_0 = plotter.plot_lines(
-        dict_data=data_collector,
-        y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
-        x_data_to_plot="mean_iteration",
-        xlabel="Rounds",
-        ylabel="Ratio (%)",
-        plot_std=True,
-    )
-
-    simulators_str_dict = dict(
-        {str(key): str(value) for key, value in simulators.__dict__.items()}
-    )
-    meta_str_sim = dict(
-        {str(key): str(value) for key, value in meta_sim.__dict__.items()}
-    )
-    meta = PngImagePlugin.PngInfo()
-    for x in simulators_str_dict:
-        meta.add_text(x, simulators_str_dict[x])
-
-    if args.save:
-        fig_name = plotter.savig_dir + "population_ration_" + timestamp() + ".png"
-        plt.savefig(fig_name, dpi=300)
-        # Add the meta data to it
-        im = Image.open(fig_name)
-        im.save(fig_name, "png", pnginfo=meta)
-    else:
-        plt.show()
-
-    ax_1 = plotter.plot_lines(
-        dict_data=data_collector,
-        y_data_to_plot=[
-            "mean_fitness_honest",
-            "mean_fitness_wolf",
-            "mean_fitness_criminal",
-        ],
-        x_data_to_plot="mean_iteration",
-        xlabel="Rounds",
-        ylabel="Average fitness",
-    )
-
-    if args.save:
-        fig_name = plotter.savig_dir + "fitness_evol_" + timestamp() + ".png"
-        plt.savefig(fig_name, dpi=300)
-        # Add the meta to it
-        im = Image.open(fig_name)
-        im.save(fig_name, "png", pnginfo=meta)
-    else:
-        plt.show()
-
-if args.entirely_sim_mart_vaq:
-    """Simulate the simulation form
-    Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
-    Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
-    """
-    # Get actual criminal network
-    nx_network = NetworkReader().get_data(args.read_data)
-
-    # Add nodes to network
-    # First convert to gt
-    meta_sim = MetaSimulator(
-        network_name=nx_network.name,
-        attachment_method=args.attach_meth,
-        ratio_honest=0.96,
-        ratio_wolf=0.01,
-        random_fit_init=False,
-        k=6,
-    )
-
-    data_collector = meta_sim.avg_play(
-        rounds=400000,
-        n_groups=1,
-        ith_collect=10000,
-        repetition=10,
+        ith_collect=int(args.rounds / 15),
+        repetition=args.n_samples,
         measure_topology=False,
     )
 
@@ -191,6 +111,53 @@ if args.entirely_sim_mart_vaq:
         ylabel="Average fitness",
     )
 
+if args.sim_mart_vaq_w_net:
+    """Simulate the simulation form
+    Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
+    Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
+    Using each time a new network
+    """
+    # Get actual criminal network
+    nx_network = NetworkReader().get_data(args.read_data)
+
+    # Add nodes to network
+    # First convert to gt
+    meta_sim = MetaSimulator(
+        network_name=nx_network.name,
+        attachment_method=args.attach_meth,
+        ratio_honest=0.96,
+        ratio_wolf=0.01,
+        random_fit_init=False,
+        k=6,
+    )
+
+    data_collector = meta_sim.avg_play(
+        rounds=args.rounds,
+        n_groups=1,
+        ith_collect=int(args.rounds / 15),
+        repetition=args.n_samples,
+        measure_topology=False,
+    )
+    ax_0 = plotter.plot_lines(
+        dict_data=data_collector,
+        y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
+        x_data_to_plot="mean_iteration",
+        xlabel="Rounds",
+        ylabel="Ratio (%)",
+        plot_deviation="std",
+    )
+
+    ax_1 = plotter.plot_lines(
+        dict_data=data_collector,
+        y_data_to_plot=[
+            "mean_fitness_honest",
+            "mean_fitness_wolf",
+            "mean_fitness_criminal",
+        ],
+        x_data_to_plot="mean_iteration",
+        xlabel="Rounds",
+        ylabel="Average fitness",
+    )
 
 if args.criminal_likelihood_corr:
     """Simulate the simulation form
@@ -320,7 +287,6 @@ if args.phase_diagram:
     # First convert to gt
     # Get actual criminal network
     nx_network = NetworkReader().get_data(args.read_data)
-    logger.info(f"The data used is {nx_network.name}")
 
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
@@ -343,10 +309,10 @@ if args.phase_diagram:
             )
             data_collector = simulators.avg_play(
                 network=simulators.network,
-                rounds=7500,
+                rounds=args.rounds,
                 n_groups=1,
-                ith_collect=7500,
-                repetition=5,
+                ith_collect=args.rounds,  # only need the last measurement
+                repetition=args.n_samples,
             )
 
             # Only look at the ratio and get the status with the highest ratio at the end
@@ -359,42 +325,21 @@ if args.phase_diagram:
             grid[x_i, y_i] = max(filtered_dict, key=lambda x: filtered_dict[x][-1])
 
     ax = plotter.plot_phase_diag(
-        grid, x_range, y_range, parameter_dict[param_x], parameter_dict[param_y]
+        grid,
+        x_range,
+        y_range,
+        parameter_dict[param_x],
+        parameter_dict[param_y],
+        simulator=simulators,
     )
 
-    if args.save:
-        e = datetime.datetime.now()
-        timestamp = e.strftime("%d-%m-%Y-%H-%M")
-        simulators_str_dict = dict(
-            {str(key): str(value) for key, value in simulators.__dict__.items()}
-        )
-        meta_str_sim = dict(
-            {str(key): str(value) for key, value in meta_sim.__dict__.items()}
-        )
-        meta = PngImagePlugin.PngInfo()
-        for x in simulators_str_dict:
-            meta.add_text(x, simulators_str_dict[x])
+if args.topo_meas:
+    """Simulate the simulation form
+    Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
+    Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
 
-        fig_name = (
-            plotter.savig_dir
-            + "phase_diag_"
-            + param_x
-            + "_"
-            + param_y
-            + "_"
-            + timestamp
-            + ".png"
-        )
-        plt.savefig(fig_name, dpi=300)
-        # Add the meta to it
-        im = Image.open(fig_name)
-        im.save(fig_name, "png", pnginfo=meta)
-    else:
-        plt.show()
-
-if args.compare_simulations:
-    logger.info(f"The data used is {args.read_data}")
-
+    Defines the topological changes along the simulation.
+    """
     ratio_honest = 0.9
     ratio_wolf = 0.01
     n_groups = 1
@@ -517,8 +462,13 @@ if args.compare_simulations:
         plot_deviation="sem",
     )
 
-if args.entirely_compare_simulations:
-    logger.info(f"The data used is {args.read_data}")
+if args.topo_meas_w_net:
+    """Simulate the simulation form
+    Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
+    Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
+
+    Defines the topological changes along the simulation running each time on a new network.
+    """
 
     ratio_honest = 0.9
     ratio_wolf = 0.01
@@ -609,7 +559,6 @@ if args.entirely_compare_simulations:
         xlabel="Rounds",
         plot_deviation="sem",
     )
-
 
 if args.animate_simulation:
     """Create an animation of the simulation."""
