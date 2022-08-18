@@ -16,8 +16,11 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import powerlaw
+import seaborn as sns
 from config.config import ConfigParser
 from cycler import cycler
+from PIL import Image
+from PIL import PngImagePlugin
 from utils.stats import get_correlation
 from utils.tools import DirectoryFinder
 from utils.tools import timestamp
@@ -193,10 +196,10 @@ class Plotter(ConfigParser):
                 ax.plot(
                     dict_data[x_data_to_plot],
                     dict_data[data],
-                    label=data.replace("_", " "),
+                    label=data.replace("_", " ").capitalize(),
                 )
             else:
-                ax.plot(dict_data[data], label=data.replace("_", " "))
+                ax.plot(dict_data[data], label=data.replace("_", " ").capitalize())
             if "plot_deviation" in kwargs:
                 if kwargs["plot_deviation"] == "std":  # standard deviation
                     dev = data.replace("mean", "std")
@@ -227,21 +230,43 @@ class Plotter(ConfigParser):
                     )
 
         if "title" in kwargs:
-            ax.set_title(kwargs["title"])
+            ax.set_title(kwargs["title"].replace("_", " ").capitalize())
         if "xlabel" in kwargs:
-            ax.set_xlabel(kwargs["xlabel"])
+            ax.set_xlabel(kwargs["xlabel"].replace("_", " ").capitalize())
         if "ylabel" in kwargs:
-            ax.set_ylabel(kwargs["ylabel"])
+            ax.set_ylabel(kwargs["ylabel"].replace("_", " ").capitalize())
 
         # set legend
         ax.legend()
-        return ax
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + "population_ration_"
+                + timestamp()
+                + ".png"
+            )
+            plt.savefig(fig_name, dpi=300)
+            if "meta_simulator" in kwargs:
+                meta_str_sim = dict(
+                    {
+                        str(key): str(value)
+                        for key, value in kwargs["meta_sim"].__dict__.items()
+                    }
+                )
+                meta = PngImagePlugin.PngInfo()
+                for x in meta_str_sim:
+                    meta.add_text(x, meta_str_sim[x])
+                im = Image.open(fig_name)
+                im.save(fig_name, "png", pnginfo=meta)
+        else:
+            plt.show()
+            return ax
 
     def plot_hist(
         self,
         dict_data: DefaultDict[str, List[Any]],
-        data_to_plot: List[str],
-        n_bins: int = None,
+        y_data_to_plot: List[str],
         *args: str,
         **kwargs: Any,
     ) -> plt.Axes:
@@ -254,25 +279,50 @@ class Plotter(ConfigParser):
         Returns:
             plt.Axes: matplotlib axes object
         """
-        _, ax = plt.subplots()
-        if ax is None:
-            ax = plt.gca()
+        _, axs = plt.subplots(1, len(y_data_to_plot))
+        if axs is None:
+            axs = plt.gca()
 
-        for data in data_to_plot:
-            if data not in dict_data.keys():
-                raise KeyError(f"Given key doens't exist,{dict_data.keys()=}")
-            ax.hist(dict_data[data], label=data, bins=n_bins)
+        keys_diff_structure = list(dict_data.keys())
 
-        if "title" in kwargs:
-            ax.set_title(kwargs["title"])
-        if "xlabel" in kwargs:
-            ax.set_xlabel(kwargs["xlabel"])
-        if "ylabel" in kwargs:
-            ax.set_ylabel(kwargs["ylabel"])
+        for data, ax in zip(y_data_to_plot, axs):
+            if data not in dict_data[keys_diff_structure[0]].keys():
+                raise KeyError(
+                    f"Given key doesn't exist,{dict_data[keys_diff_structure[0]].keys()=}"
+                )
 
-        # set legend
-        ax.legend()
-        return ax
+            color_list = iter(list(sns.color_palette("rocket")))
+            for key_diff_structure in keys_diff_structure:
+                color = next(color_list)
+                sns.histplot(
+                    dict_data[key_diff_structure][data],
+                    kde=True,
+                    color=color,
+                    stat="probability",
+                    label=key_diff_structure,
+                    ax=ax,
+                )
+
+                if "title" in kwargs:
+                    ax.set_title(data.replace("_", " ").capitalize())
+                if "ylabel" in kwargs:
+                    ax.set_ylabel("probability".capitalize())
+                # set legend
+                ax.legend()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + "correlation_fig"
+                + "_"
+                + timestamp()
+                + ".png"
+            )
+            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
+            return ax
+        else:
+            plt.show()
+            return ax
 
     def plot_phase_diag(
         self,
@@ -338,7 +388,7 @@ class Plotter(ConfigParser):
     def plot_lines_comparative(
         self,
         dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
-        y_data_to_plot: str,
+        y_data_to_plot: List[str],
         x_data_to_plot: str = None,
         *args: str,
         **kwargs: Any,
@@ -351,35 +401,37 @@ class Plotter(ConfigParser):
         Returns:
             plt.Axes: matplotlib axes object
         """
-        _, ax = plt.subplots()
-        if ax is None:
-            ax = plt.gca()
+        _, axs = plt.subplots(1, len(y_data_to_plot))
+        if axs is None:
+            axs = plt.gca()
 
-        line_plot_style = iter(["^k:", "r8-", "ob-."])
-        for network_type in dict_data:
-            if y_data_to_plot not in dict_data[network_type].keys():
-                raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
+        keys_diff_structure = list(dict_data.keys())
 
-            deviation = y_data_to_plot.replace("mean", "sem")
-            ax.errorbar(
-                dict_data[network_type][x_data_to_plot],
-                dict_data[network_type][y_data_to_plot],
-                yerr=dict_data[network_type][deviation],
-                fmt=next(line_plot_style),
-                capsize=5,
-                label=network_type,
-            )
+        for data, ax in zip(y_data_to_plot, axs):
+            if data not in dict_data[keys_diff_structure[0]].keys():
+                raise KeyError(
+                    f"Given key doesn't exist,{dict_data[keys_diff_structure[0]].keys()=}"
+                )
 
-        if "title" in kwargs:
-            ax.set_title(kwargs["title"])
-        if "xlabel" in kwargs:
-            ax.set_xlabel(kwargs["xlabel"])
-        if "ylabel" in kwargs:
-            ax.set_ylabel(kwargs["ylabel"])
+            color_list = iter(list(sns.color_palette("Set2")))
+            for key_diff_structure in keys_diff_structure:
+                color = next(color_list)
+                deviation = data.replace("mean", "sem")
+                ax.errorbar(
+                    dict_data[key_diff_structure][x_data_to_plot],
+                    dict_data[key_diff_structure][data],
+                    yerr=dict_data[key_diff_structure][deviation],
+                    color=color,
+                    capsize=5,
+                    label=key_diff_structure,
+                )
 
-        # set legend
-        ax.legend()
-        ax.grid(alpha=0.5, linestyle=":")
+                ax.set_xlabel("Rounds", weight="bold")
+                ax.set_ylabel(data.replace("_", " ").capitalize(), weight="bold")
+                # set legend
+                ax.legend()
+                ax.grid(alpha=0.5, linestyle=":")
+                ax.set_aspect(1.5 * np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
 
         if self.args.save:
             fig_name = (
@@ -389,7 +441,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300)
+            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
             return ax
         else:
             plt.show()

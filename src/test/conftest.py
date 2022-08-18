@@ -160,24 +160,35 @@ def fake_topological_data() -> Dict[str, DefaultDict[str, List[Any]]]:
     fake_data = {}
     for key in ["preferential attachment", "small world", "random attachment"]:
         data_collector = defaultdict(list)  # type: DefaultDict[str, Any]
-        loc, scale = np.random.randint(0, 10), np.random.randint(0, 10)
+
+        x = np.linspace(0, 30)
         data_collector["mean_security_efficiency"] = list(
-            np.random.logistic(loc, scale, 10) * np.random.randint(0, 10)
+            np.exp(0.34) * np.exp(0.09 * x) * np.random.normal(0, 10)
         )
         data_collector["m_security_efficiency"] = np.random.random((10, 10))
 
-        data_collector["mean_information"] = list(np.ones(10))
+        data_collector["mean_information"] = list(
+            np.exp(0.34) * np.exp(0.09 * x) * np.random.normal(0, 10)
+        )
         data_collector["m_information"] = np.random.random((10, 10))
 
-        data_collector["mean_gcs"] = list(np.ones(10) * 5)
+        data_collector["mean_gcs"] = list(
+            np.exp(0.34) * np.exp(0.09 * x) * np.random.normal(0, 10)
+        )
         data_collector["m_gcs"] = np.random.random((10, 10))
 
-        data_collector["mean_iteration"] = list(range(0, 10))
+        data_collector["mean_iteration"] = x
         data_collector["std_security_efficiency"] = list(
-            np.random.normal(1, 50, size=10)
+            np.random.normal(1, 50, size=len(x))
         )
-        data_collector["std_information"] = list(np.random.normal(1, 50, size=10))
-        data_collector["std_gcs"] = list(np.random.normal(1, 50, size=10))
+        data_collector["sem_security_efficiency"] = list(
+            np.random.normal(1, 50, size=len(x))
+        )
+        data_collector["std_information"] = list(np.random.normal(1, 50, size=len(x)))
+        data_collector["sem_information"] = list(np.random.normal(1, 50, size=len(x)))
+
+        data_collector["std_gcs"] = list(np.random.normal(1, 50, size=len(x)))
+        data_collector["sem_gcs"] = list(np.random.normal(1, 50, size=len(x)))
 
         fake_data[key] = data_collector
 

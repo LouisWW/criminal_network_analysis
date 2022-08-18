@@ -159,12 +159,13 @@ if args.entirely_sim_mart_vaq:
         ratio_honest=0.96,
         ratio_wolf=0.01,
         random_fit_init=False,
+        k=6,
     )
 
     data_collector = meta_sim.avg_play(
-        rounds=300000,
+        rounds=400000,
         n_groups=1,
-        ith_collect=30000,
+        ith_collect=10000,
         repetition=10,
         measure_topology=False,
     )
@@ -178,22 +179,6 @@ if args.entirely_sim_mart_vaq:
         plot_deviation="std",
     )
 
-    meta_str_sim = dict(
-        {str(key): str(value) for key, value in meta_sim.__dict__.items()}
-    )
-    meta = PngImagePlugin.PngInfo()
-    for x in meta_str_sim:
-        meta.add_text(x, meta_str_sim[x])
-
-    if args.save:
-        fig_name = plotter.savig_dir + "population_ration_" + timestamp() + ".png"
-        plt.savefig(fig_name, dpi=300)
-        # Add the meta data to it
-        im = Image.open(fig_name)
-        im.save(fig_name, "png", pnginfo=meta)
-    else:
-        plt.show()
-
     ax_1 = plotter.plot_lines(
         dict_data=data_collector,
         y_data_to_plot=[
@@ -206,14 +191,6 @@ if args.entirely_sim_mart_vaq:
         ylabel="Average fitness",
     )
 
-    if args.save:
-        fig_name = plotter.savig_dir + "fitness_evol_" + timestamp() + ".png"
-        plt.savefig(fig_name, dpi=300)
-        # Add the meta to it
-        im = Image.open(fig_name)
-        im.save(fig_name, "png", pnginfo=meta)
-    else:
-        plt.show()
 
 if args.criminal_likelihood_corr:
     """Simulate the simulation form
@@ -623,39 +600,16 @@ if args.entirely_compare_simulations:
             "random attachment": data_collector_rand,
             "small world": data_collector_sw,
         },
-        y_data_to_plot="mean_" + "density",
+        y_data_to_plot=[
+            "mean_density",
+            "mean_flow_information",
+            "mean_size_of_largest_component",
+        ],
         x_data_to_plot="mean_iteration",
-        title="Running the analysis on different networks for each repetition",
         xlabel="Rounds",
-        ylabel="Density (a.u.)",
         plot_deviation="sem",
     )
 
-    ax = plotter.plot_lines_comparative(
-        {
-            "preferential attachment": data_collector_pref,
-            "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
-        },
-        y_data_to_plot="mean_" + "flow_information",
-        x_data_to_plot="mean_iteration",
-        xlabel="Rounds",
-        ylabel="Flow of information (a.u.)",
-        plot_deviation="sem",
-    )
-
-    ax = plotter.plot_lines_comparative(
-        {
-            "preferential attachment": data_collector_pref,
-            "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
-        },
-        y_data_to_plot="mean_" + "size_of_largest_component",
-        x_data_to_plot="mean_iteration",
-        xlabel="Rounds",
-        ylabel="Size of largest component",
-        plot_deviation="sem",
-    )
 
 if args.animate_simulation:
     """Create an animation of the simulation."""
@@ -704,7 +658,7 @@ if args.get_network_stats:
         attachment_method="small-world",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        k=6,
+        k=5,
         random_fit_init=False,
     )
 
