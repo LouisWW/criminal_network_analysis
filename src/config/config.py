@@ -159,6 +159,27 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "-n-groups",
+            type=int,
+            default=1,
+            help="""Defines the number of groups for each round.
+            """,
+        )
+        parser.add_argument(
+            "-ratio-honest",
+            type=float,
+            help="""Defines the initial ratio of honests in a population.
+            """,
+        )
+
+        parser.add_argument(
+            "-ratio-wolf",
+            type=float,
+            help="""Defines the initial ratio of wolves in a population.
+            """,
+        )
+
+        parser.add_argument(
             "--delta",
             type=float,
             help="""Defines the influence of criminals on the acting of the wolf (SimMartVaq)

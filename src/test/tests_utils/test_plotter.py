@@ -34,10 +34,12 @@ class TestPlotter:
         data_collector["honest_ratio"] = list(np.random.rand(200))
         data_collector["criminal_ratio"] = list(np.random.rand(200))
         data_collector["wolf_ratio"] = list(np.random.rand(200))
+        data_collector["rounds"] = list(range(0, 200))
 
         ax = plotter.plot_lines(
             dict_data=data_collector,
             y_data_to_plot=["honest_ratio", "wolf_ratio"],
+            x_data_to_plot="rounds",
             xlabel="rounds",
             ylabel="ratio (per)",
             title="This is a test",
@@ -60,9 +62,12 @@ class TestPlotter:
         data_collector["std_criminal_ratio"] = list(np.random.normal(0.1, 5, size=200))
         data_collector["std_wolf_ratio"] = list(np.random.normal(0.1, 5, size=200))
 
+        data_collector["rounds"] = list(range(0, 200))
+
         ax = plotter.plot_lines(
             dict_data=data_collector,
             y_data_to_plot=["mean_honest_ratio", "mean_criminal_ratio"],
+            x_data_to_plot="rounds",
             xlabel="rounds",
             ylabel="ratio (per)",
             title="This is a test",

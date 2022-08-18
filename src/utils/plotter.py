@@ -253,6 +253,90 @@ class Plotter(ConfigParser):
             plt.show()
             return ax
 
+    def plot_lines_combined(
+        self,
+        dict_data: DefaultDict[str, List[int]],
+        y_data_to_plot: List[str],
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -> plt.Axes:
+        """Plot line graph from data  points.
+
+        Args:
+            dict_data (DefaultDict[str, List[int]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+
+        Returns:
+            plt.Axes: matplotlib axes object
+        """
+
+        keys_diff_structure = list(dict_data.keys())
+        _, axs = plt.subplots(1, len(keys_diff_structure))
+        if axs is None:
+            axs = plt.gca()
+
+        for key_diff_structure, ax in zip(keys_diff_structure, axs):
+            for data in y_data_to_plot:
+                if data not in dict_data[keys_diff_structure[0]].keys():
+                    raise KeyError(
+                        f"Given key doesn't exist,{dict_data[keys_diff_structure[0]].keys()=}"
+                    )
+                ax.plot(
+                    dict_data[key_diff_structure][x_data_to_plot],
+                    dict_data[key_diff_structure][data],
+                    label=data.replace("_", " ").capitalize(),
+                )
+
+                if "plot_deviation" in kwargs:
+                    if kwargs["plot_deviation"] == "std":  # standard deviation
+                        dev = data.replace("mean", "std")
+                    elif (
+                        kwargs["plot_deviation"] == "sem"
+                    ):  # standard error of the mean
+                        dev = data.replace("mean", "sem")
+
+                    upper_dev = np.array(
+                        dict_data[key_diff_structure][data]
+                    ) + np.array(dict_data[key_diff_structure][dev])
+                    lower_dev = np.array(
+                        dict_data[key_diff_structure][data]
+                    ) - np.array(dict_data[key_diff_structure][dev])
+
+                    # if values are above 1 or below 0 is not possible
+                    if "mean_ratio" in data:
+                        upper_dev = np.where(upper_dev > 1, 1, upper_dev)
+                        lower_dev = np.where(lower_dev < 0, 0, lower_dev)
+
+                    ax.fill_between(
+                        dict_data[key_diff_structure][x_data_to_plot],
+                        lower_dev,
+                        upper_dev,
+                        alpha=0.5,
+                    )
+
+            if "title" in kwargs:
+                ax.set_title(key_diff_structure.replace("_", " ").capitalize())
+            if "xlabel" in kwargs:
+                ax.set_xlabel(kwargs["xlabel"].replace("_", " ").capitalize())
+            if "ylabel" in kwargs:
+                ax.set_ylabel(kwargs["ylabel"].replace("_", " ").capitalize())
+
+            # set legend
+            ax.legend()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + "population_ration_"
+                + timestamp()
+                + ".png"
+            )
+            plt.savefig(fig_name, dpi=300)
+        else:
+            plt.show()
+            return ax
+
     def plot_hist(
         self,
         dict_data: DefaultDict[str, List[Any]],

@@ -33,3 +33,6 @@ python3 main.py -read-data montagna_calls -topo-meas-w-net -r 800
 
 # Run a comparsion analysis on the characterisitcs of a network
 python3 main.py -read-data montagna_calls -get-network-stats -n-samples 50
+
+
+python3 new_main.py  -read-data montagna_calls -sim-mart-vaq -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 100 -n-samples 5
