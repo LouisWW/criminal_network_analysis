@@ -37,14 +37,14 @@ class TestPlotter:
         data_collector["rounds"] = list(range(0, 200))
 
         ax = plotter.plot_lines(
-            dict_data=data_collector,
+            dict_data={"test": data_collector},
             y_data_to_plot=["honest_ratio", "wolf_ratio"],
             x_data_to_plot="rounds",
             xlabel="rounds",
             ylabel="ratio (per)",
             title="This is a test",
         )
-        assert isinstance(ax, plt.Axes)
+        assert isinstance(ax, (np.ndarray, np.generic))
 
     @pytest.mark.essential
     @patch("matplotlib.pyplot.show")
@@ -65,15 +65,15 @@ class TestPlotter:
         data_collector["rounds"] = list(range(0, 200))
 
         ax = plotter.plot_lines(
-            dict_data=data_collector,
+            dict_data={"preferential": data_collector, "random": data_collector},
             y_data_to_plot=["mean_honest_ratio", "mean_criminal_ratio"],
             x_data_to_plot="rounds",
             xlabel="rounds",
             ylabel="ratio (per)",
-            title="This is a test",
+            title=True,
             plot_deviation="std",
         )
-        assert isinstance(ax, plt.Axes)
+        assert isinstance(ax, (plt.Axes, np.ndarray, np.generic))
 
     @pytest.mark.essential
     def test_plot_lines_wrong_key(self) -> None:
@@ -88,7 +88,7 @@ class TestPlotter:
 
         with pytest.raises(Exception):
             plotter.plot_lines(
-                dict_data=data_collector,
+                dict_data={"random": data_collector},
                 data_to_plot=["honest_ratio", "ratio"],
                 xlabel="rounds",
                 ylabel="ratio (per)",
@@ -109,7 +109,7 @@ class TestPlotter:
             y_data_to_plot=["mean_security_efficiency", "mean_information", "mean_gcs"],
             title=True,
         )
-        assert isinstance(ax, plt.Axes)
+        assert isinstance(ax, (np.ndarray, np.generic))
 
     @pytest.mark.essential
     @patch("matplotlib.pyplot.show")
@@ -128,7 +128,7 @@ class TestPlotter:
             plot_deviation="sem",
         )
 
-        assert isinstance(ax, plt.Axes)
+        assert isinstance(ax, (plt.Axes, np.ndarray, np.generic))
 
     @pytest.mark.essential
     @patch("matplotlib.pyplot.show")
@@ -139,7 +139,7 @@ class TestPlotter:
     ) -> None:
         """Test if the plt lines correlation function works."""
         plotter = Plotter()
-        plotter.plot_lines_correlation(
+        ax = plotter.plot_lines_correlation(
             dict_data=fake_correlation_data,
             y_data_to_plot=[
                 "degree",
@@ -150,6 +150,8 @@ class TestPlotter:
             ],
             x_data_to_plot="criminal_likelihood",
         )
+
+        assert isinstance(ax, (np.ndarray, np.generic))
 
 
 if __name__ == "__main__":

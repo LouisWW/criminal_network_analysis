@@ -52,13 +52,13 @@ if args.sim_mart_vaq:
     # First convert to gt
     meta_sim_pref = MetaSimulator(
         network_name=args.read_data,
-        attachment_method='preferential',
+        attachment_method="preferential",
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
         k=2,
         random_fit_init=False,
     )
-    
+
     meta_sim_rnd = MetaSimulator(
         network_name=args.read_data,
         ratio_honest=args.ratio_honest,
@@ -74,7 +74,7 @@ if args.sim_mart_vaq:
         k=6,
         attachment_method="small-world",
     )
-    
+
     # Get overview of the new network
     complete_network_stats_pref = NetworkStats(
         NetworkConverter.gt_to_nk(meta_sim_pref.network)
@@ -94,77 +94,95 @@ if args.sim_mart_vaq:
         rounds=args.rounds,
         n_groups=args.n_groups,
         repetition=args.n_samples,
-        ith_collect=int(args.rounds/15),
+        ith_collect=int(args.rounds / 15),
         measure_topology=args.topo_meas,
-        measure_likelihood_corr=args.criminal_likelihood_corr)
-    
+        measure_likelihood_corr=args.criminal_likelihood_corr,
+    )
+
     data_collector_rand = meta_sim_rnd.avg_play(
         rounds=args.rounds,
         n_groups=args.n_groups,
         repetition=args.n_samples,
-        ith_collect=int(args.rounds/15),
+        ith_collect=int(args.rounds / 15),
         measure_topology=args.topo_meas,
-        measure_likelihood_corr=args.criminal_likelihood_corr)
-    
+        measure_likelihood_corr=args.criminal_likelihood_corr,
+    )
+
     data_collector_sw = meta_sim_sw.avg_play(
         rounds=args.rounds,
         n_groups=args.n_groups,
         repetition=args.n_samples,
-        ith_collect=int(args.rounds/15),
+        ith_collect=int(args.rounds / 15),
         measure_topology=args.topo_meas,
-        measure_likelihood_corr=args.criminal_likelihood_corr)
-    
-    
+        measure_likelihood_corr=args.criminal_likelihood_corr,
+    )
+
     whole_data = {
-            "preferential attachment": data_collector_pref,
-            "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
-        }
-    
-    
-    ax_0 = plotter.plot_lines_combined(
+        "preferential": data_collector_pref,
+        "random": data_collector_rand,
+        "small-world": data_collector_sw,
+    }
+
+    ax_0 = plotter.plot_lines(
         dict_data=whole_data,
         y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
         x_data_to_plot="mean_iteration",
-        title = True,
+        title=True,
         xlabel="Rounds",
         ylabel="Ratio (%)",
-        plot_deviation="std",
+        plot_deviation="sem",
     )
-    
+
+    ax_1 = plotter.plot_lines(
+        dict_data={
+            "Compare mean criminal ratio": {
+                "preferential": whole_data["preferential"]["mean_ratio_criminal"],
+                "random": whole_data["random"]["mean_ratio_criminal"],
+                "small-world": whole_data["small-world"]["mean_ratio_criminal"],
+                "mean_iteration": whole_data["preferential"]["mean_iteration"],
+            }
+        },
+        y_data_to_plot=["preferential", "random", "small-world"],
+        x_data_to_plot="mean_iteration",
+        title=True,
+        xlabel="Rounds",
+        ylabel="Ratio (%)",
+        plot_deviation="sem",
+    )
+
     if args.topo_meas:
         compare_time_series(whole_data)
-        ax_1 = plotter.plot_lines_comparative(
-        dict_data=whole_data,
-        y_data_to_plot=[
-            "mean_density",
-            "mean_flow_information",
-            "mean_size_of_largest_component",
-        ],
-        x_data_to_plot="mean_iteration",
-        xlabel="Rounds",
-        plot_deviation="sem")
-        
-        ax_2 = plotter.plot_hist(
+        ax_2 = plotter.plot_lines_comparative(
+            dict_data=whole_data,
+            y_data_to_plot=[
+                "mean_density",
+                "mean_flow_information",
+                "mean_size_of_largest_component",
+            ],
+            x_data_to_plot="mean_iteration",
+            xlabel="Rounds",
+            plot_deviation="sem",
+        )
+
+        ax_3 = plotter.plot_hist(
             dict_data=whole_data,
             y_data_to_plot=["mean_security_efficiency", "mean_information", "mean_gcs"],
             title=True,
         )
         raise NotImplementedError
-    
-    
+
     if args.criminal_likelihood_corr:
-        ax_3 = plotter.plot_lines_correlation(
-        dict_data=whole_data,
-        y_data_to_plot=[
-            "degree",
-            "betweenness",
-            "katz",
-            "closeness",
-            "eigen vector",
-        ],
-        x_data_to_plot="criminal_likelihood",
-    )
+        ax_4 = plotter.plot_lines_correlation(
+            dict_data=whole_data,
+            y_data_to_plot=[
+                "degree",
+                "betweenness",
+                "katz",
+                "closeness",
+                "eigen vector",
+            ],
+            x_data_to_plot="criminal_likelihood",
+        )
         raise NotImplementedError
 
 if args.sensitivity_analysis:

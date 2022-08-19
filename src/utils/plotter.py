@@ -9,6 +9,7 @@ __date__   = 13/02/2022
 from typing import Any
 from typing import DefaultDict
 from typing import List
+from typing import Union
 
 import graph_tool.all as gt
 import matplotlib as mpl
@@ -174,107 +175,23 @@ class Plotter(ConfigParser):
         x_data_to_plot: str,
         *args: str,
         **kwargs: Any,
-    ) -> plt.Axes:
+    ) -> Union[plt.Axes, np.ndarray, np.generic]:
         """Plot line graph from data  points.
 
         Args:
-            dict_data (DefaultDict[str, List[int]]): Contains all the data
+            dict_data (DefaultDict[str, List[Any]]): Contains all the data
             data_to_plot (List[str]): Defines which data to choose from the dict_data
 
         Returns:
             plt.Axes: matplotlib axes object
         """
-        _, ax = plt.subplots()
-        if ax is None:
-            ax = plt.gca()
-
-        for data in y_data_to_plot:
-            if data not in dict_data.keys():
-                raise KeyError(f"Given key doesn't exist,{dict_data.keys()=}")
-
-            ax.plot(
-                dict_data[x_data_to_plot],
-                dict_data[data],
-                label=data.replace("_", " ").capitalize(),
-            )
-
-            if "plot_deviation" in kwargs:
-                if kwargs["plot_deviation"] == "std":  # standard deviation
-                    dev = data.replace("mean", "std")
-                elif kwargs["plot_deviation"] == "sem":  # standard error of the mean
-                    dev = data.replace("mean", "sem")
-
-                upper_dev = np.array(dict_data[data]) + np.array(dict_data[dev])
-                lower_dev = np.array(dict_data[data]) - np.array(dict_data[dev])
-
-                # if values are above 1 or below 0 is not possible
-                if "mean_ratio" in data:
-                    upper_dev = np.where(upper_dev > 1, 1, upper_dev)
-                    lower_dev = np.where(lower_dev < 0, 0, lower_dev)
-
-                ax.fill_between(
-                    dict_data[x_data_to_plot],
-                    lower_dev,
-                    upper_dev,
-                    alpha=0.5,
-                )
-
-        if "title" in kwargs:
-            ax.set_title(kwargs["title"].replace("_", " ").capitalize())
-        if "xlabel" in kwargs:
-            ax.set_xlabel(kwargs["xlabel"].replace("_", " ").capitalize())
-        if "ylabel" in kwargs:
-            ax.set_ylabel(kwargs["ylabel"].replace("_", " ").capitalize())
-
-        # set legend
-        ax.legend()
-
-        if self.args.save:
-            fig_name = (
-                DirectoryFinder().result_dir_fig
-                + "population_ration_"
-                + timestamp()
-                + ".png"
-            )
-            plt.savefig(fig_name, dpi=300)
-            if "meta_simulator" in kwargs:
-                meta_str_sim = dict(
-                    {
-                        str(key): str(value)
-                        for key, value in kwargs["meta_sim"].__dict__.items()
-                    }
-                )
-                meta = PngImagePlugin.PngInfo()
-                for x in meta_str_sim:
-                    meta.add_text(x, meta_str_sim[x])
-                im = Image.open(fig_name)
-                im.save(fig_name, "png", pnginfo=meta)
-        else:
-            plt.show()
-            return ax
-
-    def plot_lines_combined(
-        self,
-        dict_data: DefaultDict[str, List[int]],
-        y_data_to_plot: List[str],
-        x_data_to_plot: str,
-        *args: str,
-        **kwargs: Any,
-    ) -> plt.Axes:
-        """Plot line graph from data  points.
-
-        Args:
-            dict_data (DefaultDict[str, List[int]]): Contains all the data
-            data_to_plot (List[str]): Defines which data to choose from the dict_data
-
-        Returns:
-            plt.Axes: matplotlib axes object
-        """
-
         keys_diff_structure = list(dict_data.keys())
         _, axs = plt.subplots(1, len(keys_diff_structure))
         if axs is None:
             axs = plt.gca()
+
+        if not isinstance(axs, (np.ndarray, np.generic)):
+            axs = np.array([axs])
 
         for key_diff_structure, ax in zip(keys_diff_structure, axs):
             for data in y_data_to_plot:
@@ -333,9 +250,10 @@ class Plotter(ConfigParser):
                 + ".png"
             )
             plt.savefig(fig_name, dpi=300)
+            return axs
         else:
             plt.show()
-            return ax
+            return axs
 
     def plot_hist(
         self,
@@ -343,7 +261,7 @@ class Plotter(ConfigParser):
         y_data_to_plot: List[str],
         *args: str,
         **kwargs: Any,
-    ) -> plt.Axes:
+    ) -> Union[plt.Axes, np.ndarray, np.generic]:
         """Plot a histogram from data points.
 
         Args:
@@ -393,10 +311,10 @@ class Plotter(ConfigParser):
                 + ".png"
             )
             plt.savefig(fig_name, dpi=300, bbox_inches="tight")
-            return ax
+            return axs
         else:
             plt.show()
-            return ax
+            return axs
 
     def plot_phase_diag(
         self,
@@ -498,7 +416,7 @@ class Plotter(ConfigParser):
         x_data_to_plot: str = None,
         *args: str,
         **kwargs: Any,
-    ) -> plt.Axes:
+    ) -> Union[plt.Axes, np.ndarray, np.generic]:
         """Plot line graph from data points.
 
         Args:
@@ -548,10 +466,10 @@ class Plotter(ConfigParser):
                 + ".png"
             )
             plt.savefig(fig_name, dpi=300, bbox_inches="tight")
-            return ax
+            return axs
         else:
             plt.show()
-            return ax
+            return axs
 
     def plot_lines_correlation(
         self,
@@ -560,7 +478,7 @@ class Plotter(ConfigParser):
         x_data_to_plot: str,
         *args: str,
         **kwargs: Any,
-    ) -> plt.Axes:
+    ) -> Union[plt.Axes, np.ndarray, np.generic]:
         """Plot line graph from correlation points with correlatio factor.
 
         Args:
@@ -618,7 +536,7 @@ class Plotter(ConfigParser):
                 + ".png"
             )
             plt.savefig(fig_name, dpi=300, bbox_inches="tight")
-            return ax
+            return axs
         else:
             plt.show()
-            return ax
+            return axs
