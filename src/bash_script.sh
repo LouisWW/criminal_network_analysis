@@ -8,13 +8,13 @@
 
 
 # Run normal simulation
-python3 main.py -sim-mart-vaq -read-data montagna_calls -attach-meth preferential -r 10 -n-samples 2 -save
+python3 main.py -sim-mart-vaq -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -attach-meth random -r 10 -n-samples 20 -save
 
 # Run normal simulation, each repetition on a new network
-python3 main.py -sim-mart-vaq-w-net -read-data montagna_calls -attach-meth preferential -save
+python3 main.py -sim-mart-vaq-w-net -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -attach-meth random -r 100 -n-samples 20 -save
 
 # Run an anlysis on the criminal likelihood
-python3 main.py -read-data montagna_calls -criminal-likelihood-corr -r 1000 -n-samples 30 -save
+nohup python3 main.py -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -criminal-likelihood-corr -r 400 -n-samples 10 -save &
 
 # Run the sensitivity analysis
 nohup python3 main.py -read-data montagna_meetings -sa sim-mart-vaq -n-samples 1024  -r 3000 -output-value ratio_criminal -save &
@@ -32,7 +32,7 @@ python3 main.py -read-data montagna_calls -topo-meas-w-net -r 800
 
 
 # Run a comparsion analysis on the characterisitcs of a network
-python3 main.py -read-data montagna_calls -get-network-stats -n-samples 50
+python3 new_main.py -read-data montagna_calls -get-network-stats -n-samples 50
 
 
-python3 new_main.py  -read-data montagna_calls -sim-mart-vaq -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 100 -n-samples 5
+nohup python3 new_main.py -read-data montagna_calls -sim-mart-vaq -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 400000 -n-samples 50 -criminal-likelihood-corr -save &

@@ -169,7 +169,6 @@ if args.sim_mart_vaq:
             y_data_to_plot=["mean_security_efficiency", "mean_information", "mean_gcs"],
             title=True,
         )
-        raise NotImplementedError
 
     if args.criminal_likelihood_corr:
         ax_4 = plotter.plot_lines_correlation(
@@ -183,7 +182,6 @@ if args.sim_mart_vaq:
             ],
             x_data_to_plot="criminal_likelihood",
         )
-        raise NotImplementedError
 
 if args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
@@ -324,7 +322,7 @@ if args.get_network_stats:
         attachment_method="small-world",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        k=5,
+        k=6,
         random_fit_init=False,
     )
 

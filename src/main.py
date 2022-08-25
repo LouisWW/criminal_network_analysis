@@ -55,10 +55,9 @@ if args.sim_mart_vaq:
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
         attachment_method=args.attach_meth,
-        ratio_honest=0.96,
-        ratio_wolf=0.01,
-        prob=0.0034,  # 0.0034 for random
-        k=6,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
+        k=2,
         random_fit_init=False,
     )
 
@@ -84,14 +83,14 @@ if args.sim_mart_vaq:
     data_collector = simulators.avg_play(
         network=simulators.network,
         rounds=args.rounds,
-        n_groups=1,
+        n_groups=args.n_groups,
         ith_collect=int(args.rounds / 15),
         repetition=args.n_samples,
         measure_topology=False,
     )
 
     ax_0 = plotter.plot_lines(
-        dict_data=data_collector,
+        dict_data={args.attach_meth: data_collector},
         y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
         x_data_to_plot="mean_iteration",
         xlabel="Rounds",
@@ -100,7 +99,7 @@ if args.sim_mart_vaq:
     )
 
     ax_1 = plotter.plot_lines(
-        dict_data=data_collector,
+        dict_data={args.attach_meth: data_collector},
         y_data_to_plot=[
             "mean_fitness_honest",
             "mean_fitness_wolf",
@@ -125,21 +124,21 @@ if args.sim_mart_vaq_w_net:
     meta_sim = MetaSimulator(
         network_name=nx_network.name,
         attachment_method=args.attach_meth,
-        ratio_honest=0.96,
-        ratio_wolf=0.01,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
         random_fit_init=False,
         k=6,
     )
 
     data_collector = meta_sim.avg_play(
         rounds=args.rounds,
-        n_groups=1,
+        n_groups=args.n_groups,
         ith_collect=int(args.rounds / 15),
         repetition=args.n_samples,
         measure_topology=False,
     )
     ax_0 = plotter.plot_lines(
-        dict_data=data_collector,
+        dict_data={args.attach_meth: data_collector},
         y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
         x_data_to_plot="mean_iteration",
         xlabel="Rounds",
@@ -148,7 +147,7 @@ if args.sim_mart_vaq_w_net:
     )
 
     ax_1 = plotter.plot_lines(
-        dict_data=data_collector,
+        dict_data={args.attach_meth: data_collector},
         y_data_to_plot=[
             "mean_fitness_honest",
             "mean_fitness_wolf",
@@ -169,38 +168,38 @@ if args.criminal_likelihood_corr:
     # Get actual criminal network
     nx_network = NetworkReader().get_data(args.read_data)
 
-    ratio_honest = 0.96
-    ratio_wolf = 0.01
-
     # Add nodes to network
     # First convert to gt
     meta_sim_pref = MetaSimulator(
         network_name=nx_network.name,
         attachment_method="preferential",
-        ratio_honest=ratio_honest,
-        ratio_wolf=ratio_wolf,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
         random_fit_init=False,
+        k=2,
     )
 
     meta_sim_rnd = MetaSimulator(
         network_name=nx_network.name,
         attachment_method="random",
-        ratio_honest=ratio_honest,
-        ratio_wolf=ratio_wolf,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
         random_fit_init=False,
+        k=2,
     )
 
     meta_sim_sw = MetaSimulator(
         network_name=nx_network.name,
         attachment_method="small-world",
-        ratio_honest=ratio_honest,
-        ratio_wolf=ratio_wolf,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
         random_fit_init=False,
+        k=6,
     )
 
     data_collector_pref = meta_sim_pref.avg_play(
         rounds=args.rounds,
-        n_groups=1,
+        n_groups=args.n_groups,
         ith_collect=args.rounds + 1,  # don't need to collect this information
         repetition=args.n_samples,
         measure_topology=False,
@@ -577,7 +576,7 @@ if args.get_network_stats:
     """
 
     nx_network = NetworkReader().get_data(args.read_data)
-    ratio_honest = 0.95
+    ratio_honest = 0.96
     ratio_wolf = 0.01
     logger.info(f"Ration : {ratio_honest=}, {ratio_wolf=}")
 
@@ -597,7 +596,7 @@ if args.get_network_stats:
         attachment_method="random",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        prob=2,  # 0.0034 for random
+        k=2,  # 0.0034 for random
         random_fit_init=False,
     )
 
@@ -607,7 +606,7 @@ if args.get_network_stats:
         attachment_method="small-world",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        k=5,
+        k=6,
         random_fit_init=False,
     )
 

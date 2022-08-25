@@ -245,6 +245,7 @@ class SimMartVaq:
         if measure_likelihood_corr:
             data_collector["df"] = self.create_likelihood_corr_df(network)
 
+        print("Done")
         return network, data_collector
 
     def avg_play(
@@ -315,6 +316,7 @@ class SimMartVaq:
                 ),
                 **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
             )
+
         # merge results in a dict
         data_collector = defaultdict(list)
         for i, k in enumerate(results):
@@ -337,6 +339,7 @@ class SimMartVaq:
             measure_topology,
             measure_likelihood_corr,
         ) = tuple_of_variable
+
         _, data_collector = self.play(
             network,
             rounds,
@@ -457,7 +460,9 @@ class SimMartVaq:
             )
             return new_network, slct_pers, slct_pers_status
         else:
-            raise KeyError("Person status didn't correspond to h/c/w...")
+            raise KeyError(
+                f"Person status {slct_pers_status} didn't correspond to h/c/w..."
+            )
 
     def inflict_damage(
         self,

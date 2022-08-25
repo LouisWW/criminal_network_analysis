@@ -10,7 +10,7 @@ import os
 def timestamp() -> str:
     """Return a timestamp."""
     e = datetime.datetime.now()
-    return e.strftime("%d-%m-%Y-%H-%M")
+    return e.strftime("%d-%m-%Y-%H-%M-%f")
 
 
 class DirectoryFinder:

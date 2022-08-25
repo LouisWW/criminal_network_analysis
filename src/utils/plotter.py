@@ -15,6 +15,7 @@ import graph_tool.all as gt
 import matplotlib as mpl
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import numpy as np
 import powerlaw
 import seaborn as sns
@@ -232,6 +233,8 @@ class Plotter(ConfigParser):
                         alpha=0.5,
                     )
 
+            # set label to percentage
+            ax.yaxis.set_major_formatter(mtick.PercentFormatter())
             if "title" in kwargs:
                 ax.set_title(key_diff_structure.replace("_", " ").capitalize())
             if "xlabel" in kwargs:
@@ -245,7 +248,7 @@ class Plotter(ConfigParser):
         if self.args.save:
             fig_name = (
                 DirectoryFinder().result_dir_fig
-                + "population_ration_"
+                + "population_ratio_"
                 + timestamp()
                 + ".png"
             )
@@ -518,6 +521,8 @@ class Plotter(ConfigParser):
                     next(line_plot_style),
                     label=key + f" --- {corr=}",
                 )
+
+                ax.xaxis.set_major_formatter(mtick.PercentFormatter())
                 ax.set_xlabel("Criminal likelihood", weight="bold")
                 ax.set_ylabel(centrality_measure.capitalize(), weight="bold")
                 ax.patch.set_edgecolor("black")
