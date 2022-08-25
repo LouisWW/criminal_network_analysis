@@ -90,6 +90,7 @@ if args.sim_mart_vaq:
     complete_network_stats_rand.get_overview()
     complete_network_stats_sw.get_overview()
 
+    logger.info("Doing preferential simulation")
     data_collector_pref = meta_sim_pref.avg_play(
         rounds=args.rounds,
         n_groups=args.n_groups,
@@ -98,7 +99,8 @@ if args.sim_mart_vaq:
         measure_topology=args.topo_meas,
         measure_likelihood_corr=args.criminal_likelihood_corr,
     )
-
+    logger.info("Done")
+    logger.info("Doing random simulation")
     data_collector_rand = meta_sim_rnd.avg_play(
         rounds=args.rounds,
         n_groups=args.n_groups,
@@ -107,7 +109,8 @@ if args.sim_mart_vaq:
         measure_topology=args.topo_meas,
         measure_likelihood_corr=args.criminal_likelihood_corr,
     )
-
+    logger.info("Done")
+    logger.info("Doing small-world simulation")
     data_collector_sw = meta_sim_sw.avg_play(
         rounds=args.rounds,
         n_groups=args.n_groups,
@@ -116,6 +119,7 @@ if args.sim_mart_vaq:
         measure_topology=args.topo_meas,
         measure_likelihood_corr=args.criminal_likelihood_corr,
     )
+    logger.info("Done")
 
     whole_data = {
         "preferential": data_collector_pref,
@@ -312,7 +316,7 @@ if args.get_network_stats:
         attachment_method="random",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        prob=2,  # 0.0034 for random
+        k=2,  # 0.0034 for random
         random_fit_init=False,
     )
 
@@ -355,7 +359,7 @@ if args.get_network_stats:
     mean_dict_of_network_stats_sw = dict_mean(list_of_network_stats_sw)
 
     with open(
-        DirectoryFinder().result_dir_data_network_stats + f"_result_{timestamp()}.json",
+        DirectoryFinder().result_dir_data_network_stats + f"result_{timestamp()}.json",
         "w",
     ) as fp:
         json.dump(

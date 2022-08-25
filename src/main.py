@@ -639,7 +639,7 @@ if args.get_network_stats:
     mean_dict_of_network_stats_sw = dict_mean(list_of_network_stats_sw)
 
     with open(
-        DirectoryFinder().result_dir_data_network_stats + f"_result_{timestamp()}.json",
+        DirectoryFinder().result_dir_data_network_stats + f"result_{timestamp()}.json",
         "w",
     ) as fp:
         json.dump(
