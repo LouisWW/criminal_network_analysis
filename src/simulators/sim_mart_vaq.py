@@ -245,7 +245,6 @@ class SimMartVaq:
         if measure_likelihood_corr:
             data_collector["df"] = self.create_likelihood_corr_df(network)
 
-        print("Done")
         return network, data_collector
 
     def avg_play(
@@ -276,7 +275,7 @@ class SimMartVaq:
         if repetition < multiprocessing.cpu_count() - 1:
             num_cpus = repetition
         else:
-            num_cpus = multiprocessing.cpu_count() - 1
+            num_cpus = multiprocessing.cpu_count() - 5
 
         if isinstance(network, gt.Graph):
             results = p_umap(
@@ -839,11 +838,14 @@ class SimMartVaq:
         return network
 
     def create_likelihood_corr_df(self, network: gt.Graph) -> pd.DataFrame:
-        """Create a DataFrame of nodes likhelihood of being a criminal and its characterisitcs."""
+        """Create a DataFrame of nodes likelihood of being a criminal and its characteristics."""
+        org_num_threads = gt.openmp_get_num_threads()
+        gt.openmp_set_num_threads(1)
         network, _ = NodeStats.get_eigenvector_centrality(network)
         network, _ = NodeStats.get_betweenness(network)
         network, _ = NodeStats.get_closeness(network)
         network, _ = NodeStats.get_katz(network)
+        gt.openmp_set_num_threads(org_num_threads)
 
         df = pd.DataFrame(
             columns=[

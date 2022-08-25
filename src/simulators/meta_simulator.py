@@ -207,7 +207,14 @@ class MetaSimulator:
     def create_list_of_populations(self, repetition: int) -> List[gt.Graph]:
         """Create a list of n different populations."""
         list_of_population = []
-        for _ in range(0, repetition):
+        tq = tqdm(
+            range(repetition),
+            desc="Creating list of populations",
+            total=repetition,
+            leave=False,
+            disable=True,
+        )
+        for _ in tq:
             list_of_population.append(self.create_population(self.criminal_network))
         return list_of_population
 

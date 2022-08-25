@@ -85,7 +85,9 @@ def concat_df(
         df_total = pd.concat(list_of_dfs)
         data_collector["df_total"] = df_total
         # divide the criminal_likelihood by the number of rounds
-        data_collector["df_total"]["criminal_likelihood"].div(rounds)
+        data_collector["df_total"]["criminal_likelihood"] = data_collector["df_total"][
+            "criminal_likelihood"
+        ].div(rounds)
 
     return data_collector
 
@@ -151,9 +153,9 @@ def compare_time_series(
 
         # stats f_oneway functions takes the groups as input and returns F and P-value
         fvalue, pvalue = stats.f_oneway(
-            time_series["preferential attachment"][metric.replace("mean", "m")][:, -1],
-            time_series["random attachment"][metric.replace("mean", "m")][:, -1],
-            time_series["small world"][metric.replace("mean", "m")][:, -1],
+            time_series["preferential"][metric.replace("mean", "m")][:, -1],
+            time_series["random"][metric.replace("mean", "m")][:, -1],
+            time_series["small-world"][metric.replace("mean", "m")][:, -1],
         )
         print(
             f"Results of ANOVA test:\nThe F-statistic is: {fvalue}\nThe p-value is: {pvalue}"
@@ -161,24 +163,22 @@ def compare_time_series(
 
         df_pref = pd.DataFrame(
             {
-                "score": time_series["preferential attachment"][
-                    metric.replace("mean", "m")
-                ][:, -1],
-                "group": "preferential attachment",
+                "score": time_series["preferential"][metric.replace("mean", "m")][
+                    :, -1
+                ],
+                "group": "preferential",
             }
         )
         df_rand = pd.DataFrame(
             {
-                "score": time_series["random attachment"][metric.replace("mean", "m")][
-                    :, -1
-                ],
-                "group": "random attachment",
+                "score": time_series["random"][metric.replace("mean", "m")][:, -1],
+                "group": "random",
             }
         )
         df_sw = pd.DataFrame(
             {
-                "score": time_series["small world"][metric.replace("mean", "m")][:, -1],
-                "group": "small world",
+                "score": time_series["small-world"][metric.replace("mean", "m")][:, -1],
+                "group": "small-world",
             }
         )
 

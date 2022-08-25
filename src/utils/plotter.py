@@ -214,6 +214,7 @@ class Plotter(ConfigParser):
                     ):  # standard error of the mean
                         dev = data.replace("mean", "sem")
 
+                    print(f"{dict_data[key_diff_structure][dev]=}")
                     upper_dev = np.array(
                         dict_data[key_diff_structure][data]
                     ) + np.array(dict_data[key_diff_structure][dev])
@@ -502,7 +503,7 @@ class Plotter(ConfigParser):
 
         for centrality_measure, ax in zip(y_data_to_plot, axs):
 
-            line_plot_style = iter(["k-", "k--", "k.-"])
+            line_plot_style = iter(["k-", "k--", "k:"])
             for key in keys:
                 corr = get_correlation(
                     dict_data[key]["df_total"][x_data_to_plot],

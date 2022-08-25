@@ -140,13 +140,19 @@ if args.sim_mart_vaq:
     ax_1 = plotter.plot_lines(
         dict_data={
             "Compare mean criminal ratio": {
-                "preferential": whole_data["preferential"]["mean_ratio_criminal"],
-                "random": whole_data["random"]["mean_ratio_criminal"],
-                "small-world": whole_data["small-world"]["mean_ratio_criminal"],
+                "mean_preferential": whole_data["preferential"]["mean_ratio_criminal"],
+                "sem_preferential": whole_data["preferential"]["sem_ratio_criminal"],
+                "std_preferential": whole_data["preferential"]["std_ratio_criminal"],
+                "mean_random": whole_data["random"]["mean_ratio_criminal"],
+                "sem_random": whole_data["random"]["sem_ratio_criminal"],
+                "std_random": whole_data["random"]["std_ratio_criminal"],
+                "mean_small-world": whole_data["small-world"]["mean_ratio_criminal"],
+                "sem_small-world": whole_data["small-world"]["sem_ratio_criminal"],
+                "std_small-world": whole_data["small-world"]["std_ratio_criminal"],
                 "mean_iteration": whole_data["preferential"]["mean_iteration"],
             }
         },
-        y_data_to_plot=["preferential", "random", "small-world"],
+        y_data_to_plot=["mean_preferential", "mean_random", "mean_small-world"],
         x_data_to_plot="mean_iteration",
         title=True,
         xlabel="Rounds",
