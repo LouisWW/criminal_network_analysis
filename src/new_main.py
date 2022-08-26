@@ -6,6 +6,7 @@ __date__   = 22/02/2022
 """
 import json
 import logging
+import os
 
 import numpy as np
 from config.config import ConfigParser
@@ -19,6 +20,7 @@ from utils.plotter import Plotter
 from utils.sensitivity_analysis import SensitivityAnalyser
 from utils.stats import compare_time_series
 from utils.stats import dict_mean
+from utils.stats import get_mean_std_over_list
 from utils.tools import DirectoryFinder
 from utils.tools import timestamp
 
@@ -42,7 +44,194 @@ logger.propagate = False
 if args.verbose:
     logger.setLevel(logging.INFO)
 
+
 if args.sim_mart_vaq:
+    """Simulate the simulation form
+    Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
+    Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.
+
+    Runs only one structure at the time
+    """
+    # Add nodes to network
+    # First convert to gt
+    meta_sim = MetaSimulator(
+        network_name=args.read_data,
+        attachment_method=args.attach_method,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
+        k=args.k,
+        random_fit_init=False,
+    )
+
+    # Get overview of the new network
+    complete_network_stats = NetworkStats(NetworkConverter.gt_to_nk(meta_sim.network))
+    complete_network_stats.get_overview()
+    logger.info("Doing preferential simulation")
+
+    data_collector = meta_sim.avg_play(
+        rounds=args.rounds,
+        n_groups=args.n_groups,
+        repetition=args.n_samples,
+        ith_collect=int(args.rounds / 15),
+        measure_topology=args.topo_meas,
+        measure_likelihood_corr=args.criminal_likelihood_corr,
+    )
+    logger.info("Done")
+
+    if args.save:
+
+        file_name = (
+            DirectoryFinder().result_dir_data_sim_mart_vaq
+            + args.case
+            + "_"
+            + args.attach_meth
+            + ".json"
+        )
+
+        if os.path.isfile(file_name) and os.access(file_name, os.R_OK):
+            with open(file_name) as fp:
+                previous_results = json.load(fp)
+
+            # get the number of runs already done
+            n_prev_runs = max(previous_results.keys())
+            simple_runs = {
+                str(int(k) + n_prev_runs): v
+                for k, v in data_collector.items()
+                if k.isdigit()
+            }
+
+            new_results = previous_results.append(simple_runs)
+            with open(
+                file_name,
+                "w",
+            ) as fp:
+                json.dump(new_results, fp, indent=4)
+
+        elif not (file_name) and os.access(file_name, os.R_OK):
+            # Get the simple runs
+            simple_runs = {k: v for k, v in data_collector.items() if k.isdigit()}
+            with open(
+                file_name,
+                "w",
+            ) as fp:
+                json.dump(simple_runs, fp, indent=4)
+
+    if args.plot:
+        ax_0 = plotter.plot_lines(
+            dict_data={args.attach_meth: data_collector},
+            y_data_to_plot=[
+                "mean_ratio_honest",
+                "mean_ratio_wolf",
+                "mean_ratio_criminal",
+            ],
+            x_data_to_plot="mean_iteration",
+            xlabel="Rounds",
+            ylabel="Ratio (%)",
+            plot_deviation="std",
+        )
+
+        ax_1 = plotter.plot_lines(
+            dict_data={args.attach_meth: data_collector},
+            y_data_to_plot=[
+                "mean_fitness_honest",
+                "mean_fitness_wolf",
+                "mean_fitness_criminal",
+            ],
+            x_data_to_plot="mean_iteration",
+            xlabel="Rounds",
+            ylabel="Average fitness",
+        )
+
+
+elif args.plot:
+    """Plot the results collected over the different runs.
+
+    Important to specify the cases
+    """
+    results_dir = DirectoryFinder().result_dir_data_sim_mart_vaq + args.case
+    preferential_file = results_dir + "_preferential.json"
+    random_file = results_dir + "_random.json"
+    sw_file = results_dir + "_small-world.json"
+
+    whole_data = {}
+    for structure, file_name in [
+        ("preferential", preferential_file),
+        ("random", random_file),
+        ("small-world", sw_file),
+    ]:
+        with open(file_name) as fp:
+            whole_data[structure] = json.load(file_name)
+
+    # Get the mean of the data
+    for structure, data in whole_data.items():
+        whole_data[structure] = get_mean_std_over_list(data)
+
+    # Ready to be plotted
+    ax_0 = plotter.plot_lines(
+        dict_data=whole_data,
+        y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
+        x_data_to_plot="mean_iteration",
+        title=True,
+        xlabel="Rounds",
+        ylabel="Ratio (%)",
+        plot_deviation="sem",
+    )
+
+    ax_1 = plotter.plot_lines(
+        dict_data={
+            "Compare mean criminal ratio": {
+                "mean_preferential": whole_data["preferential"]["mean_ratio_criminal"],
+                "sem_preferential": whole_data["preferential"]["sem_ratio_criminal"],
+                "std_preferential": whole_data["preferential"]["std_ratio_criminal"],
+                "mean_random": whole_data["random"]["mean_ratio_criminal"],
+                "sem_random": whole_data["random"]["sem_ratio_criminal"],
+                "std_random": whole_data["random"]["std_ratio_criminal"],
+                "mean_small-world": whole_data["small-world"]["mean_ratio_criminal"],
+                "sem_small-world": whole_data["small-world"]["sem_ratio_criminal"],
+                "std_small-world": whole_data["small-world"]["std_ratio_criminal"],
+                "mean_iteration": whole_data["preferential"]["mean_iteration"],
+            }
+        },
+        y_data_to_plot=["mean_preferential", "mean_random", "mean_small-world"],
+        x_data_to_plot="mean_iteration",
+        title=True,
+        xlabel="Rounds",
+        ylabel="Ratio (%)",
+        plot_deviation="sem",
+    )
+
+    compare_time_series(whole_data)
+    ax_2 = plotter.plot_lines_comparative(
+        dict_data=whole_data,
+        y_data_to_plot=[
+            "mean_density",
+            "mean_flow_information",
+            "mean_size_of_largest_component",
+        ],
+        x_data_to_plot="mean_iteration",
+        xlabel="Rounds",
+        plot_deviation="sem",
+    )
+
+    ax_3 = plotter.plot_hist(
+        dict_data=whole_data,
+        y_data_to_plot=["mean_security_efficiency", "mean_information", "mean_gcs"],
+        title=True,
+    )
+
+    ax_4 = plotter.plot_lines_correlation(
+        dict_data=whole_data,
+        y_data_to_plot=[
+            "degree",
+            "betweenness",
+            "katz",
+            "closeness",
+            "eigen vector",
+        ],
+        x_data_to_plot="criminal_likelihood",
+    )
+
+elif args.whole_pipeline:
     """Simulate the simulation form
     Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
     Evolutionary dynamics of organised crime and terrorist networks. Scientific reports, 9(1), 1-10.

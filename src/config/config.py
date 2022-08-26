@@ -37,7 +37,7 @@ class ConfigParser:
         parser.add_argument(
             "-get-network-stats",
             action="store_true",
-            help="""Returns the mean characteristis of a population
+            help="""Returns the mean characteristics of a population
                     (preferential/random/small-world)""",
         )
 
@@ -59,7 +59,13 @@ class ConfigParser:
             nargs="?",
             const="preferential",
             choices=["preferential", "random", "small-world"],
-            help="""Defines the attachment methos around the criminal network. (MetaSimuator)""",
+            help="""Defines the attachment methods around the criminal network. (MetaSimulator)""",
+        )
+
+        parser.add_argument(
+            "-k",
+            type=int,
+            help="""Defines how many new connection a new node is making while generating a population.""",
         )
 
         parser.add_argument(
@@ -71,10 +77,23 @@ class ConfigParser:
         parser.add_argument(
             "-sim-mart-vaq",
             action="store_true",
-            help="""Defines if the simulation based on Martiez-Vaquero is run.
-                    Thereby, for each repetition the same network is used.""",
+            help="""Defines if the simulation based on Martinez-Vaquero is run.
+                    Thereby, for each repetition the another network is used.""",
         )
 
+        parser.add_argument(
+            "-case",
+            type=str,
+            choices=["const", "growth", "decline"],
+            help="""Defines which case is simulated""",
+        )
+
+        parser.add_argument(
+            "-whole-pipeline",
+            action="store_true",
+            help="""Runs the whole simulation for the different structures in one go.
+                    Caution: Might be unstable!!!""",
+        )
         parser.add_argument(
             "-criminal-likelihood-corr",
             action="store_true",
@@ -83,7 +102,7 @@ class ConfigParser:
         parser.add_argument(
             "-sim-mart-vaq-w-net",
             action="store_true",
-            help="""Defines if the simulation based on Martiez-Vaquero is run.
+            help="""Defines if the simulation based on Martinez-Vaquero is run.
                     Thereby, for each repetition an new network is created.""",
         )
 
@@ -149,6 +168,12 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "-plot",
+            action="store_true",
+            help="""Defines if the results should be plotted.ss""",
+        )
+
+        parser.add_argument(
             "-r",
             "--rounds",
             type=int,
@@ -168,7 +193,7 @@ class ConfigParser:
         parser.add_argument(
             "-ratio-honest",
             type=float,
-            help="""Defines the initial ratio of honests in a population.
+            help="""Defines the initial ratio of honest in a population.
             """,
         )
 
@@ -215,7 +240,7 @@ class ConfigParser:
         )
 
         parser.add_argument(
-            "--c-c", type=int, help="""Damage caused by ciminal (SimMartVaq)"""
+            "--c-c", type=int, help="""Damage caused by criminal (SimMartVaq)"""
         )
 
         parser.add_argument(
