@@ -56,7 +56,7 @@ if args.sim_mart_vaq:
     # First convert to gt
     meta_sim = MetaSimulator(
         network_name=args.read_data,
-        attachment_method=args.attach_method,
+        attachment_method=args.attach_meth,
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
         k=args.k,
@@ -87,27 +87,26 @@ if args.sim_mart_vaq:
             + args.attach_meth
             + ".json"
         )
-
+        print(file_name)
         if os.path.isfile(file_name) and os.access(file_name, os.R_OK):
             with open(file_name) as fp:
                 previous_results = json.load(fp)
 
             # get the number of runs already done
-            n_prev_runs = max(previous_results.keys())
+            n_prev_runs = max(int(key) for key in previous_results.keys())
             simple_runs = {
                 str(int(k) + n_prev_runs): v
                 for k, v in data_collector.items()
                 if k.isdigit()
             }
-
-            new_results = previous_results.append(simple_runs)
+            new_results = {**previous_results, **simple_runs}
             with open(
                 file_name,
                 "w",
             ) as fp:
                 json.dump(new_results, fp, indent=4)
 
-        elif not (file_name) and os.access(file_name, os.R_OK):
+        elif not os.path.isfile(file_name):
             # Get the simple runs
             simple_runs = {k: v for k, v in data_collector.items() if k.isdigit()}
             with open(
@@ -287,6 +286,7 @@ elif args.whole_pipeline:
         ith_collect=int(args.rounds / 15),
         measure_topology=args.topo_meas,
         measure_likelihood_corr=args.criminal_likelihood_corr,
+        execute=args.execute,
     )
     logger.info("Done")
     logger.info("Doing random simulation")
@@ -297,6 +297,7 @@ elif args.whole_pipeline:
         ith_collect=int(args.rounds / 15),
         measure_topology=args.topo_meas,
         measure_likelihood_corr=args.criminal_likelihood_corr,
+        execute=args.execute,
     )
     logger.info("Done")
     logger.info("Doing small-world simulation")
@@ -307,6 +308,7 @@ elif args.whole_pipeline:
         ith_collect=int(args.rounds / 15),
         measure_topology=args.topo_meas,
         measure_likelihood_corr=args.criminal_likelihood_corr,
+        execute=args.execute,
     )
     logger.info("Done")
 

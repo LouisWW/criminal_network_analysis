@@ -35,4 +35,8 @@ python3 main.py -read-data montagna_calls -topo-meas-w-net -r 800
 python3 new_main.py -read-data montagna_calls -get-network-stats -n-samples 50
 
 
-nohup python3 new_main.py -read-data montagna_calls -sim-mart-vaq -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 400000 -n-samples 50 -criminal-likelihood-corr -save &
+# Run the whole pipeline
+nohup python3 new_main.py -read-data montagna_calls -whole-pipeline -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save &
+
+# Run the simulation chunck vise
+nohup python3 new_main.py -read-data montagna_calls -sim-mart-vaq -case cnst -attach-meth preferential -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save &

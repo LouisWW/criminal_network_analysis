@@ -228,7 +228,7 @@ if args.criminal_likelihood_corr:
         {
             "preferential attachment": data_collector_pref,
             "random attachment": data_collector_rnd,
-            "small world": data_collector_sw,
+            "small-world": data_collector_sw,
         },
         y_data_to_plot=[
             "degree",
@@ -416,14 +416,14 @@ if args.topo_meas:
         {
             "preferential attachment": data_collector_pref,
             "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
+            "small-world": data_collector_sw,
         }
     )
     ax = plotter.plot_lines_comparative(
         {
             "preferential attachment": data_collector_pref,
             "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
+            "small-world": data_collector_sw,
         },
         y_data_to_plot="mean_" + "density",
         x_data_to_plot="mean_iteration",
@@ -437,7 +437,7 @@ if args.topo_meas:
         {
             "preferential attachment": data_collector_pref,
             "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
+            "small-world": data_collector_sw,
         },
         y_data_to_plot="mean_" + "flow_information",
         x_data_to_plot="mean_iteration",
@@ -451,7 +451,7 @@ if args.topo_meas:
         {
             "preferential attachment": data_collector_pref,
             "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
+            "small-world": data_collector_sw,
         },
         y_data_to_plot="mean_" + "size_of_largest_component",
         x_data_to_plot="mean_iteration",
@@ -539,7 +539,7 @@ if args.topo_meas_w_net:
         {
             "preferential attachment": data_collector_pref,
             "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
+            "small-world": data_collector_sw,
         }
     )
 
@@ -547,7 +547,7 @@ if args.topo_meas_w_net:
         {
             "preferential attachment": data_collector_pref,
             "random attachment": data_collector_rand,
-            "small world": data_collector_sw,
+            "small-world": data_collector_sw,
         },
         y_data_to_plot=[
             "mean_density",

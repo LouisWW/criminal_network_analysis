@@ -56,6 +56,7 @@ class SimMartVaq:
         r_h: int = 0,
         temperature: float = 10,
         mutation_prob: float = 0.0001,
+        execute: str = "parallel",
     ) -> None:
         """Init the network characteristics.
 
@@ -77,6 +78,8 @@ class SimMartVaq:
             temperature (int, optional): Temperature used in the fermi function. Defaults to 10.
             mutation_prob (float, optional): Mutation probability to either randomly pick a
                                 new state or switch state with an other agent. Defaults to 0.0001.
+            execute (str,optional): Defines if some process should run parallel or sequential. 
+                                    Default to parallel.
         """
         # Define name of simulator
         self._name = "sim_mart_vaq"
@@ -116,6 +119,9 @@ class SimMartVaq:
         # Set the fermic temperature & mutation probability
         self.temperature = temperature
         self.mutation_prob = mutation_prob
+
+        # Set the execute, if parallel or sequential
+        self.execute = execute
 
     @property
     def name(self) -> str:
@@ -229,16 +235,32 @@ class SimMartVaq:
 
                 if measure_topology:
                     # Extract the criminal network, the filtering is done on the network object
+                    logger.info("Filtering the criminal_network")
                     NetworkExtractor.filter_criminal_network(network)
+                    logger.info("Calculating the density")
                     data_collector["density"].append(NodeStats.get_density(network))
-                    data_collector["flow_information"].append(
-                        NodeStats.get_flow_of_information(network)
-                    )
+                    logger.info("Calculating the flow of information")
+
+                    if self.execute == "parallel":
+                        data_collector["flow_information"].append(
+                            NodeStats.get_flow_of_information(
+                                gt.extract_largest_component(network)
+                            )
+                        )
+                    elif self.execute == "sequential":
+                        # the faster version doesn't work sequentially
+                        data_collector["flow_information"].append(
+                            NodeStats.get_flow_of_information_faster(
+                                gt.extract_largest_component(network)
+                            )
+                        )
+                    logger.info("Calculating the largest_component")
                     data_collector["size_of_largest_component"].append(
                         NodeStats.get_size_of_largest_component(network)[0]
                     )
 
                     # Unfilter the network back to its initial configuration
+                    logger.info("UnFiltering the criminal_network")
                     NetworkExtractor.un_filter_criminal_network(network)
 
         # Add a df with the likelihood of being a criminal and the node centrality
@@ -272,54 +294,74 @@ class SimMartVaq:
         # Running multiprocessing
         # If repetition are less than number of cores
         # then don't use all the cores
-        if repetition < multiprocessing.cpu_count() - 1:
-            num_cpus = repetition
-        else:
-            num_cpus = multiprocessing.cpu_count() - 5
+        if self.execute == "parallel":
+            if repetition < multiprocessing.cpu_count() - 1:
+                num_cpus = repetition
+            else:
+                num_cpus = multiprocessing.cpu_count() - 5
 
-        if isinstance(network, gt.Graph):
-            results = p_umap(
-                self.avg_play_help,
-                (
-                    [
-                        # arguments need to be in this order
-                        (
-                            network,
-                            rounds,
-                            n_groups,
-                            ith_collect,
-                            measure_topology,
-                            measure_likelihood_corr,
-                        )
-                        for i in range(0, repetition)
-                    ]
-                ),
-                **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
-            )
-        elif isinstance(network, list):
-            results = p_umap(
-                self.avg_play_help,
-                (
-                    [
-                        # arguments need to be in this order
-                        (
-                            network[i],
-                            rounds,
-                            n_groups,
-                            ith_collect,
-                            measure_topology,
-                            measure_likelihood_corr,
-                        )
-                        for i in range(0, repetition)
-                    ]
-                ),
-                **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
-            )
+            if isinstance(network, gt.Graph):
+                results = p_umap(
+                    self.avg_play_help,
+                    (
+                        [
+                            # arguments need to be in this order
+                            (
+                                network,
+                                rounds,
+                                n_groups,
+                                ith_collect,
+                                measure_topology,
+                                measure_likelihood_corr,
+                            )
+                            for i in range(0, repetition)
+                        ]
+                    ),
+                    **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
+                )
+            elif isinstance(network, list):
+                results = p_umap(
+                    self.avg_play_help,
+                    (
+                        [
+                            # arguments need to be in this order
+                            (
+                                network[i],
+                                rounds,
+                                n_groups,
+                                ith_collect,
+                                measure_topology,
+                                measure_likelihood_corr,
+                            )
+                            for i in range(0, repetition)
+                        ]
+                    ),
+                    **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
+                )
 
-        # merge results in a dict
-        data_collector = defaultdict(list)
-        for i, k in enumerate(results):
-            data_collector[str(i)] = k
+            # merge results in a dict
+            data_collector = defaultdict(list)
+            for i, k in enumerate(results):
+                data_collector[str(i)] = k
+
+        elif self.execute == "sequential":
+            data_collector = defaultdict(list)
+            for i in tqdm(
+                range(0, repetition),
+                desc="Repeating the simulation...",
+                total=repetition,
+                leave=False,
+            ):
+                data_collector[str(i)] = self.avg_play_help(
+                    (
+                        network[i],
+                        rounds,
+                        n_groups,
+                        ith_collect,
+                        measure_topology,
+                        measure_likelihood_corr,
+                    )
+                )
 
         # Data over the different rounds is averaged and std is computed
         averaged_dict = get_mean_std_over_list(data_collector)
@@ -824,10 +866,9 @@ class SimMartVaq:
 
         Basically, count how many rounds a node has a criminal status criminal
         """
-        for node in range(0, network.num_vertices()):
-            if network.vp.state[network.vertex(node)] == "c":
-                network.vp.age[network.vertex(node)] += 1
-
+        nodes = gt.find_vertex(network, network.vp.state, "c")
+        for node in nodes:
+            network.vp.age[node] += 1
         return network
 
     def update_fitness(self, network: gt.Graph) -> gt.Graph:

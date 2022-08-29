@@ -35,6 +35,13 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "-exec",
+            type=str,
+            choices=["parallel", "sequential"],
+            help="""Runs the simulation in parallel or sequential.""",
+        )
+
+        parser.add_argument(
             "-get-network-stats",
             action="store_true",
             help="""Returns the mean characteristics of a population
@@ -65,7 +72,8 @@ class ConfigParser:
         parser.add_argument(
             "-k",
             type=int,
-            help="""Defines how many new connection a new node is making while generating a population.""",
+            help="""Defines how many new connection a 
+                    new node is making while generating a population.""",
         )
 
         parser.add_argument(

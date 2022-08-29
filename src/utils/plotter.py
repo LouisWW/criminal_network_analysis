@@ -236,6 +236,7 @@ class Plotter(ConfigParser):
 
             # set label to percentage
             ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+            ax.set_xscale("log")
             if "title" in kwargs:
                 ax.set_title(key_diff_structure.replace("_", " ").capitalize())
             if "xlabel" in kwargs:
@@ -464,7 +465,7 @@ class Plotter(ConfigParser):
         if self.args.save:
             fig_name = (
                 DirectoryFinder().result_dir_fig
-                + y_data_to_plot
+                + "topological_meas"
                 + "_"
                 + timestamp()
                 + ".png"

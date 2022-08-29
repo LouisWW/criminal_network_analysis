@@ -77,7 +77,7 @@ class TestStats:
         """Test if the time-series comparison/anova test is working."""
         compare_time_series(fake_topological_data)
         assert (
-            "('preferential attachment', 'small world')         : frechet_dist"
+            "('preferential', 'small-world')                    : frechet_dist"
             in mocked_print.mock_calls[1].args[0]
         )
 

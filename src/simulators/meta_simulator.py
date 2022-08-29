@@ -226,6 +226,7 @@ class MetaSimulator:
         repetition: int = 20,
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
+        execute: str = "parallel",
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
@@ -245,7 +246,7 @@ class MetaSimulator:
         list_of_population = self.create_list_of_populations(repetition)
 
         # init simulator and use a place holder population
-        simulator = SimMartVaq(list_of_population[0])
+        simulator = SimMartVaq(list_of_population[0], execute=execute)
 
         data_collector = simulator.avg_play(
             list_of_population,

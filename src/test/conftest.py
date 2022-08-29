@@ -158,7 +158,7 @@ def fake_topological_data() -> Dict[str, DefaultDict[str, List[Any]]]:
     """Create fake topological data."""
     # create fake data
     fake_data = {}
-    for key in ["preferential attachment", "small world", "random attachment"]:
+    for key in ["preferential", "small-world", "random"]:
         data_collector = defaultdict(list)  # type: DefaultDict[str, Any]
 
         x = np.linspace(0, 30)
@@ -200,7 +200,7 @@ def fake_correlation_data() -> Dict[str, DefaultDict[str, List[Any]]]:
     """Create fake correlation data."""
     fake_data = {}
 
-    for key in ["preferential", "small world", "random"]:
+    for key in ["preferential", "small-world", "random"]:
         # create fake data
         # The desired covariance matrix.
         num_samples = 40

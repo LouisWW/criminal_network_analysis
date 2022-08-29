@@ -236,7 +236,10 @@ class TestMetaSimualtor:
             ratio_honest,
             ratio_wolf,
         )
-        data = meta_simulator_pref.avg_play(rounds=rounds, repetition=10, ith_collect=1)
+
+        data = meta_simulator_pref.avg_play(
+            rounds=rounds, repetition=10, ith_collect=1, execute="parallel"
+        )
 
         assert "mean_ratio_criminal" in data.keys(), "Key not found"
         assert "mean_ratio_honest" in data.keys(), "Key not found"

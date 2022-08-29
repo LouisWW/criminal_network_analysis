@@ -54,15 +54,15 @@ class TestPlotter:
 
         # create fake data
         data_collector = defaultdict(list)  # type: DefaultDict[str, List[Any]]
-        data_collector["mean_honest_ratio"] = list(np.random.rand(200))
-        data_collector["mean_criminal_ratio"] = list(np.random.rand(200))
-        data_collector["mean_wolf_ratio"] = list(np.random.rand(200))
+        data_collector["mean_honest_ratio"] = list(np.random.rand(2000))
+        data_collector["mean_criminal_ratio"] = list(np.random.rand(2000))
+        data_collector["mean_wolf_ratio"] = list(np.random.rand(2000))
 
-        data_collector["std_honest_ratio"] = list(np.random.normal(0.1, 5, size=200))
-        data_collector["std_criminal_ratio"] = list(np.random.normal(0.1, 5, size=200))
-        data_collector["std_wolf_ratio"] = list(np.random.normal(0.1, 5, size=200))
+        data_collector["std_honest_ratio"] = list(np.random.normal(0.1, 5, size=2000))
+        data_collector["std_criminal_ratio"] = list(np.random.normal(0.1, 5, size=2000))
+        data_collector["std_wolf_ratio"] = list(np.random.normal(0.1, 5, size=2000))
 
-        data_collector["rounds"] = list(range(0, 200))
+        data_collector["rounds"] = list(range(0, 2000))
 
         ax = plotter.plot_lines(
             dict_data={"preferential": data_collector, "random": data_collector},
