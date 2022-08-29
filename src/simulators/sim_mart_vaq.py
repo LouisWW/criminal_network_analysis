@@ -78,7 +78,7 @@ class SimMartVaq:
             temperature (int, optional): Temperature used in the fermi function. Defaults to 10.
             mutation_prob (float, optional): Mutation probability to either randomly pick a
                                 new state or switch state with an other agent. Defaults to 0.0001.
-            execute (str,optional): Defines if some process should run parallel or sequential. 
+            execute (str,optional): Defines if some process should run parallel or sequential.
                                     Default to parallel.
         """
         # Define name of simulator

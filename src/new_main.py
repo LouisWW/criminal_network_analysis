@@ -394,6 +394,17 @@ elif args.whole_pipeline:
             ],
             x_data_to_plot="criminal_likelihood",
         )
+        ax_5 = plotter.plot_lines_correlation_grid(
+            dict_data=whole_data,
+            y_data_to_plot=[
+                "degree",
+                "betweenness",
+                "katz",
+                "closeness",
+                "eigen vector",
+            ],
+            x_data_to_plot="criminal_likelihood",
+        )
 
 elif args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
