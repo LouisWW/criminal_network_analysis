@@ -44,7 +44,6 @@ logger.propagate = False
 if args.verbose:
     logger.setLevel(logging.INFO)
 
-
 if args.sim_mart_vaq:
     """Simulate the simulation form
     Martinez-Vaquero, L. A., Dolci, V., & Trianni, V. (2019).
@@ -141,7 +140,6 @@ if args.sim_mart_vaq:
             ylabel="Average fitness",
         )
 
-
 elif args.plot:
     """Plot the results collected over the different runs.
 
@@ -214,7 +212,11 @@ elif args.plot:
 
     ax_3 = plotter.plot_hist(
         dict_data=whole_data,
-        y_data_to_plot=["mean_security_efficiency", "mean_information", "mean_gcs"],
+        y_data_to_plot=[
+            "mean_density",
+            "mean_flow_information",
+            "mean_size_of_largest_component",
+        ],
         title=True,
     )
 
@@ -353,6 +355,11 @@ elif args.whole_pipeline:
 
     if args.topo_meas:
         compare_time_series(whole_data)
+        print(f"{whole_data['preferential']['mean_density']=}")
+        print(f"{whole_data['preferential']['sem_density']=}")
+        print(f"{whole_data['random']['mean_density']=}")
+        print(f"{whole_data['small-world']['mean_density']=}")
+
         ax_2 = plotter.plot_lines_comparative(
             dict_data=whole_data,
             y_data_to_plot=[
@@ -367,7 +374,11 @@ elif args.whole_pipeline:
 
         ax_3 = plotter.plot_hist(
             dict_data=whole_data,
-            y_data_to_plot=["mean_security_efficiency", "mean_information", "mean_gcs"],
+            y_data_to_plot=[
+                "mean_density",
+                "mean_flow_information",
+                "mean_size_of_largest_component",
+            ],
             title=True,
         )
 
@@ -384,7 +395,7 @@ elif args.whole_pipeline:
             x_data_to_plot="criminal_likelihood",
         )
 
-if args.sensitivity_analysis:
+elif args.sensitivity_analysis:
     """Runs a sensitivity analysis on the given choice."""
     if args.sensitivity_analysis == "sim-mart-vaq":
 
@@ -396,7 +407,7 @@ if args.sensitivity_analysis:
             rounds=args.rounds,
         )
 
-if args.phase_diagram:
+elif args.phase_diagram:
     parameter_dict = {
         "1": "beta_s",
         "2": "beta_h",
@@ -476,17 +487,17 @@ if args.phase_diagram:
         simulator=simulators,
     )
 
-if args.animate_simulation:
+elif args.animate_simulation:
     """Create an animation of the simulation."""
     animateur = Animateur()
     animateur.create_animation()
 
-if args.animate_attachment_process:
+elif args.animate_attachment_process:
     """Create an animation of the attachment process."""
     animateur = Animateur()
     animateur.create_animation()
 
-if args.get_network_stats:
+elif args.get_network_stats:
     """Return the mean/standard deviation of a population structure.
 
     The strucutre is either preferential,random or small-world

@@ -37,7 +37,7 @@ class Plotter(ConfigParser):
 
         # Making sure all the plots have the same parameters
         # plt.style.use('ggplot')
-        plt.rcParams["figure.figsize"] = (15, 13)
+        plt.rcParams["figure.figsize"] = (20, 12)
         plt.rcParams["figure.autolayout"] = True
         plt.rcParams["xtick.direction"] = "in"
         plt.rcParams["ytick.direction"] = "in"
@@ -214,7 +214,6 @@ class Plotter(ConfigParser):
                     ):  # standard error of the mean
                         dev = data.replace("mean", "sem")
 
-                    print(f"{dict_data[key_diff_structure][dev]=}")
                     upper_dev = np.array(
                         dict_data[key_diff_structure][data]
                     ) + np.array(dict_data[key_diff_structure][dev])
@@ -236,13 +235,24 @@ class Plotter(ConfigParser):
 
             # set label to percentage
             ax.yaxis.set_major_formatter(mtick.PercentFormatter())
-            ax.set_xscale("log")
+            ax.set_yticklabels(
+                [f"{x:,.2%}" for x in dict_data[key_diff_structure][data]]
+            )
+            ax.ticklabel_format(
+                axis="x", style="sci", scilimits=(0, 0), useMathText="True"
+            )
             if "title" in kwargs:
-                ax.set_title(key_diff_structure.replace("_", " ").capitalize())
+                ax.set_title(
+                    key_diff_structure.replace("_", " ").capitalize(), weight="bold"
+                )
             if "xlabel" in kwargs:
-                ax.set_xlabel(kwargs["xlabel"].replace("_", " ").capitalize())
+                ax.set_xlabel(
+                    kwargs["xlabel"].replace("_", " ").capitalize(), weight="bold"
+                )
             if "ylabel" in kwargs:
-                ax.set_ylabel(kwargs["ylabel"].replace("_", " ").capitalize())
+                ax.set_ylabel(
+                    kwargs["ylabel"].replace("_", " ").capitalize(), weight="bold"
+                )
 
             # set legend
             ax.legend()
@@ -301,16 +311,16 @@ class Plotter(ConfigParser):
                 )
 
                 if "title" in kwargs:
-                    ax.set_title(data.replace("_", " ").capitalize())
+                    ax.set_title(data.replace("_", " ").capitalize(), weight="bold")
                 if "ylabel" in kwargs:
-                    ax.set_ylabel("probability".capitalize())
+                    ax.set_ylabel("probability".capitalize(), weight="bold")
                 # set legend
                 ax.legend()
 
         if self.args.save:
             fig_name = (
                 DirectoryFinder().result_dir_fig
-                + "correlation_fig"
+                + "topo_meas_hist"
                 + "_"
                 + timestamp()
                 + ".png"
@@ -456,6 +466,9 @@ class Plotter(ConfigParser):
                 )
 
                 ax.set_xlabel("Rounds", weight="bold")
+                ax.ticklabel_format(
+                    axis="x", style="sci", scilimits=(0, 0), useMathText="True"
+                )
                 ax.set_ylabel(data.replace("_", " ").capitalize(), weight="bold")
                 # set legend
                 ax.legend()
@@ -497,7 +510,7 @@ class Plotter(ConfigParser):
         mpl.rcParams["axes.spines.top"] = True
         mpl.rcParams["axes.spines.right"] = True
 
-        _, axs = plt.subplots(1, len(y_data_to_plot))
+        fig, axs = plt.subplots(1, len(y_data_to_plot))
 
         if axs is None:
             axs = plt.gca()
@@ -521,7 +534,8 @@ class Plotter(ConfigParser):
                     dict_data[key]["df_total"][x_data_to_plot],
                     m * dict_data[key]["df_total"][x_data_to_plot] + b,
                     next(line_plot_style),
-                    label=key + f" --- {corr=}",
+                    # label=key + f" --- {corr=}",
+                    label=corr,
                 )
 
                 ax.xaxis.set_major_formatter(mtick.PercentFormatter())
@@ -530,7 +544,24 @@ class Plotter(ConfigParser):
                 ax.patch.set_edgecolor("black")
                 ax.patch.set_linewidth("2")
                 ax.set_aspect(1.5 * np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
-                ax.legend(loc="upper right", fontsize="x-small")
+                ax.legend(
+                    loc="upper center",
+                    bbox_to_anchor=(0.5, 1.05),
+                    ncol=3,
+                    fancybox=True,
+                    shadow=True,
+                )
+
+        line_labels = ["Preferential", "Random", "Small-world"]
+        fig.legend(
+            ax.get_lines(),  # The line objects
+            labels=line_labels,  # The labels for each line
+            loc="upper center",  # Position of legend
+            bbox_to_anchor=(0.5, 0.8),
+            borderaxespad=0.1,  # Small spacing around legend box
+            ncol=3,
+            fontsize="large",
+        )
 
         plt.tight_layout()
 
@@ -538,6 +569,96 @@ class Plotter(ConfigParser):
             fig_name = (
                 DirectoryFinder().result_dir_fig
                 + "correlation_fig"
+                + "_"
+                + timestamp()
+                + ".png"
+            )
+            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
+            return axs
+        else:
+            plt.show()
+            return axs
+
+    def plot_lines_correlation_grid(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: str,
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -> Union[plt.Axes, np.ndarray, np.generic]:
+        """Plot line graph from correlation points with correlatio factor.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        """
+        keys = list(dict_data.keys())
+
+        mpl.rcParams["axes.spines.top"] = True
+        mpl.rcParams["axes.spines.right"] = True
+
+        fig, axs = plt.subplots(len(y_data_to_plot), len(keys))
+
+        if axs is None:
+            axs = plt.gca()
+
+        for centrality_measure, i in zip(y_data_to_plot, range(axs.shape[0])):
+            for key, k in zip(keys, range(0, axs.shape[1])):
+
+                corr = get_correlation(
+                    dict_data[key]["df_total"][x_data_to_plot],
+                    dict_data[key]["df_total"][centrality_measure],
+                )
+
+                m, b = np.polyfit(
+                    dict_data[key]["df_total"][x_data_to_plot],
+                    dict_data[key]["df_total"][centrality_measure],
+                    1,
+                )
+
+                axs[i, k].plot(
+                    dict_data[key]["df_total"][x_data_to_plot],
+                    m * dict_data[key]["df_total"][x_data_to_plot] + b,
+                    color="k",
+                    label=corr,
+                )
+
+                axs[i, k].scatter(
+                    dict_data[key]["df_total"][x_data_to_plot],
+                    dict_data[key]["df_total"][centrality_measure],
+                    s=0.5,
+                    color="grey",
+                )
+
+                axs[i, k].xaxis.set_major_formatter(mtick.PercentFormatter())
+                axs[i, k].patch.set_edgecolor("black")
+                axs[i, k].patch.set_linewidth("2")
+                axs[i, k].legend(
+                    loc="upper center",
+                    bbox_to_anchor=(0.5, 1.05),
+                    ncol=3,
+                    fancybox=True,
+                    shadow=True,
+                )
+
+        for ax, col in zip(axs[0], keys):
+            ax.set_title(col.capitalize(), weight="bold")
+
+        for ax, col in zip(axs[-1], keys):
+            ax.set_xlabel("Criminal likelihood".capitalize(), weight="bold")
+
+        for ax, row in zip(axs[:, 0], y_data_to_plot):
+            ax.set_ylabel(row.capitalize(), weight="bold")
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + "correlation_grid_fig"
                 + "_"
                 + timestamp()
                 + ".png"

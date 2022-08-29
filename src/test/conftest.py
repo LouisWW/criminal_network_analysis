@@ -203,7 +203,7 @@ def fake_correlation_data() -> Dict[str, DefaultDict[str, List[Any]]]:
     for key in ["preferential", "small-world", "random"]:
         # create fake data
         # The desired covariance matrix.
-        num_samples = 40
+        num_samples = 20000
         # The desired mean values of the sample.
         mu = np.array([5.0, 0.0, 10.0])
         r = np.array([[3.40, -2.75, -2.00], [-2.75, 5.50, 1.50], [-2.00, 1.50, 1.25]])

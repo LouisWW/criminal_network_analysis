@@ -131,15 +131,38 @@ class TestPlotter:
         assert isinstance(ax, (plt.Axes, np.ndarray, np.generic))
 
     @pytest.mark.essential
-    @patch("matplotlib.pyplot.show")
+    # @patch("matplotlib.pyplot.show")
     def test_plot_lines_correlation(
+        self,
+        # mock_show: Mock,
+        fake_correlation_data: Dict[str, DefaultDict[str, List[Any]]],
+    ) -> None:
+        """Test if the plt lines correlation function works."""
+        plotter = Plotter()
+        ax = plotter.plot_lines_correlation(
+            dict_data=fake_correlation_data,
+            y_data_to_plot=[
+                "degree",
+                "betweenness",
+                "katz",
+                "closeness",
+                "eigen vector",
+            ],
+            x_data_to_plot="criminal_likelihood",
+        )
+
+        assert isinstance(ax, (np.ndarray, np.generic))
+
+    @pytest.mark.essential
+    @patch("matplotlib.pyplot.show")
+    def test_plot_lines_correlation_grid(
         self,
         mock_show: Mock,
         fake_correlation_data: Dict[str, DefaultDict[str, List[Any]]],
     ) -> None:
         """Test if the plt lines correlation function works."""
         plotter = Plotter()
-        ax = plotter.plot_lines_correlation(
+        ax = plotter.plot_lines_correlation_grid(
             dict_data=fake_correlation_data,
             y_data_to_plot=[
                 "degree",

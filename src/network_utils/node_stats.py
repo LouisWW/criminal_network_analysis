@@ -89,6 +89,8 @@ class NodeStats:
         """
         n_edges = network.num_edges()
         n_nodes = network.num_vertices()
+        if (n_nodes * (n_nodes - 1)) == 0:
+            return 0
         return (2 * n_edges) / (n_nodes * (n_nodes - 1))
 
     @staticmethod
