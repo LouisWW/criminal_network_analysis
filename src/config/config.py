@@ -35,7 +35,7 @@ class ConfigParser:
         )
 
         parser.add_argument(
-            "-exec",
+            "-execute",
             type=str,
             choices=["parallel", "sequential"],
             help="""Runs the simulation in parallel or sequential.""",
@@ -72,7 +72,7 @@ class ConfigParser:
         parser.add_argument(
             "-k",
             type=int,
-            help="""Defines how many new connection a 
+            help="""Defines how many new connection a
                     new node is making while generating a population.""",
         )
 
