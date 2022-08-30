@@ -107,7 +107,8 @@ class TestPlotter:
         ax = plotter.plot_hist(
             dict_data=fake_topological_data,
             y_data_to_plot=["mean_security_efficiency", "mean_information", "mean_gcs"],
-            title=True,
+            ylabel=True,
+            xlabel=True,
         )
         assert isinstance(ax, (np.ndarray, np.generic))
 

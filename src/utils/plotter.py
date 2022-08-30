@@ -235,9 +235,7 @@ class Plotter(ConfigParser):
 
             # set label to percentage
             ax.yaxis.set_major_formatter(mtick.PercentFormatter())
-            ax.set_yticklabels(
-                [f"{x:,.2%}" for x in dict_data[key_diff_structure][data]]
-            )
+            ax.set_ylim(0, 1)
             ax.ticklabel_format(
                 axis="x", style="sci", scilimits=(0, 0), useMathText="True"
             )
@@ -255,7 +253,16 @@ class Plotter(ConfigParser):
                 )
 
             # set legend
-            ax.legend()
+            ax.legend(
+                fancybox=True,
+                shadow=True,
+            )
+
+            # only do it if multiple plots are made
+            if isinstance(axs, (np.ndarray, np.generic)):
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+        plt.tight_layout()
 
         if self.args.save:
             fig_name = (
@@ -264,7 +271,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300)
+            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
             return axs
         else:
             plt.show()
@@ -298,24 +305,32 @@ class Plotter(ConfigParser):
                     f"Given key doesn't exist,{dict_data[keys_diff_structure[0]].keys()=}"
                 )
 
-            color_list = iter(list(sns.color_palette("rocket")))
+            color_list = iter(list(sns.color_palette("Set2")))
             for key_diff_structure in keys_diff_structure:
                 color = next(color_list)
-                sns.histplot(
+                sns.kdeplot(
                     dict_data[key_diff_structure][data],
-                    kde=True,
                     color=color,
-                    stat="probability",
+                    common_norm=True,
+                    multiple="stack",
+                    alpha=0.8,
+                    linewidth=0,
                     label=key_diff_structure,
                     ax=ax,
                 )
 
-                if "title" in kwargs:
-                    ax.set_title(data.replace("_", " ").capitalize(), weight="bold")
-                if "ylabel" in kwargs:
-                    ax.set_ylabel("probability".capitalize(), weight="bold")
+                if "xlabel" in kwargs:
+                    ax.set_xlabel(data.replace("_", " ").capitalize(), weight="bold")
                 # set legend
-                ax.legend()
+                ax.legend(fancybox=True, shadow=True)
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+            if "ylabel" in kwargs:
+                axs[0].set_ylabel("Density".capitalize(), weight="bold")
+                axs[1].set_ylabel(" ".capitalize(), weight="bold")
+                axs[2].set_ylabel(" ".capitalize(), weight="bold")
+
+        plt.tight_layout()
 
         if self.args.save:
             fig_name = (
@@ -393,6 +408,8 @@ class Plotter(ConfigParser):
         ax.set_xlabel(fr"${param_y}$")
         ax.set_ylabel(fr"${param_x}$")
 
+        plt.tight_layout()
+
         if self.args.save:
 
             fig_name = (
@@ -405,7 +422,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300)
+            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
             if "simulators" in kwargs:
                 simulators_str_dict = dict(
                     {
@@ -471,9 +488,14 @@ class Plotter(ConfigParser):
                 )
                 ax.set_ylabel(data.replace("_", " ").capitalize(), weight="bold")
                 # set legend
-                ax.legend()
+                ax.legend(
+                    fancybox=True,
+                    shadow=True,
+                )
                 ax.grid(alpha=0.5, linestyle=":")
-                ax.set_aspect(1.5 * np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+        plt.tight_layout()
 
         if self.args.save:
             fig_name = (
@@ -543,7 +565,7 @@ class Plotter(ConfigParser):
                 ax.set_ylabel(centrality_measure.capitalize(), weight="bold")
                 ax.patch.set_edgecolor("black")
                 ax.patch.set_linewidth("2")
-                ax.set_aspect(1.5 * np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
                 ax.legend(
                     loc="upper center",
                     bbox_to_anchor=(0.5, 1.05),
@@ -633,6 +655,7 @@ class Plotter(ConfigParser):
                     color="grey",
                 )
 
+                axs[i, k].set_xlim(0, 1)
                 axs[i, k].xaxis.set_major_formatter(mtick.PercentFormatter())
                 axs[i, k].patch.set_edgecolor("black")
                 axs[i, k].patch.set_linewidth("2")
