@@ -156,7 +156,7 @@ class SimMartVaq:
                     "fitness_honest",
                     "fitness_criminal",
                     "fitness_wolf",
-                    "density",
+                    "secrecy",
                     "flow_information",
                     "size_of_largest_component",
                     "df",
@@ -237,23 +237,25 @@ class SimMartVaq:
                     # Extract the criminal network, the filtering is done on the network object
                     logger.info("Filtering the criminal_network")
                     NetworkExtractor.filter_criminal_network(network)
-                    logger.info("Calculating the density")
-                    data_collector["density"].append(NodeStats.get_density(network))
+                    logger.info("Calculating the secrecy")
+                    data_collector["secrecy"].append(NodeStats.get_density(network))
                     logger.info("Calculating the flow of information")
 
-                    if self.execute == "parallel":
-                        data_collector["flow_information"].append(
-                            NodeStats.get_flow_of_information(
-                                gt.extract_largest_component(network)
+                    try:
+                        gsc = gt.extract_largest_component(network)
+                        if self.execute == "parallel":
+                            data_collector["flow_information"].append(
+                                NodeStats.get_flow_of_information(gsc)
                             )
-                        )
-                    elif self.execute == "sequential":
-                        # the faster version doesn't work sequentially
-                        data_collector["flow_information"].append(
-                            NodeStats.get_flow_of_information_faster(
-                                gt.extract_largest_component(network)
+                        elif self.execute == "sequential":
+                            # the faster version doesn't work sequentially
+                            data_collector["flow_information"].append(
+                                NodeStats.get_flow_of_information_faster(gsc)
                             )
-                        )
+                    except Warning:
+                        logger.info("Something didn't work with extracting of GCS")
+                        data_collector["flow_information"] = 0
+
                     logger.info("Calculating the largest_component")
                     data_collector["size_of_largest_component"].append(
                         NodeStats.get_size_of_largest_component(network)[0]

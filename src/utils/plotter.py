@@ -6,6 +6,7 @@ More specifically, generated data is visualized.
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
+import pickle
 from typing import Any
 from typing import DefaultDict
 from typing import List
@@ -58,6 +59,18 @@ class Plotter(ConfigParser):
         mpl.rcParams["savefig.dpi"] = 300
         mpl.rcParams["axes.spines.top"] = False
         mpl.rcParams["axes.spines.right"] = False
+
+    def save_figure(sefl, fig_name: str, axs: plt.Axes) -> None:
+        """Save figures to png files and pickle data."""
+        plt.savefig(fig_name, dpi=300, bbox_inches="tight")
+        with open(fig_name.replace("png", "pkl"), "wb") as fig:
+            pickle.dump(axs, fig)
+
+    def load_figure(self, fig_name: str) -> plt.Axes:
+        """Load a pickle saved figure and returns an axes."""
+        with open(fig_name, "rb") as fid:
+            ax = pickle.load(fid)
+        return ax
 
     def draw_network(
         self,
@@ -271,7 +284,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
+            self.save_figure(fig_name, axs)
             return axs
         else:
             plt.show()
@@ -340,7 +353,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
+            self.save_figure(fig_name, axs)
             return axs
         else:
             plt.show()
@@ -437,6 +450,8 @@ class Plotter(ConfigParser):
                 # Add the meta to it
                 im = Image.open(fig_name)
                 im.save(fig_name, "png", pnginfo=meta)
+                with open(fig_name.replace("png", "pkl"), "wb") as fig:
+                    pickle.dump(ax, fig)
         else:
             plt.show()
             return ax
@@ -505,7 +520,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
+            self.save_figure(fig_name, axs)
             return axs
         else:
             plt.show()
@@ -595,7 +610,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
+            self.save_figure(fig_name, axs)
             return axs
         else:
             plt.show()
@@ -686,7 +701,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
+            self.save_figure(fig_name, axs)
             return axs
         else:
             plt.show()

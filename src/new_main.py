@@ -191,7 +191,7 @@ elif args.plot:
         },
         y_data_to_plot=["mean_preferential", "mean_random", "mean_small-world"],
         x_data_to_plot="mean_iteration",
-        title=True,
+        title=False,
         xlabel="Rounds",
         ylabel="Ratio (%)",
         plot_deviation="sem",
@@ -201,7 +201,7 @@ elif args.plot:
     ax_2 = plotter.plot_lines_comparative(
         dict_data=whole_data,
         y_data_to_plot=[
-            "mean_density",
+            "mean_secrecy",
             "mean_flow_information",
             "mean_size_of_largest_component",
         ],
@@ -213,11 +213,12 @@ elif args.plot:
     ax_3 = plotter.plot_hist(
         dict_data=whole_data,
         y_data_to_plot=[
-            "mean_density",
+            "mean_secrecy",
             "mean_flow_information",
             "mean_size_of_largest_component",
         ],
-        title=True,
+        xlabel=True,
+        ylabel=True,
     )
 
     ax_4 = plotter.plot_lines_correlation(
@@ -355,15 +356,15 @@ elif args.whole_pipeline:
 
     if args.topo_meas:
         compare_time_series(whole_data)
-        print(f"{whole_data['preferential']['mean_density']=}")
-        print(f"{whole_data['preferential']['sem_density']=}")
-        print(f"{whole_data['random']['mean_density']=}")
-        print(f"{whole_data['small-world']['mean_density']=}")
+        print(f"{whole_data['preferential']['mean_secrecy']=}")
+        print(f"{whole_data['preferential']['sem_secrecy']=}")
+        print(f"{whole_data['random']['mean_secrecy']=}")
+        print(f"{whole_data['small-world']['mean_secrecy']=}")
 
         ax_2 = plotter.plot_lines_comparative(
             dict_data=whole_data,
             y_data_to_plot=[
-                "mean_density",
+                "mean_secrecy",
                 "mean_flow_information",
                 "mean_size_of_largest_component",
             ],
@@ -375,11 +376,12 @@ elif args.whole_pipeline:
         ax_3 = plotter.plot_hist(
             dict_data=whole_data,
             y_data_to_plot=[
-                "mean_density",
+                "mean_secrecy",
                 "mean_flow_information",
                 "mean_size_of_largest_component",
             ],
-            title=True,
+            xlabel=True,
+            ylabel=True,
         )
 
     if args.criminal_likelihood_corr:

@@ -425,11 +425,11 @@ if args.topo_meas:
             "random attachment": data_collector_rand,
             "small-world": data_collector_sw,
         },
-        y_data_to_plot="mean_" + "density",
+        y_data_to_plot="mean_" + "secrecy",
         x_data_to_plot="mean_iteration",
         title="Testing the simulation",
         xlabel="Rounds",
-        ylabel="Density (a.u.)",
+        ylabel="Secrecy (a.u.)",
         plot_deviation="sem",
     )
 
@@ -550,7 +550,7 @@ if args.topo_meas_w_net:
             "small-world": data_collector_sw,
         },
         y_data_to_plot=[
-            "mean_density",
+            "mean_secrecy",
             "mean_flow_information",
             "mean_size_of_largest_component",
         ],
