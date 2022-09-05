@@ -44,15 +44,15 @@ class SimMartVaq:
         self,
         network: gt.Graph,
         delta: float = 0.7,
-        tau: float = 0.1,
+        tau: float = 0.8,
         gamma: float = 0.8,
         beta_s: int = 1,
         beta_h: int = 1,
         beta_c: int = 1,
-        c_w: int = 1,
-        c_c: int = 1,
+        c_w: int = 0,
+        c_c: int = 100,
         r_w: int = 1,
-        r_c: int = 1,
+        r_c: int = 100,
         r_h: int = 0,
         temperature: float = 10,
         mutation_prob: float = 0.0001,
@@ -132,7 +132,7 @@ class SimMartVaq:
         self,
         network: gt.Graph,
         rounds: int = 1,
-        n_groups: int = 20,
+        n_groups: int = 1,
         ith_collect: int = 20,
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
@@ -238,7 +238,8 @@ class SimMartVaq:
                     logger.info("Filtering the criminal_network")
                     NetworkExtractor.filter_criminal_network(network)
                     logger.info("Calculating the secrecy")
-                    data_collector["secrecy"].append(NodeStats.get_density(network))
+                    data_collector["secrecy"].append(NodeStats.get_secrecy(network))
+                    data_collector["density"].append(NodeStats.get_density(network))
                     logger.info("Calculating the flow of information")
 
                     try:
@@ -254,7 +255,7 @@ class SimMartVaq:
                             )
                     except Warning:
                         logger.info("Something didn't work with extracting of GCS")
-                        data_collector["flow_information"] = 0
+                        data_collector["flow_information"].append(0)
 
                     logger.info("Calculating the largest_component")
                     data_collector["size_of_largest_component"].append(

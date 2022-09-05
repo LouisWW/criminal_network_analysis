@@ -261,7 +261,7 @@ elif args.whole_pipeline:
         network_name=args.read_data,
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        prob=0.4,
+        prob=0.01,
         k=6,
         attachment_method="small-world",
     )

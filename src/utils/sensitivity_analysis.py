@@ -107,15 +107,16 @@ class SensitivityAnalyser(ConfigParser):
         # Get the network of criminal first
         meta_sim = MetaSimulator(
             network_name=self.args.read_data,
-            ratio_honest=0.9,
-            ratio_wolf=0.01,
             attachment_method=self.args.attach_meth,
+            ratio_honest=self.args.ratio_honest,
+            ratio_wolf=self.args.ratio_wolf,
+            k=self.args.k,
         )
         gt_network = meta_sim.network
 
         if problem is None:
             problem = {
-                "num_vars": 11,
+                "num_vars": 10,
                 "names": [
                     "delta",
                     "tau",
@@ -127,7 +128,6 @@ class SensitivityAnalyser(ConfigParser):
                     "c_c",
                     "r_w",
                     "r_c",
-                    "r_h",
                 ],
                 "bounds": [
                     [0, 1],
@@ -136,11 +136,10 @@ class SensitivityAnalyser(ConfigParser):
                     [0, 20],
                     [0, 20],
                     [0, 20],
-                    [0, 5],
-                    [0, 5],
-                    [0, 5],
-                    [0, 5],
-                    [0, 5],
+                    [0, 100],
+                    [0, 100],
+                    [0, 100],
+                    [0, 100],
                 ],
             }
         # sample

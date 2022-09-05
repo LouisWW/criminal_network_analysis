@@ -40,3 +40,6 @@ nohup python3 new_main.py -read-data montagna_calls -whole-pipeline -ratio-hones
 
 # Run the simulation chunck vise
 nohup python3 new_main.py -read-data montagna_calls -sim-mart-vaq -case cnst -attach-meth preferential -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save &
+
+# Run sensitivity analysis
+python3 new_main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 2500 -n-samples 32  -exec parallel -output-value ratio_criminal -attach-meth random -k 2 -save

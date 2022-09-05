@@ -37,6 +37,7 @@ class NetworkStats:
             "component": int(self.get_connected_components()),
             "is_powerlaw": self.check_if_powerlaw()[0],
             "density": self.get_density(),
+            "secrecy": self.get_secrecy(),
             "nodes": int(self.network.numberOfNodes()),
             "edges": int(self.network.numberOfEdges()),
             "avg_degree": sum(
@@ -48,6 +49,7 @@ class NetworkStats:
             "diameter": int(self.get_diameter()),
             "radius": int(self.get_radius()),
             "dispersion": self.get_degree_dispersion(),
+            "avg_path_length": self.get_average_path_length(),
         }
         # self.get_efficiency()
         if logging.getLevelName(logger.level) == "INFO":
@@ -120,6 +122,24 @@ class NetworkStats:
             logger.warning("Graph must be connected! Otherwise distance == inf")
             return -1
 
+    def get_average_path_length(self) -> float:
+        """Return the average_path_length"""
+        # Initialse algorithm
+        cc = nk.components.ConnectedComponents(self.network)
+        cc.run()
+        gcs = cc.extractLargestConnectedComponent(self.network, True)
+        n_nodes = gcs.numberOfNodes()
+        if n_nodes <= 1:
+            return 0
+        apsp = nk.distance.APSP(gcs)
+        apsp.run()
+
+        distances = apsp.getDistances(asarray=True)
+        upper_triang = np.triu(distances, k=1)
+        avg_path_length = upper_triang[np.nonzero(upper_triang)].mean()
+        logger.info(f"Average path length is {avg_path_length=}")
+        return avg_path_length
+
     def get_radius(self) -> int:
         """Get the radius of a graph which is the minimum eccentricity."""
         # predefine the len of the list for speed
@@ -152,6 +172,14 @@ class NetworkStats:
         d = (2 * m) / (n * (n - 1))
         logger.info(f"Density = {d}")
         return d
+
+    def get_secrecy(self) -> float:
+        """Get the secrecy of a network."""
+        m = self.network.numberOfEdges()
+        n = self.network.numberOfNodes()
+        s = (n * (n - 1)) / (2 * m)
+        logger.info(f"Secrecy = {s}")
+        return s
 
     def get_relative_density(self) -> float:
         """Get the relative density of a graph as defined in Scott J."""

@@ -4,6 +4,7 @@ __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
 import itertools
+import logging
 from typing import Sequence
 from typing import Tuple
 
@@ -13,6 +14,8 @@ import numpy as np
 from graph_tool import EdgePropertyMap
 from graph_tool import VertexPropertyMap
 from network_utils.network_converter import NetworkConverter
+
+logger = logging.getLogger("logger")
 
 
 class NodeStats:
@@ -94,6 +97,18 @@ class NodeStats:
         return (2 * n_edges) / (n_nodes * (n_nodes - 1))
 
     @staticmethod
+    def get_secrecy(network: gt.Graph) -> float:
+        """Return the secrecy.
+
+        Metric has been defined in https://www.nature.com/articles/srep04238
+        """
+        n_edges = network.num_edges()
+        n_nodes = network.num_vertices()
+        if (2 * n_edges) == 0:
+            return -1
+        return (n_nodes * (n_nodes - 1)) / (2 * n_edges)
+
+    @staticmethod
     def get_flow_of_information(network: gt.Graph) -> float:
         """Return the flow of information.
 
@@ -112,7 +127,7 @@ class NodeStats:
         sum_inv_shortest_dist = sum(1 / dist for dist in shortest_dist_list)
         return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_shortest_dist
 
-    def get_flow_of_information_faster(gt_network):
+    def get_flow_of_information_faster(gt_network:gt.Graph) -> float:
         """Return the flow of information.
 
         Metric has been defined in
@@ -133,7 +148,12 @@ class NodeStats:
     @staticmethod
     def get_size_of_largest_component(network: gt.Graph) -> Tuple[int, int]:
         """Return the size of the largest component."""
-        largest_component = gt.extract_largest_component(network)
+        try:
+            largest_component = gt.extract_largest_component(network)
+        except:
+            logger.info("Something didn't work with extracting of GCS")
+            return 0, 0
+
         return largest_component.num_vertices(), largest_component.num_edges()
 
     def get_degree(self) -> Sequence[Tuple[int, int]]:
