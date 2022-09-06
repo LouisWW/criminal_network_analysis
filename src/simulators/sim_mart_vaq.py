@@ -6,6 +6,7 @@ Evolutionary dynamics of organised crime and terrorist networks. Scientific repo
 __author__ = Louis Weyland
 __date__   = 11/04/2022
 """
+import gc
 import itertools
 import logging
 import math
@@ -136,7 +137,7 @@ class SimMartVaq:
         ith_collect: int = 20,
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
-        show_bar: bool = False,
+        show_bar: bool = True,
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
@@ -272,6 +273,7 @@ class SimMartVaq:
         if measure_likelihood_corr:
             data_collector["df"] = self.create_likelihood_corr_df(network)
 
+        gc.collect()
         return network, data_collector
 
     def avg_play(
@@ -344,29 +346,29 @@ class SimMartVaq:
                     **{"num_cpus": num_cpus, "desc": "Repeating simulation...."},
                 )
 
-            # merge results in a dict
-            data_collector = defaultdict(list)
-            for i, k in enumerate(results):
-                data_collector[str(i)] = k
+                # merge results in a dict
+                data_collector = defaultdict(list)
+                for i, k in enumerate(results):
+                    data_collector[str(i)] = k
 
-        elif self.execute == "sequential":
-            data_collector = defaultdict(list)
-            for i in tqdm(
-                range(0, repetition),
-                desc="Repeating the simulation...",
-                total=repetition,
-                leave=False,
-            ):
-                data_collector[str(i)] = self.avg_play_help(
-                    (
-                        network[i],
-                        rounds,
-                        n_groups,
-                        ith_collect,
-                        measure_topology,
-                        measure_likelihood_corr,
+            elif self.execute == "sequential":
+                data_collector = defaultdict(list)
+                for i in tqdm(
+                    range(0, repetition),
+                    desc="Repeating the simulation...",
+                    total=repetition,
+                    leave=False,
+                ):
+                    data_collector[str(i)] = self.avg_play_help(
+                        (
+                            network[i],
+                            rounds,
+                            n_groups,
+                            ith_collect,
+                            measure_topology,
+                            measure_likelihood_corr,
+                        )
                     )
-                )
 
         # Data over the different rounds is averaged and std is computed
         averaged_dict = get_mean_std_over_list(data_collector)
@@ -506,7 +508,7 @@ class SimMartVaq:
             )
             return new_network, slct_pers, slct_pers_status
         else:
-            raise KeyError(
+            raise warnings.warn(
                 f"Person status {slct_pers_status} didn't correspond to h/c/w..."
             )
 

@@ -18,8 +18,8 @@ from typing import TypeVar
 
 import numpy as np
 import pandas as pd
+import tqdm
 from config.config import ConfigParser
-from p_tqdm import p_map
 from SALib.analyze import sobol
 from SALib.sample import saltelli
 from simulators.meta_simulator import MetaSimulator
@@ -153,16 +153,26 @@ class SensitivityAnalyser(ConfigParser):
         )
         # Running multiprocessing
         num_cpus = multiprocessing.cpu_count() - 1
-        Y = p_map(
-            self.sim_mart_vaq_sa_helper,
-            (
-                [
-                    (gt_network, problem, params, output_value, rounds)
-                    for params in param_values
-                ]
-            ),
-            **{"num_cpus": num_cpus, "desc": "Running sensitivity analysis"},
-        )
+        Y = []
+        list_of_param_comb = [
+            (gt_network, problem, params, output_value, rounds)
+            for params in param_values
+        ]
+        with multiprocessing.Pool(num_cpus) as p:
+            # Y = p.map(
+            #    self.sim_mart_vaq_sa_helper,
+            #        [
+            #            (gt_network, problem, params, output_value, rounds)
+            #            for params in param_values
+            #        ]
+            # )
+            for result in tqdm.tqdm(
+                p.imap(self.sim_mart_vaq_sa_helper, list_of_param_comb),
+                total=len(list_of_param_comb),
+            ):
+                Y.append(result)
+            p.close()
+            p.join()
 
         Y_array = np.asarray(Y)
 
