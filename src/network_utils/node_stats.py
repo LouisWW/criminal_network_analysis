@@ -127,7 +127,7 @@ class NodeStats:
         sum_inv_shortest_dist = sum(1 / dist for dist in shortest_dist_list)
         return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_shortest_dist
 
-    def get_flow_of_information_faster(gt_network:gt.Graph) -> float:
+    def get_flow_of_information_faster(gt_network: gt.Graph) -> float:
         """Return the flow of information.
 
         Metric has been defined in
