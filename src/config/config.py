@@ -276,5 +276,12 @@ class ConfigParser:
 
         parser.add_argument("-verbose", action="store_true", help="Print extra info")
 
+        parser.add_argument(
+            "-running-chunk",
+            action="store_true",
+            help="""Running the analysis in chunk
+                                                                    by saving in between""",
+        )
+
         # compile the flags
         self.args = parser.parse_known_args()[0]

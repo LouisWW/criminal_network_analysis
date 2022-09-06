@@ -8,6 +8,7 @@ __date__   = 5/05/2022
 import functools
 import logging
 import multiprocessing
+import os
 from collections import OrderedDict
 from typing import Any
 from typing import Callable
@@ -15,7 +16,9 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import TypeVar
+from typing import Union
 
+import graph_tool.all as gt
 import numpy as np
 import pandas as pd
 import tqdm
@@ -35,87 +38,11 @@ SA = TypeVar("SA", bound="SensitivityAnalyser")
 class SensitivityAnalyser(ConfigParser):
     """Performs sensitivity analysis on different models."""
 
-    def __init__(self) -> None:
+    def __init__(self, problem: dict = None) -> None:
         """Inherit from Configparser."""
         super().__init__()
-
-    def save_results(func: Callable) -> Any:
-        """Save the sensitivity analysis results.
-
-        Acts as a wrapper and must be at the top of the class
-        """
-
-        @functools.wraps(func)
-        def wrapper_decorator(self: SA, *args: Tuple, **kwargs: Dict[str, Any]) -> Any:
-            value = func(self, *args, **kwargs)
-            # Save results
-            if self.args.save:
-                file_name = (
-                    DirectoryFinder().result_dir_data_sa
-                    + func.__name__
-                    + "_"
-                    + str(kwargs["output_value"])
-                    + "_r_"
-                    + str(kwargs["rounds"])
-                    + "_n_s_"
-                    + str(kwargs["n_samples"])
-                    + "_"
-                    + timestamp()
-                )
-
-                df_list = value.to_df()
-                df = pd.concat([df_list[0], df_list[1], df_list[2]], axis=1)
-                with open(file_name, "w") as fo:
-                    fo.write(df.to_string())
-
-            return value
-
-        return wrapper_decorator
-
-    @save_results
-    def sim_mart_vaq_sa(
-        self,
-        output_value: str,
-        n_samples: int,
-        rounds: int,
-        problem: dict = None,
-    ) -> Dict[str, List[float]]:
-        """Perform a sensitivity analysis on the Martinez-Vaquero model.
-
-        The analysis is limited on "delta","tau","gamma","beta_s","beta_h" and "beta_c".
-        For the sake of time, no sensitivity analysis is conducted on the ration of h/w/c.
-        Actually, h/w/c are correlated and would therefore return falsified Sobol results.
-        Furthermore, the importance of the two parameters, temperature or the probability
-        of random mutation is known. If the temperature is too high, the system will have
-        random chaotic switched between status. If the probability of random mutation is high,
-        the system with converge to a ration of 0.33 for h/w/c. What is interesting is to see the
-        importance of the investigation stage as well as the influence of criminals on lone wolfs.
-        Also it is interesting to see, what influence the penalty on the whole criminal organisation
-        can have.
-
-        Args:
-            network  (gt.graph): Criminal network
-            output_value  (str): Name of the interested output value such as
-                                    ['ratio_honest','ratio_wolf','ratio_criminal'
-                                    'fitness_honest','fitness_criminal','fitness_wolf]
-            problem      (dict): Define which variables to conduct sensitivity analysis
-                                    with defining the bounds
-            n_samples     (int): Define the size of the search space
-            rounds        (int): Define the number of rounds played in the Simulation
-            ith_collect   (int): Define the how many nth round to collect data
-        """
-        # Get the network of criminal first
-        meta_sim = MetaSimulator(
-            network_name=self.args.read_data,
-            attachment_method=self.args.attach_meth,
-            ratio_honest=self.args.ratio_honest,
-            ratio_wolf=self.args.ratio_wolf,
-            k=self.args.k,
-        )
-        gt_network = meta_sim.network
-
         if problem is None:
-            problem = {
+            self.problem = {
                 "num_vars": 10,
                 "names": [
                     "delta",
@@ -142,30 +69,104 @@ class SensitivityAnalyser(ConfigParser):
                     [0, 100],
                 ],
             }
-        # sample
-        param_values = saltelli.sample(problem, n_samples)
 
+    def save_results(func: Callable) -> Any:
+        """Save the sensitivity analysis results.
+
+        Acts as a wrapper and must be at the top of the class
+        """
+
+        @functools.wraps(func)
+        def wrapper_decorator(self: SA, *args: Tuple, **kwargs: Dict[str, Any]) -> Any:
+            value = func(self, *args, **kwargs)
+            # Save results
+            if self.args.save:
+                file_name = (
+                    DirectoryFinder().result_dir_data_sa
+                    + func.__name__
+                    + "_"
+                    + str(kwargs["output_value"])
+                    + "_r_"
+                    + str(kwargs["rounds"])
+                    + "_n_s_"
+                    + str(kwargs["n_samples"])
+                    + "_"
+                    + self.args.attach_meth
+                    + "_"
+                    + timestamp()
+                )
+
+                df_list = value.to_df()
+                df = pd.concat([df_list[0], df_list[1], df_list[2]], axis=1)
+                with open(file_name, "w") as fo:
+                    fo.write(df.to_string())
+
+            return value
+
+        return wrapper_decorator
+
+    @save_results
+    def sim_mart_vaq_sa(
+        self,
+        output_value: str,
+        n_samples: int,
+        rounds: int,
+        problem: dict = None,
+    ) -> Union[int, Dict[str, List[float]]]:
+        """Runnning the sensitivity analysis."""
+        if self.args.running_chunk:
+            # chuck the sensitivity analysis and save the dataframe inbetween
+            self.check_file_and_graph_exist(n_samples, rounds)
+            param_values, gt_network = self.load_file_and_graph(n_samples, rounds)
+            # Getting all param_values that haven't run yet
+            latest_param_values = param_values[param_values.isnull().any(axis=1)]
+
+            for sub_pd in self.chunker(latest_param_values, 20):
+                latest_param_values_to_list = sub_pd.values.tolist()
+                list_of_param_comb = [
+                    (gt_network, self.problem, params, output_value, rounds)
+                    for params in latest_param_values_to_list
+                ]
+
+                y = self.sensitivity_analysis_parallel(list_of_param_comb)
+                param_values.loc[sub_pd.index, "y"] = y
+
+                self.overwrite_file(param_values, n_samples, rounds)
+
+            # analyse
+            sobol_indices = sobol.analyze(self.problem, param_values["y"])
+            return sobol_indices
+
+        elif not self.args.running_chunk:
+            # Get the network of criminal first
+            meta_sim = MetaSimulator(
+                network_name=self.args.read_data,
+                attachment_method=self.args.attach_meth,
+                ratio_honest=self.args.ratio_honest,
+                ratio_wolf=self.args.ratio_wolf,
+                k=self.args.k,
+            )
+            gt_network = meta_sim.network
+            param_values = self.create_saltelli_samples(self.problem, n_samples)
+            param_values = [
+                (gt_network, self.problem, params, output_value, rounds)
+                for params in param_values
+            ]
+
+            results = self.sensitivity_analysis_parallel(param_values)
+
+            # analyse
+            sobol_indices = sobol.analyze(self.problem, results)
+            return sobol_indices
+        return -1
+
+    def sensitivity_analysis_parallel(self, list_of_param_comb: list) -> np.ndarray:
+        """Run the simulation parallel."""
         # ((number of loops*rounds/average_time_per_round)/n_threads)/ convert_to_hours
-        approx_running_time = ((len(param_values) * rounds * (1 / 300)) / 23) / 3600
-        logger.warning(
-            f"The sensitivity analysis will take approx {approx_running_time:.2f}h on\
-            24 cpus (~ 3.8 GHz))"
-        )
         # Running multiprocessing
         num_cpus = multiprocessing.cpu_count() - 1
         Y = []
-        list_of_param_comb = [
-            (gt_network, problem, params, output_value, rounds)
-            for params in param_values
-        ]
         with multiprocessing.Pool(num_cpus) as p:
-            # Y = p.map(
-            #    self.sim_mart_vaq_sa_helper,
-            #        [
-            #            (gt_network, problem, params, output_value, rounds)
-            #            for params in param_values
-            #        ]
-            # )
             for result in tqdm.tqdm(
                 p.imap(self.sim_mart_vaq_sa_helper, list_of_param_comb),
                 total=len(list_of_param_comb),
@@ -175,10 +176,7 @@ class SensitivityAnalyser(ConfigParser):
             p.join()
 
         Y_array = np.asarray(Y)
-
-        # analyse
-        sobol_indices = sobol.analyze(problem, Y_array)
-        return sobol_indices
+        return Y_array
 
     def sim_mart_vaq_sa_helper(self, tuple_of_variable: Any) -> float:
         """Run the simulation Mart-Vaq given the parameter."""
@@ -198,3 +196,83 @@ class SensitivityAnalyser(ConfigParser):
             ith_collect=rounds,
         )
         return data_collector[output_value][-1]
+
+    def create_saltelli_samples(self, problem: dict, n_samples: int) -> np.ndarray:
+        """Return saltelli samples."""
+        return saltelli.sample(problem, n_samples)
+
+    def check_file_and_graph_exist(self, n_samples: int, rounds: int) -> None:
+        """Check if file and graph doesn't exist otherwise create."""
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + "_"
+            + str(rounds)
+            + "_"
+            + str(n_samples)
+            + ".csv"
+        )
+        graph_file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + "_graph.xml.gz"
+        )
+        if not os.path.isfile(file):
+            param_values = self.create_saltelli_samples(self.problem, n_samples)
+            param_values = pd.DataFrame.from_records(
+                param_values, columns=self.problem["names"]
+            )
+            param_values["y"] = np.nan
+            param_values.to_csv(file, index=True)
+        if not os.path.isfile(graph_file):
+            # create graph
+            meta_sim = MetaSimulator(
+                network_name=self.args.read_data,
+                attachment_method=self.args.attach_meth,
+                ratio_honest=self.args.ratio_honest,
+                ratio_wolf=self.args.ratio_wolf,
+                k=self.args.k,
+            )
+
+            meta_sim.network.save(graph_file)
+
+    def overwrite_file(
+        self, param_values: pd.DataFrame, n_samples: int, rounds: int
+    ) -> None:
+        """Overwite the file with new results."""
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + "_"
+            + str(rounds)
+            + "_"
+            + str(n_samples)
+            + ".csv"
+        )
+        param_values.to_csv(file, index=True)
+
+    def load_file_and_graph(
+        self, n_samples: int, rounds: int
+    ) -> Tuple[pd.DataFrame, gt.Graph]:
+        """Load the data and the graph."""
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + "_"
+            + str(rounds)
+            + "_"
+            + str(n_samples)
+            + ".csv"
+        )
+        graph_file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + "_graph.xml.gz"
+        )
+        param_values = pd.read_csv(file)
+        graph = gt.load_graph(graph_file)
+        return param_values, graph
+
+    def chunker(self, seq: pd.DataFrame, size: int) -> pd.DataFrame:
+        """Chucks the panda DataFrame."""
+        return (seq[pos: pos + size] for pos in range(0, len(seq), size))
