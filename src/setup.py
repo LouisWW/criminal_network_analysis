@@ -22,6 +22,9 @@ ext_modules = [
         ["network_utils/network_combiner_helper_c.pyx"],
         include_dirs=[np.get_include()],
     ),
+    Extension(
+        "utils.mt_random_c", sources=["utils/mt_random.pyx", "utils/mt19937ar.c"]
+    ),
 ]
 
 extensions = cythonize(ext_modules, compiler_directives={"language_level": "3"})

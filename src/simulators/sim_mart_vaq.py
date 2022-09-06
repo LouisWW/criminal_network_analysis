@@ -30,6 +30,7 @@ from network_utils.node_stats import NodeStats
 from p_tqdm import p_umap
 from simulators.sim_mart_vaq_helper_c import divide_network_fast_loop
 from tqdm import tqdm
+from utils.mt_random_c import random_c
 from utils.stats import concat_df
 from utils.stats import get_mean_std_over_list
 
@@ -137,7 +138,7 @@ class SimMartVaq:
         ith_collect: int = 20,
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
-        show_bar: bool = True,
+        show_no_bar: bool = True,
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
@@ -172,7 +173,7 @@ class SimMartVaq:
             desc="Playing the rounds...",
             total=rounds,
             leave=False,
-            disable=show_bar,
+            disable=show_no_bar,
         ):
             # Divide the network in random new groups
             dict_of_group = self.slct_pers_n_neighbours(
@@ -285,6 +286,7 @@ class SimMartVaq:
         repetition: int = 20,
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
+        show_no_bar: bool = False,
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
@@ -320,6 +322,7 @@ class SimMartVaq:
                                 ith_collect,
                                 measure_topology,
                                 measure_likelihood_corr,
+                                show_no_bar,
                             )
                             for i in range(0, repetition)
                         ]
@@ -339,6 +342,7 @@ class SimMartVaq:
                                 ith_collect,
                                 measure_topology,
                                 measure_likelihood_corr,
+                                show_no_bar,
                             )
                             for i in range(0, repetition)
                         ]
@@ -367,6 +371,7 @@ class SimMartVaq:
                             ith_collect,
                             measure_topology,
                             measure_likelihood_corr,
+                            show_no_bar,
                         )
                     )
 
@@ -386,6 +391,7 @@ class SimMartVaq:
             ith_collect,
             measure_topology,
             measure_likelihood_corr,
+            show_no_bar,
         ) = tuple_of_variable
 
         _, data_collector = self.play(
@@ -395,6 +401,7 @@ class SimMartVaq:
             ith_collect,
             measure_topology,
             measure_likelihood_corr,
+            show_no_bar,
         )
         return data_collector
 
@@ -555,7 +562,7 @@ class SimMartVaq:
         elif slct_pers_status == "w":
             # Decide if lone wolf dares to act
             self.wolf_acting = False
-            if random.random() >= 1 - self.delta * (1 - p_c):
+            if random_c() >= 1 - self.delta * (1 - p_c):
                 self.wolf_acting = True
             # Inflicting damage to everyone but himself
             if self.wolf_acting is True:
@@ -598,7 +605,7 @@ class SimMartVaq:
         person_a = slct_person
         bucket_list = list(group_members)
         bucket_list.remove(person_a)
-        if random.random() > self.mutation_prob and len(bucket_list) != 0:
+        if random_c() > self.mutation_prob and len(bucket_list) != 0:
             # Based on the fermi function will check if an interaction will happen
             person_b = random.choice(bucket_list)
             network = self.interchange_roles(network, person_a, person_b)
@@ -862,7 +869,7 @@ class SimMartVaq:
     def fermi_function(self, w_j: float, w_i: float) -> bool:
         """Return the probability of changing their role."""
         prob = 1 / (np.exp(-(w_j - w_i) / self.temperature) + 1)
-        if random.random() > prob:
+        if random_c() > prob:
             return False
         else:
             return True

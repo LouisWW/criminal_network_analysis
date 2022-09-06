@@ -227,6 +227,7 @@ class MetaSimulator:
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
         execute: str = "parallel",
+        show_no_bar: bool = False,
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
@@ -256,5 +257,6 @@ class MetaSimulator:
             repetition=repetition,
             measure_topology=measure_topology,
             measure_likelihood_corr=measure_likelihood_corr,
+            show_no_bar=show_no_bar,
         )
         return data_collector
