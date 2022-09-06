@@ -136,6 +136,7 @@ class SimMartVaq:
         ith_collect: int = 20,
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
+        show_bar: bool = False,
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
@@ -170,6 +171,7 @@ class SimMartVaq:
             desc="Playing the rounds...",
             total=rounds,
             leave=False,
+            disable=show_bar,
         ):
             # Divide the network in random new groups
             dict_of_group = self.slct_pers_n_neighbours(
