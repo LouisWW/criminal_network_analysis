@@ -7,7 +7,8 @@
 # __date__   = 6/05/22
 set -e
 
-declare -a arr=("preferential" "random" "small-world")
+declare -a arr_structure=("preferential" "random" "small-world")
+declare -a arr_k=(17 17 35)
 ## Run a comparsion analysis on the characterisitcs of a network
 #python3 new_main.py -read-data montagna_calls -get-network-stats -n-samples 50
 #
@@ -17,26 +18,29 @@ declare -a arr=("preferential" "random" "small-world")
 #
 #
 ## Run the simulation chunck vise
-#for i in "${arr[@]}"
-#do
-#   echo "Doing $i"
-#   for k in {0..5}
-#   do
-#      python3 new_main.py -read-data montagna_calls -sim-mart-vaq -case const -attach-meth $i -k 17 -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 10 -topo-meas -criminal-likelihood-corr -save
-#   done
-#done
+for i in "${!arr_structure[@]}"
+do
+   echo "Doing ${arr_structure[i]}"
+   for k in {0..5}
+   do
+      python3 new_main.py -read-data montagna_calls -sim-mart-vaq -case growth -attach-meth ${arr_structure[i]} -k ${arr_k[i]}\
+      -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 350000 -n-samples 10 -topo-meas -criminal-likelihood-corr -save
+   done
+done
 #
 #
 #
 #echo "Run sensitivity analysis"
 #python3 new_main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000 -n-samples 512  -exec parallel -output-value ratio_criminal -attach-meth random -k 2 -save
 #
-#cho "Run sensitvitiy analysis in chuncks"
-for i in "${arr[@]}"
+echo "Run sensitvitiy analysis in chuncks"
+for i in "${!arr_structure[@]}"
 do
-   echo "Doing $i"
+   echo "Doing ${arr_structure[i]}"
    for k in {0..20}
    do
-      python3 new_main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000 -n-samples 512  -exec parallel -output-value ratio_criminal -attach-meth $1 -k 17 -running-chunk -save
+      python3 new_main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1\
+      -r 250000 -n-samples 512  -exec parallel -output-value ratio_criminal -attach-meth ${arr_structure[i]} -k ${arr_k[i]}\
+      -running-chunk -save
    done
 done
