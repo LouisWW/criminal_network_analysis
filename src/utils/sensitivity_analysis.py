@@ -111,7 +111,6 @@ class SensitivityAnalyser(ConfigParser):
         output_value: str,
         n_samples: int,
         rounds: int,
-        problem: dict = None,
     ) -> Union[int, Dict[str, List[float]]]:
         """Runnning the sensitivity analysis."""
         if self.args.running_chunk:
@@ -121,7 +120,7 @@ class SensitivityAnalyser(ConfigParser):
             # Getting all param_values that haven't run yet
             latest_param_values = param_values[param_values.isnull().any(axis=1)]
 
-            for sub_pd in self.chunker(latest_param_values, 20):
+            for sub_pd in self.chunker(latest_param_values, 200):
                 latest_param_values_to_list = sub_pd.values.tolist()
                 list_of_param_comb = [
                     (gt_network, self.problem, params, output_value, rounds)
@@ -130,11 +129,10 @@ class SensitivityAnalyser(ConfigParser):
 
                 y = self.sensitivity_analysis_parallel(list_of_param_comb)
                 param_values.loc[sub_pd.index, "y"] = y
-
                 self.overwrite_file(param_values, n_samples, rounds)
 
             # analyse
-            sobol_indices = sobol.analyze(self.problem, param_values["y"])
+            sobol_indices = sobol.analyze(self.problem, np.asarray(param_values["y"]))
             return sobol_indices
 
         elif not self.args.running_chunk:
