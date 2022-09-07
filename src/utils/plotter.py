@@ -46,10 +46,10 @@ class Plotter(ConfigParser):
         plt.rcParams["xtick.minor.size"] = 3.0
         plt.rcParams["ytick.major.size"] = 5.0
         plt.rcParams["ytick.minor.size"] = 3.0
-        plt.rcParams["axes.labelsize"] = "x-large"
+        plt.rcParams["axes.labelsize"] = "xx-large"
         plt.rcParams["axes.titlesize"] = "x-large"
-        plt.rcParams["xtick.labelsize"] = "x-large"
-        plt.rcParams["ytick.labelsize"] = "x-large"
+        plt.rcParams["xtick.labelsize"] = "xx-large"
+        plt.rcParams["ytick.labelsize"] = "xx-large"
         mpl.rcParams["lines.linewidth"] = 2
         mpl.rcParams["lines.markersize"] = 4
 
@@ -248,7 +248,10 @@ class Plotter(ConfigParser):
 
             # set label to percentage
             ax.yaxis.set_major_formatter(mtick.PercentFormatter())
-            ax.set_ylim(0, 1)
+            if "ylim" in kwargs:
+                ax.set_ylim(kwargs["ylim"][0], kwargs["ylim"][1])
+            else:
+                ax.set_ylim(0, 1)
             ax.ticklabel_format(
                 axis="x", style="sci", scilimits=(0, 0), useMathText="True"
             )
@@ -272,7 +275,7 @@ class Plotter(ConfigParser):
             )
 
             # only do it if multiple plots are made
-            if isinstance(axs, (np.ndarray, np.generic)):
+            if "square_plot" in kwargs:
                 ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
 
         plt.tight_layout()
@@ -645,27 +648,32 @@ class Plotter(ConfigParser):
         for centrality_measure, i in zip(y_data_to_plot, range(axs.shape[0])):
             for key, k in zip(keys, range(0, axs.shape[1])):
 
+                # filter the nodes that have not been affected at all by the simulation
+                filtered_data = dict_data[key]["df_total"][
+                    dict_data[key]["df_total"][x_data_to_plot] != 0
+                ]
+
                 corr = get_correlation(
-                    dict_data[key]["df_total"][x_data_to_plot],
-                    dict_data[key]["df_total"][centrality_measure],
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
                 )
 
                 m, b = np.polyfit(
-                    dict_data[key]["df_total"][x_data_to_plot],
-                    dict_data[key]["df_total"][centrality_measure],
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
                     1,
                 )
 
                 axs[i, k].plot(
-                    dict_data[key]["df_total"][x_data_to_plot],
-                    m * dict_data[key]["df_total"][x_data_to_plot] + b,
+                    filtered_data[x_data_to_plot],
+                    m * filtered_data[x_data_to_plot] + b,
                     color="k",
                     label=corr,
                 )
 
                 axs[i, k].scatter(
-                    dict_data[key]["df_total"][x_data_to_plot],
-                    dict_data[key]["df_total"][centrality_measure],
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
                     s=0.5,
                     color="grey",
                 )
