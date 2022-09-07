@@ -7,7 +7,9 @@ the different models can be run.
 __author__ = Louis Weyland
 __date__ = 17/05/2022
 """
+import itertools
 import logging
+import multiprocessing
 from copy import deepcopy
 from typing import Any
 from typing import DefaultDict
@@ -17,11 +19,11 @@ from typing import Union
 
 import graph_tool.all as gt
 import numpy as np
+import tqdm
 from network_utils.network_combiner import NetworkCombiner
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from simulators.sim_mart_vaq import SimMartVaq
-from tqdm import tqdm
 
 
 logger = logging.getLogger("logger")
@@ -158,7 +160,7 @@ class MetaSimulator:
 
         # Get all the agents with no states
         nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, "")
-        tq = tqdm(
+        tq = tqdm.tqdm(
             nodes_no_states,
             desc="Adding attributes to nodes",
             total=self.new_nodes,
@@ -207,15 +209,19 @@ class MetaSimulator:
     def create_list_of_populations(self, repetition: int) -> List[gt.Graph]:
         """Create a list of n different populations."""
         list_of_population = []
-        tq = tqdm(
-            range(repetition),
-            desc="Creating list of populations",
-            total=repetition,
-            leave=False,
-            disable=True,
-        )
-        for _ in tq:
-            list_of_population.append(self.create_population(self.criminal_network))
+        num_cpus = multiprocessing.cpu_count() - 1
+        with multiprocessing.Pool(num_cpus) as p:
+            for population in tqdm.tqdm(
+                p.imap(
+                    self.create_population,
+                    itertools.repeat(deepcopy(self.criminal_network), repetition),
+                ),
+                total=repetition,
+                desc="Creating populations....",
+            ):
+                list_of_population.append(population)
+            p.close()
+            p.join()
         return list_of_population
 
     def avg_play(
