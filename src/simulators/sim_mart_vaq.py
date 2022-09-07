@@ -46,15 +46,15 @@ class SimMartVaq:
         self,
         network: gt.Graph,
         delta: float = 0.7,
-        tau: float = 0.8,
+        tau: float = 0.1,
         gamma: float = 0.8,
         beta_s: int = 1,
         beta_h: int = 1,
         beta_c: int = 1,
-        c_w: int = 0,
-        c_c: int = 100,
+        c_w: int = 1,
+        c_c: int = 1,
         r_w: int = 1,
-        r_c: int = 100,
+        r_c: int = 1,
         r_h: int = 0,
         temperature: float = 10,
         mutation_prob: float = 0.0001,
@@ -241,12 +241,23 @@ class SimMartVaq:
                     # Extract the criminal network, the filtering is done on the network object
                     logger.info("Filtering the criminal_network")
                     NetworkExtractor.filter_criminal_network(network)
-                    logger.info("Calculating the secrecy")
-                    data_collector["secrecy"].append(NodeStats.get_secrecy(network))
-                    data_collector["density"].append(NodeStats.get_density(network))
-                    logger.info("Calculating the flow of information")
 
-                    try:
+                    if network.num_vertices() == 0:
+                        logger.info("No criminals in the network")
+                        logger.info("Calculating the secrecy")
+                        data_collector["secrecy"].append(-1)
+                        data_collector["density"].append(0)
+                        logger.info("Calculating the flow of information")
+                        data_collector["flow_information"].append(0)
+                        logger.info("Calculating the largest_component")
+                        data_collector["size_of_largest_component"].append(0)
+
+                    elif network.num_vertices() >= 1:
+                        logger.info("Calculating the secrecy")
+                        data_collector["secrecy"].append(NodeStats.get_secrecy(network))
+                        data_collector["density"].append(NodeStats.get_density(network))
+                        logger.info("Calculating the flow of information")
+
                         gsc = gt.extract_largest_component(network)
                         if self.execute == "parallel":
                             data_collector["flow_information"].append(
@@ -257,14 +268,11 @@ class SimMartVaq:
                             data_collector["flow_information"].append(
                                 NodeStats.get_flow_of_information_faster(gsc)
                             )
-                    except Warning:
-                        logger.info("Something didn't work with extracting of GCS")
-                        data_collector["flow_information"].append(0)
 
-                    logger.info("Calculating the largest_component")
-                    data_collector["size_of_largest_component"].append(
-                        NodeStats.get_size_of_largest_component(network)[0]
-                    )
+                        logger.info("Calculating the largest_component")
+                        data_collector["size_of_largest_component"].append(
+                            NodeStats.get_size_of_largest_component(network)[0]
+                        )
 
                     # Unfilter the network back to its initial configuration
                     logger.info("UnFiltering the criminal_network")
@@ -468,7 +476,7 @@ class SimMartVaq:
                 )
 
         else:
-            raise KeyError("slct_status should be either h/w/c...")
+            raise warnings.warn("slct_status should be either h/w/c...")
 
         return network
 
@@ -590,7 +598,7 @@ class SimMartVaq:
                         ] + (self.r_w * self.c_w)
 
         else:
-            raise KeyError("Person status didn't correspond to c/w...")
+            raise warnings.warn("Person status didn't correspond to c/w...")
 
         return network
 
