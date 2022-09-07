@@ -268,11 +268,21 @@ class Plotter(ConfigParser):
                     kwargs["ylabel"].replace("_", " ").capitalize(), weight="bold"
                 )
 
-            # set legend
-            ax.legend(
-                fancybox=True,
-                shadow=True,
-            )
+            if "tick_size" in kwargs:
+                ax.tick_params(labelsize=kwargs["tick_size"])
+
+            if "axes_size" in kwargs:
+                ax.xaxis.label.set_size(kwargs["axes_size"])
+                ax.yaxis.label.set_size(kwargs["axes_size"])
+
+            if "legend_size" in kwargs:
+                ax.legend(fancybox=True, shadow=True, fontsize=kwargs["legend_size"])
+            else:
+                # set legend
+                ax.legend(
+                    fancybox=True,
+                    shadow=True,
+                )
 
             # only do it if multiple plots are made
             if "square_plot" in kwargs:

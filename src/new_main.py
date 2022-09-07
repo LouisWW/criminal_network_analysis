@@ -193,7 +193,7 @@ elif args.plot:
 
     ax_1 = plotter.plot_lines(
         dict_data={
-            "Compare mean criminal ratio": {
+            " ": {
                 "mean_preferential": whole_data["preferential"]["mean_ratio_criminal"],
                 "sem_preferential": whole_data["preferential"]["sem_ratio_criminal"],
                 "std_preferential": whole_data["preferential"]["std_ratio_criminal"],
@@ -213,9 +213,12 @@ elif args.plot:
         ylabel="Ratio (%)",
         plot_deviation="sem",
         ylim=[0, 0.2],
+        legend_size=20,
+        axes_size=25,
+        thick_size=20,
     )
 
-    compare_time_series(whole_data)
+    # compare_time_series(whole_data)
     ax_2 = plotter.plot_lines_comparative(
         dict_data=whole_data,
         y_data_to_plot=[
