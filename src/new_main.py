@@ -9,6 +9,7 @@ import logging
 import os
 
 import numpy as np
+import pandas as pd
 from config.config import ConfigParser
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
@@ -19,6 +20,7 @@ from utils.animation import Animateur
 from utils.plotter import Plotter
 from utils.sensitivity_analysis import SensitivityAnalyser
 from utils.stats import compare_time_series
+from utils.stats import concat_df
 from utils.stats import dict_mean
 from utils.stats import get_mean_std_over_list
 from utils.tools import DirectoryFinder
@@ -74,6 +76,7 @@ if args.sim_mart_vaq:
         ith_collect=int(args.rounds / 15),
         measure_topology=args.topo_meas,
         measure_likelihood_corr=args.criminal_likelihood_corr,
+        show_no_bar=False,
     )
     logger.info("Done")
 
@@ -86,7 +89,12 @@ if args.sim_mart_vaq:
             + args.attach_meth
             + ".json"
         )
-        print(file_name)
+
+        # check if df is in dict and convert it to json
+        for run in data_collector.keys():
+            if "df" in data_collector[run]:
+                data_collector[run]["df"] = data_collector[run]["df"].to_json()
+
         if os.path.isfile(file_name) and os.access(file_name, os.R_OK):
             with open(file_name) as fp:
                 previous_results = json.load(fp)
@@ -157,11 +165,19 @@ elif args.plot:
         ("small-world", sw_file),
     ]:
         with open(file_name) as fp:
-            whole_data[structure] = json.load(file_name)
+            whole_data[structure] = json.load(fp)
+
+    # since df is saved as json, need to convert it back
+    for structure in whole_data.keys():
+        for key in whole_data[structure].keys():
+            whole_data[structure][key]["df"] = pd.read_json(
+                whole_data[structure][key]["df"]
+            )
 
     # Get the mean of the data
     for structure, data in whole_data.items():
         whole_data[structure] = get_mean_std_over_list(data)
+        whole_data[structure] = concat_df(whole_data[structure], 250000)
 
     # Ready to be plotted
     ax_0 = plotter.plot_lines(
@@ -172,6 +188,7 @@ elif args.plot:
         xlabel="Rounds",
         ylabel="Ratio (%)",
         plot_deviation="sem",
+        square_plot=True,
     )
 
     ax_1 = plotter.plot_lines(
@@ -195,6 +212,7 @@ elif args.plot:
         xlabel="Rounds",
         ylabel="Ratio (%)",
         plot_deviation="sem",
+        ylim=[0, 0.2],
     )
 
     compare_time_series(whole_data)
@@ -221,7 +239,7 @@ elif args.plot:
         ylabel=True,
     )
 
-    ax_4 = plotter.plot_lines_correlation(
+    ax_4 = plotter.plot_lines_correlation_grid(
         dict_data=whole_data,
         y_data_to_plot=[
             "degree",
@@ -246,7 +264,7 @@ elif args.whole_pipeline:
         attachment_method="preferential",
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        k=2,
+        k=17,
         random_fit_init=False,
     )
 
@@ -254,15 +272,15 @@ elif args.whole_pipeline:
         network_name=args.read_data,
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        k=2,
+        k=17,
         attachment_method="random",
     )
     meta_sim_sw = MetaSimulator(
         network_name=args.read_data,
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        prob=0.01,
-        k=6,
+        prob=0.2,
+        k=35,
         attachment_method="small-world",
     )
 
@@ -415,7 +433,6 @@ elif args.sensitivity_analysis:
         sa = SensitivityAnalyser()
         sobol_indices = sa.sim_mart_vaq_sa(
             output_value=args.output_value,
-            problem=None,
             n_samples=args.n_samples,
             rounds=args.rounds,
         )
@@ -527,7 +544,7 @@ elif args.get_network_stats:
         attachment_method="preferential",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        k=2,
+        k=17,
         random_fit_init=False,
     )
 
@@ -537,7 +554,7 @@ elif args.get_network_stats:
         attachment_method="random",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        k=2,  # 0.0034 for random
+        k=17,  # 0.0034 for random
         random_fit_init=False,
     )
 
@@ -547,7 +564,8 @@ elif args.get_network_stats:
         attachment_method="small-world",
         ratio_honest=ratio_honest,
         ratio_wolf=ratio_wolf,
-        k=6,
+        prob=0.2,
+        k=35,
         random_fit_init=False,
     )
 
