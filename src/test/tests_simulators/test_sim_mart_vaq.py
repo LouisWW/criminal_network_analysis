@@ -31,98 +31,6 @@ class TestSimMartVaq:
             simulators.name = "New name"
 
     @pytest.mark.essential
-    def test_divide_in_groups(self, meta_simulator_network: gt.Graph) -> None:
-        """Test if the division into groups works correctly."""
-        simulators = SimMartVaq(meta_simulator_network)
-        groups, groups_label = simulators.divide_in_groups(
-            simulators.network, min_group=3
-        )
-
-        assert groups is not np.empty, "Group list is empty"
-        assert all(
-            [isinstance(item, int) for item in groups]
-        ), "Items in Group should be int"
-        assert isinstance(groups_label, frozenset), "Group label should be frozenset"
-        assert len(groups_label) > 0, "Group label is empty"
-        assert all(
-            [isinstance(item, int) for item in groups_label]
-        ), "Items in Group label should be int"
-
-    @pytest.mark.essential
-    def test_act_divide_in_groups_faster(
-        self, meta_simulator_network: gt.Graph
-    ) -> None:
-        """Test if the division into groups works correctly."""
-        simulators = SimMartVaq(meta_simulator_network)
-        divided_network, n_groups = simulators.act_divide_in_groups_faster(
-            simulators.network, min_grp=2, max_grp=2
-        )
-
-        # Group attribute needs to exist
-        assert divided_network.vp.grp_nbr, "Attribute grp_nbr doesn't exist...."
-
-        # Check if divided in two, every node should have a neighbour of the same group#
-        # Pick random neighbors
-        for i in range(0, 100):
-            # Get random node
-            x = np.random.uniform(1, divided_network.num_vertices())
-            x_group = divided_network.vp.grp_nbr[divided_network.vertex(x)]
-            neighbours = list(divided_network.iter_all_neighbors(x))
-            neighbours_group = [
-                divided_network.vp.grp_nbr[divided_network.vertex(neighbour)]
-                for neighbour in neighbours
-            ]
-            assert x_group in neighbours_group, "No neighbour is of the same group..."
-
-        # Check if recalled, the attributes are indeed reset
-        # Set group number to avoid the chance to have same group number again
-        divided_network_1, n_groups = simulators.act_divide_in_groups_faster(
-            simulators.network, min_grp=100, max_grp=100
-        )
-        x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
-        divided_network_2, n_groups = simulators.act_divide_in_groups_faster(
-            divided_network_1, min_grp=100, max_grp=100
-        )
-        x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
-        assert x_group_1 != x_group_2, "Attributes are not reset correctly"
-
-    @pytest.mark.essential
-    def test_act_divide_in_groups(self, meta_simulator_network: gt.Graph) -> None:
-        """Test if the division into groups works correctly."""
-        simulators = SimMartVaq(meta_simulator_network)
-        divided_network, n_groups = simulators.act_divide_in_groups(
-            simulators.network, min_grp=2, max_grp=2
-        )
-
-        # Group attribute needs to exist
-        assert divided_network.vp.grp_nbr, "Attribute grp_nbr doesn't exist...."
-
-        # Check if divided in two, every node should have a neighbour of the same group#
-        # Pick random neighbors
-        for i in range(0, 100):
-            # Get random node
-            x = np.random.uniform(1, divided_network.num_vertices())
-            x_group = divided_network.vp.grp_nbr[divided_network.vertex(x)]
-            neighbours = list(divided_network.iter_all_neighbors(x))
-            neighbours_group = [
-                divided_network.vp.grp_nbr[divided_network.vertex(neighbour)]
-                for neighbour in neighbours
-            ]
-            assert x_group in neighbours_group, "No neighbour is of the same group..."
-
-        # Check if recalled, the attributes are indeed reset
-        # Set group number to avoid the chance to have same group number again
-        divided_network_1, n_groups = simulators.act_divide_in_groups(
-            simulators.network, min_grp=100, max_grp=100
-        )
-        x_group_1 = divided_network_1.vp.grp_nbr[divided_network_1.vertex(25)]
-        divided_network_2, n_groups = simulators.act_divide_in_groups(
-            divided_network_1, min_grp=100, max_grp=100
-        )
-        x_group_2 = divided_network_2.vp.grp_nbr[divided_network_2.vertex(25)]
-        assert x_group_1 != x_group_2, "Attributes are not reset correctly"
-
-    @pytest.mark.essential
     def test_acting_stage(self, meta_simulator_network: gt.Graph) -> None:
         """Test if the acting stage process is working correctly."""
         # Set delta to 100 to make sure wolf will always act
@@ -694,7 +602,7 @@ class TestSimMartVaq:
         rounds = 50
         simulator = SimMartVaq(meta_simulator_network)
         network, data_collector = simulator.play(
-            simulator.network, rounds=rounds, ith_collect=1
+            simulator.network, rounds=rounds, ith_collect=1, collect_fitness=True
         )
 
         # Check if the data_collectors collect at each round data
@@ -771,7 +679,7 @@ class TestSimMartVaq:
         """Test if the play function is working."""
         # Play the simulation
         rounds = 20
-        simulator = SimMartVaq(meta_simulator_network)
+        simulator = SimMartVaq(meta_simulator_network, execute="parallel")
         data = simulator.avg_play(
             simulator.network, rounds=rounds, repetition=5, ith_collect=1
         )

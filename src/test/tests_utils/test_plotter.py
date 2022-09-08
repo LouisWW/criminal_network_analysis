@@ -132,10 +132,10 @@ class TestPlotter:
         assert isinstance(ax, (plt.Axes, np.ndarray, np.generic))
 
     @pytest.mark.essential
-    # @patch("matplotlib.pyplot.show")
+    @patch("matplotlib.pyplot.show")
     def test_plot_lines_correlation(
         self,
-        # mock_show: Mock,
+        mock_show: Mock,
         fake_correlation_data: Dict[str, DefaultDict[str, List[Any]]],
     ) -> None:
         """Test if the plt lines correlation function works."""

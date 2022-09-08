@@ -26,18 +26,20 @@ class TestSensitivityAnalyser:
             "names": ["tau", "gamma"],
             "bounds": [[0, 1], [0.1, 0.28]],
         }
-        sa = SensitivityAnalyser()
+        sa = SensitivityAnalyser(problem=problem)
         # Define network
         sa.args.read_data = "montagna_calls"
         sa.args.save = True
         sa.args.attach_meth = "preferential"
         sa.args.n_samples = 10
+        sa.args.k = 2
+        sa.args.ratio_honest = 0.7
+        sa.args.ratio_wolf = 0.1
 
         sobol_indices = sa.sim_mart_vaq_sa(
             output_value="ratio_criminal",
             n_samples=4,
             rounds=10,
-            problem=problem,
         )
 
         assert any(sobol_indices["S1"]), "List contains only zeros/False"

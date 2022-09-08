@@ -24,7 +24,7 @@ do
    for k in {0..5}
    do
       python3 new_main.py -read-data montagna_calls -sim-mart-vaq -case growth -attach-meth ${arr_structure[i]} -k ${arr_k[i]}\
-      -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 350000 -n-samples 10 -topo-meas -criminal-likelihood-corr -save
+      -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 10 -topo-meas -criminal-likelihood-corr -exec sequential -save
    done
 done
 #
