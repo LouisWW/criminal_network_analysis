@@ -11,7 +11,6 @@ from typing import Tuple
 import graph_tool.all as gt
 import networkit as nk
 import numpy as np
-from graph_tool import EdgePropertyMap
 from graph_tool import VertexPropertyMap
 from network_utils.network_converter import NetworkConverter
 
@@ -30,37 +29,37 @@ class NodeStats:
         pass
 
     @staticmethod
-    def get_katz(network: gt.Graph) -> VertexPropertyMap:
+    def get_katz(network: gt.Graph) -> Tuple[gt.Graph, VertexPropertyMap]:
         """Get the katz score for each node."""
         # Initialize algorithm
         katz = gt.katz(network)
-        network.vertex_properties["katz"] = katz
+        network.katz = katz.a
         return network, katz
 
     @staticmethod
-    def get_betweenness(network: gt.Graph) -> Tuple[VertexPropertyMap, EdgePropertyMap]:
+    def get_betweenness(network: gt.Graph) -> Tuple[gt.Graph, VertexPropertyMap]:
         """Return betweeness centrality."""
         btwn, _ = gt.betweenness(network)
-        network.vertex_properties["betweenness"] = btwn
+        network.btwn = btwn.a
         return network, btwn
 
     @staticmethod
-    def get_closeness(network: gt.Graph) -> VertexPropertyMap:
+    def get_closeness(network: gt.Graph) -> Tuple[gt.Graph, VertexPropertyMap]:
         """Return the closeness of a node."""
         closeness = gt.closeness(network)
-        network.vertex_properties["closeness"] = closeness
+        network.closeness = closeness.a
         return network, closeness
 
     @staticmethod
     def get_eigenvector_centrality(
         network: gt.Graph,
-    ) -> Tuple[float, VertexPropertyMap]:
+    ) -> Tuple[gt.Graph, VertexPropertyMap]:
         """Get the eigenvector centrality of a node."""
         (
             _,
             eigen_v,
         ) = gt.eigenvector(network)
-        network.vertex_properties["eigen_v"] = eigen_v
+        network.eigen_v = eigen_v.a
         return network, eigen_v
 
     @staticmethod
@@ -150,7 +149,7 @@ class NodeStats:
         """Return the size of the largest component."""
         try:
             largest_component = gt.extract_largest_component(network)
-        except:
+        except Exception:
             logger.info("Something didn't work with extracting of GCS")
             return 0, 0
 

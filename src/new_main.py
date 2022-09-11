@@ -76,7 +76,9 @@ if args.sim_mart_vaq:
         ith_collect=int(args.rounds / 15),
         measure_topology=args.topo_meas,
         measure_likelihood_corr=args.criminal_likelihood_corr,
+        execute=args.execute,
         show_no_bar=False,
+        collect_fitness=False,
     )
     logger.info("Done")
 
@@ -136,17 +138,6 @@ if args.sim_mart_vaq:
             plot_deviation="std",
         )
 
-        ax_1 = plotter.plot_lines(
-            dict_data={args.attach_meth: data_collector},
-            y_data_to_plot=[
-                "mean_fitness_honest",
-                "mean_fitness_wolf",
-                "mean_fitness_criminal",
-            ],
-            x_data_to_plot="mean_iteration",
-            xlabel="Rounds",
-            ylabel="Average fitness",
-        )
 
 elif args.plot:
     """Plot the results collected over the different runs.

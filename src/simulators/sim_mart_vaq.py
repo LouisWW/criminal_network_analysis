@@ -139,7 +139,7 @@ class SimMartVaq:
         rounds: int = 1,
         n_groups: int = 1,
         ith_collect: int = 20,
-        collect_fitness: bool = False,
+        collect_fitness: bool = True,
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
         show_no_bar: bool = True,
@@ -151,6 +151,10 @@ class SimMartVaq:
         If selected person is a wolf or criminal,
         damage is inflicted on others.
         """
+        network.status = np.asarray(list(network.vp.state))
+        network.fitness = np.zeros(network.num_vertices())
+        network.age = np.zeros(network.num_vertices())
+
         # Creating profile object
         ob = cProfile.Profile()
         ob.enable()
@@ -173,7 +177,6 @@ class SimMartVaq:
                 )
             },
         )  # type: DefaultDict[str, List[Any]]
-        age_collector = np.zeros(network.num_vertices())
 
         # Run the simulation
         for i in tqdm(
@@ -192,7 +195,7 @@ class SimMartVaq:
             for slct_pers, group_members in dict_of_group.items():
 
                 # Check the person status
-                slct_pers_status = network.vp.state[slct_pers]
+                slct_pers_status = network.status[slct_pers]
 
                 # Acting stage
                 network, slct_pers, slct_status = self.acting_stage(
@@ -217,15 +220,15 @@ class SimMartVaq:
                 )
 
             if measure_likelihood_corr:
-                age_collector = self.update_age(network, age_collector)
+                network = self.update_age(network)
 
             # update fitness decay
             network = self.update_fitness(network)
 
             # Collect the data
             if i % ith_collect == 0 or i == 1:
-                _, _, _, p_c, p_h, p_w = self.counting_status_proportions_overall(
-                    network=network
+                _, _, _, p_c, p_h, p_w = self.counting_status_proportions(
+                    network=network, group_members=np.arange(0, network.num_vertices())
                 )
 
                 data_collector["iteration"].append(i)
@@ -289,8 +292,6 @@ class SimMartVaq:
 
         # Add a df with the likelihood of being a criminal and the node centrality
         if measure_likelihood_corr:
-            for idx, age in enumerate(age_collector):
-                network.vp.age[idx] += age
             data_collector["df"] = self.create_likelihood_corr_df(network)
 
         ob.disable()
@@ -439,10 +440,10 @@ class SimMartVaq:
     def investigation_stage(
         self,
         network: gt.Graph,
-        group_members: FrozenSet[int],
+        group_members: List[int],
         slct_pers: int,
         slct_status: str,
-    ) -> gt.Graph:
+    ) -> Tuple[gt.Graph]:
         """Correspond to the investigation stage.
 
         Given an group, if the victimizer is found, a punishment is conducted
@@ -472,13 +473,13 @@ class SimMartVaq:
             # only punish a wolf if he dared to act
             if self.criminal_acting is True:
                 # Punish the victimizer
-                network.vp.fitness[slct_pers] = (
-                    network.vp.fitness[slct_pers] - state_penalty - civil_penalty
+                network.fitness[slct_pers] = (
+                    network.fitness[slct_pers] - state_penalty - civil_penalty
                 )
                 # Punish the partner in crime
                 for member in group_members:
-                    if network.vp.state[member] == "c" and member != slct_pers:
-                        network.vp.fitness[member] = network.vp.fitness[
+                    if network.status[member] == "c" and member != slct_pers:
+                        network.fitness[member] = network.fitness[
                             member
                         ] - self.gamma * (state_penalty + civil_penalty)
 
@@ -486,8 +487,8 @@ class SimMartVaq:
             # only punish a wolf if he dared to act
             if self.wolf_acting is True:
                 # Punish the victimizer
-                network.vp.fitness[slct_pers] = (
-                    network.vp.fitness[slct_pers]
+                network.fitness[slct_pers] = (
+                    network.fitness[slct_pers]
                     - state_penalty
                     - civil_penalty
                     - criminal_penalty
@@ -499,7 +500,7 @@ class SimMartVaq:
         return network
 
     def conducting_investigation(
-        self, group_members: FrozenSet[int], slct_pers: int, penalty_score: int
+        self, group_members: List[int], slct_pers: int, penalty_score: int
     ) -> int:
         """Perform an state investigation.
 
@@ -519,7 +520,7 @@ class SimMartVaq:
         network: gt.Graph,
         slct_pers: int,
         slct_pers_status: str,
-        group_members: FrozenSet[int],
+        group_members: List[int],
     ) -> Tuple[gt.Graph, int, str]:
         """Correspond to the acting stage in the paper.
 
@@ -548,10 +549,10 @@ class SimMartVaq:
     def inflict_damage(
         self,
         network: gt.Graph,
-        group_members: FrozenSet[int],
+        group_members: List[int],
         slct_pers: int,
         slct_pers_status: str,
-    ) -> gt.Graph:
+    ) -> Tuple[gt.Graph]:
         """Perform criminal activity.
 
         Rest of the group gets a damage inflicted.
@@ -563,7 +564,7 @@ class SimMartVaq:
             )
         if slct_pers_status == "h":
             # Bonus points if law-abiding
-            network.vp.fitness[slct_pers] = network.vp.fitness[slct_pers] + self.r_h
+            network.fitness[slct_pers] = network.fitness[slct_pers] + self.r_h
         elif slct_pers_status == "c":
             # Inflict damage to all the wolfs and honest
             # If only criminals are present in the group
@@ -575,12 +576,10 @@ class SimMartVaq:
             # Inflicting damage to everyone but himself
             if self.criminal_acting is True:
                 for member in group_members:
-                    if network.vp.state[member] in ["h", "w"]:
-                        network.vp.fitness[member] = (
-                            network.vp.fitness[member] - self.c_c
-                        )
-                    elif network.vp.state[member] == "c":
-                        network.vp.fitness[member] = network.vp.fitness[member] + (
+                    if network.status[member] in ["h", "w"]:
+                        network.fitness[member] = network.fitness[member] - self.c_c
+                    elif network.status[member] == "c":
+                        network.fitness[member] = network.fitness[member] + (
                             (self.r_c * self.c_c) / n_c
                         )
 
@@ -592,20 +591,18 @@ class SimMartVaq:
             # Inflicting damage to everyone but himself
             if self.wolf_acting is True:
                 for member in group_members:
-                    if member != slct_pers and network.vp.state[member] in ["h", "w"]:
-                        network.vp.fitness[member] = (
-                            network.vp.fitness[member] - self.c_w
-                        )
+                    if member != slct_pers and network.status[member] in ["h", "w"]:
+                        network.fitness[member] = network.fitness[member] - self.c_w
 
-                    elif member != slct_pers and network.vp.state[member] == "c":
-                        network.vp.fitness[member] = (
-                            network.vp.fitness[member]
+                    elif member != slct_pers and network.status[member] == "c":
+                        network.fitness[member] = (
+                            network.fitness[member]
                             - self.c_w
                             + ((self.tau * (self.r_w * self.c_w)) / n_c)
                         )
 
                     elif member == slct_pers:
-                        network.vp.fitness[member] = network.vp.fitness[member] + (
+                        network.fitness[member] = network.fitness[member] + (
                             self.r_w * self.c_w
                         )
 
@@ -615,8 +612,8 @@ class SimMartVaq:
         return network
 
     def evolutionary_stage(
-        self, network: gt.Graph, slct_person: int, group_members: FrozenSet[int]
-    ) -> gt.Graph:
+        self, network: gt.Graph, slct_person: int, group_members: List[int]
+    ) -> Tuple[gt.Graph]:
         """Perform the evolutionary stage.
 
         Randomly picks a two players and performs either mutation
@@ -635,31 +632,29 @@ class SimMartVaq:
         return network
 
     def counting_status_proportions(
-        self, network: gt.Graph, group_members: FrozenSet[int]
+        self, network: gt.Graph, group_members: np.ndarray
     ) -> Tuple[int, int, int, float, float, float]:
         """Return the proportions of criminals,honest and wolfs."""
         # First get proportions of h/c/w within the group
-        statuses = []
         size_group = len(group_members)
-        vertex_number = list(group_members)
-        statuses = list(map(network.vp.state.__getitem__, vertex_number))
-        n_h = statuses.count("h")
-        n_c = statuses.count("c")
-        n_w = statuses.count("w")
-        p_h = n_h / size_group
-        p_c = n_c / size_group
-        p_w = n_w / size_group
-        return n_c, n_h, n_w, p_c, p_h, p_w
+        unique, counts = np.unique(network.status[group_members], return_counts=True)
+        count_dict = dict(zip(unique, counts))
 
-    def counting_status_proportions_overall(
-        self, network: gt.Graph
-    ) -> Tuple[int, int, int, float, float, float]:
-        """Return the proportions of criminals,honest and wolfs."""
-        # First get proportions of h/c/w within the group
-        size_group = network.num_vertices()
-        n_c = len(gt.find_vertex(network, network.vp.state, "c"))
-        n_w = len(gt.find_vertex(network, network.vp.state, "w"))
-        n_h = size_group - n_c - n_w
+        if "h" in count_dict:
+            n_h = count_dict["h"]
+        else:
+            n_h = 0
+
+        if "c" in count_dict:
+            n_c = count_dict["c"]
+        else:
+            n_c = 0
+
+        if "w" in count_dict:
+            n_w = count_dict["w"]
+        else:
+            n_w = 0
+
         p_h = n_h / size_group
         p_c = n_c / size_group
         p_w = n_w / size_group
@@ -669,32 +664,13 @@ class SimMartVaq:
         self, network: gt.Graph, group_members: List[int]
     ) -> Tuple[float, float, float]:
         """Get the mean fitness for the different states in a group."""
-        vertex_number = [member for member in group_members]
-        statuses = list(map(network.vp.state.__getitem__, vertex_number))
-        fitness = list(map(network.vp.fitness.__getitem__, vertex_number))
+        h_idx = np.where(network.status == "h")
+        c_idx = np.where(network.status == "c")
+        w_idx = np.where(network.status == "w")
 
-        df = pd.DataFrame(list(zip(statuses, fitness)), columns=["statuses", "fitness"])
-
-        df_grouped = df.groupby("statuses", as_index=False)["fitness"].mean()
-        try:
-            mean_h_fit = df_grouped.loc[
-                df_grouped["statuses"] == "h", "fitness"
-            ].values[0]
-        except Exception:
-            mean_h_fit = None
-        try:
-            mean_c_fit = df_grouped.loc[
-                df_grouped["statuses"] == "c", "fitness"
-            ].values[0]
-        except Exception:
-            mean_c_fit = None
-        try:
-            mean_w_fit = df_grouped.loc[
-                df_grouped["statuses"] == "w", "fitness"
-            ].values[0]
-        except Exception:
-            mean_w_fit = None
-
+        mean_h_fit = np.mean(network.fitness[h_idx])
+        mean_c_fit = np.mean(network.fitness[c_idx])
+        mean_w_fit = np.mean(network.fitness[w_idx])
         return mean_h_fit, mean_c_fit, mean_w_fit
 
     def divide_in_groups(
@@ -757,7 +733,7 @@ class SimMartVaq:
 
     def slct_pers_n_neighbours(
         self, network: gt.Graph, n_groups: int, network_size: int
-    ) -> Dict[int, FrozenSet[int]]:
+    ) -> Dict[int, List[int]]:
         """Randomly select the protagonist (person who can act) and its neighbours.
 
         Args:
@@ -765,31 +741,35 @@ class SimMartVaq:
             network_size (int): get the size of the network to include all the nodes
 
         Returns:
-            Dict[int,FrozenSet[int]]: key is the protagonist and value is protagonist + neighbors
+            Dict[int,List[int]]: key is the protagonist and value is protagonist + neighbors
         """
         communities = {}
         protagonists = random.sample(range(0, network_size), n_groups)
         for protagonist in protagonists:
-            communities[protagonist] = frozenset(
-                [protagonist] + list(network.get_all_neighbors(protagonist))
+            communities[protagonist] = [protagonist] + list(
+                network.get_all_neighbors(protagonist)
             )
+
         return communities
 
     def mutation(self, network: gt.Graph, person: int) -> gt.Graph:
         """Perform mutation on a given individual."""
-        network.vp.state[person] = random.choice(["c", "h", "w"])
+        network.status[person] = random.choice(["c", "h", "w"])
         return network
 
     def interchange_roles(
-        self, network: gt.Graph, person_a: int, person_b: int
-    ) -> gt.Graph:
+        self,
+        network: gt.Graph,
+        person_a: int,
+        person_b: int,
+    ) -> Tuple[gt.Graph]:
         """Interchange roles based on fermin function."""
-        fitness_a = network.vp.fitness[person_a]
-        fitness_b = network.vp.fitness[person_b]
+        fitness_a = network.fitness[person_a]
+        fitness_b = network.fitness[person_b]
 
         # Probability that a copies b
         if self.fermi_function(fitness_b, fitness_a):
-            network.vp.state[person_a] = network.vp.state[person_b]
+            network.status[person_a] = network.status[person_b]
 
         return network
 
@@ -802,63 +782,45 @@ class SimMartVaq:
             return True
         return None
 
-    def update_age(self, network: gt.Graph, age_collector: np.ndarray) -> gt.Graph:
+    def update_age(self, network: gt.Graph) -> gt.Graph:
         """Update the age of a criminal node.
 
         Basically, count how many rounds a node has a criminal status criminal
         """
-        nodes = gt.find_vertex(network, network.vp.state, "c")
-        idx = list(map(int, nodes))
-        age_collector[idx] = age_collector[idx] + 1
-        return age_collector
+        idx = np.where(network.status == "c")
+        network.age[idx] = network.age[idx] + 1
+        return network
 
     def update_fitness(self, network: gt.Graph) -> gt.Graph:
         """Update the fitness in a decay fashion."""
-        update_fitness = network.new_vertex_property("double")
-        update_fitness.a = network.vp.fitness.a * 0.666
-        network.vertex_properties["fitness"] = update_fitness
+        network.fitness = network.fitness * 0.666
         return network
 
     def create_likelihood_corr_df(self, network: gt.Graph) -> pd.DataFrame:
         """Create a DataFrame of nodes likelihood of being a criminal and its characteristics."""
         org_num_threads = gt.openmp_get_num_threads()
-        gt.openmp_set_num_threads(1)
+        if self.execute == "parallel":
+            gt.openmp_set_num_threads(1)
         network, _ = NodeStats.get_eigenvector_centrality(network)
         network, _ = NodeStats.get_betweenness(network)
         network, _ = NodeStats.get_closeness(network)
         network, _ = NodeStats.get_katz(network)
-        gt.openmp_set_num_threads(org_num_threads)
+
+        if self.execute == "parallel":
+            gt.openmp_set_num_threads(org_num_threads)
 
         df = pd.DataFrame(
-            columns=[
-                "criminal_likelihood",
-                "degree",
-                "betweenness",
-                "katz",
-                "closeness",
-                "eigen vector",
-            ]
+            {
+                "criminal_likelihood": network.age,
+                "degree": network.get_total_degrees(
+                    list(range(0, network.num_vertices()))
+                ),
+                "betweenness": network.btwn,
+                "katz": network.katz,
+                "closeness": network.closeness,
+                "eigen vector": network.eigen_v,
+            }
         )
-
-        for node in range(0, network.num_vertices()):
-            age = network.vp.age[node]
-            degree = network.get_total_degrees([node])[0]
-            btw = network.vp.betweenness[node]
-            cls = network.vp.closeness[node]
-            katz = network.vp.katz[node]
-            eign_v = network.vp.eigen_v[node]
-
-            df = df.append(
-                {
-                    "criminal_likelihood": age,
-                    "degree": degree,
-                    "betweenness": btw,
-                    "katz": katz,
-                    "closeness": cls,
-                    "eigen vector": eign_v,
-                },
-                ignore_index=True,
-            )
         df = df.astype(float)
         return df
 

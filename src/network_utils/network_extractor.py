@@ -16,12 +16,9 @@ class NetworkExtractor:
     @staticmethod
     def filter_criminal_network(network: gt.Graph) -> gt.Graph:
         """Filter the criminal network out of the whole network."""
-        for i in range(0, network.num_vertices()):
-            if network.vp.state[network.vertex(i)] == "c":
-                network.vp.filtering[network.vertex(i)] = 1
-            else:
-                network.vp.filtering[network.vertex(i)] = 0
-
+        filtering = network.new_vertex_property("bool")
+        filtering.a = (network.status == "c").astype(int)
+        network.vertex_properties["filtering"] = filtering
         network.set_vertex_filter(network.vp.filtering)
         return network
 

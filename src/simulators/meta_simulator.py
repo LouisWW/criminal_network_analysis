@@ -105,14 +105,7 @@ class MetaSimulator:
     def create_population(self, network: gt.Graph) -> gt.Graph:
         """Create the population."""
         # Add the new nodes
-        np.random.seed()
         network = self.initialise_network(network, self.prob, self.k)
-        # Init fitness
-        network = self.init_fitness(network, self.random_fit_init)
-        # Init age
-        network = self.init_age(network)
-        # Init filtering
-        network = self.init_filtering(network)
         return network
 
     def compute_the_ratio(self, n_criminal: int) -> Tuple[int, int, float, float]:
@@ -175,38 +168,6 @@ class MetaSimulator:
 
         return new_network
 
-    def init_fitness(self, network: gt.Graph, random_fit: bool) -> gt.Graph:
-        """Add the attribute fitness to the network."""
-        if "fitness" in network.vp:
-            return network
-        else:
-            fitness = network.new_vertex_property("double")
-            if random_fit:
-                fitness.a = np.random.uniform(-50, 50, network.num_vertices())
-            network.vertex_properties["fitness"] = fitness
-        return network
-
-    def init_age(self, network: gt.Graph) -> gt.Graph:
-        """Add the attribute age to the network."""
-        if "age" in network.vp:
-            return network
-        else:
-            age = network.new_vertex_property("double")
-            network.vertex_properties["age"] = age
-        return network
-
-    def init_filtering(self, network: gt.Graph) -> gt.Graph:
-        """Add the filtering attribute.
-
-        By doing so, we can later filter out the criminal network
-        """
-        if "filtering" in network.vp:
-            return network
-        else:
-            filtering = network.new_vertex_property("bool")
-            network.vertex_properties["filtering"] = filtering
-        return network
-
     def create_list_of_populations(self, repetition: int) -> List[gt.Graph]:
         """Create a list of n different populations."""
         list_of_population = []
@@ -233,6 +194,7 @@ class MetaSimulator:
         repetition: int = 20,
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
+        collect_fitness: bool = False,
         execute: str = "parallel",
         show_no_bar: bool = False,
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
@@ -264,6 +226,7 @@ class MetaSimulator:
             repetition=repetition,
             measure_topology=measure_topology,
             measure_likelihood_corr=measure_likelihood_corr,
+            collect_fitness=collect_fitness,
             show_no_bar=show_no_bar,
         )
         return data_collector
