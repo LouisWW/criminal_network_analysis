@@ -116,36 +116,6 @@ class TestMetaSimualtor:
         ), "Wolf ratio not correct"
 
     @pytest.mark.essential
-    def test_init_fitness_not_rand(self, gt_network: gt.Graph) -> None:
-        """Test if the init of the fitness attribute is done correctly.
-
-        Using zero fit for all the nodes.
-        """
-        meta_sim = MetaSimulator("montagna_calls", attachment_method="random")
-        network = meta_sim.init_fitness(gt_network, random_fit=False)
-        assert network.vp.fitness, "Fitness attribute doesn't exists..."
-        assert not any(network.vp.fitness), "Fitness should all be zero"
-
-    @pytest.mark.essential
-    def test_init_fitness_rand(self, gt_network: gt.Graph) -> None:
-        """Test if the init of the fitness attribute is done correctly.
-
-        Using radnom fit for all the nodes.
-        """
-        meta_sim = MetaSimulator("montagna_calls", attachment_method="random")
-
-        network = meta_sim.init_fitness(gt_network, random_fit=True)
-        assert network.vp.fitness, "Fitness attribute doesn't exists..."
-        assert any(network.vp.fitness), "Fitness should not all be zero"
-
-    @pytest.mark.essential
-    def test_init_filtering(self, gt_network: gt.Graph) -> None:
-        """Test if the init of the fitness attribute is done correctly."""
-        meta_sim = MetaSimulator("montagna_calls", attachment_method="preferential")
-        network = meta_sim.init_filtering(gt_network)
-        assert network.vp.filtering, "Filtering attribute doesn't exists..."
-
-    @pytest.mark.essential
     def test_create_population(self) -> None:
         """Checks if the create populatio creates different graph each time."""
         # Keep the ratio small so the test will be faster

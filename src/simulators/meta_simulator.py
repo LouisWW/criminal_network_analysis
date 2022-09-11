@@ -105,6 +105,7 @@ class MetaSimulator:
     def create_population(self, network: gt.Graph) -> gt.Graph:
         """Create the population."""
         # Add the new nodes
+        np.random.seed()
         network = self.initialise_network(network, self.prob, self.k)
         return network
 

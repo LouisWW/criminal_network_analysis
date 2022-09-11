@@ -3,6 +3,7 @@ from copy import deepcopy
 from unittest import main
 
 import graph_tool.all as gt
+import numpy as np
 import pytest
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_extractor import NetworkExtractor
@@ -32,6 +33,7 @@ class TestNetworkExtractor:
             attachment_method="random",
         )
 
+        meta_sim.network.status = np.asarray(list(meta_sim.network.vp.state))
         filtered_network = NetworkExtractor.filter_criminal_network(meta_sim.network)
 
         assert (
@@ -60,6 +62,7 @@ class TestNetworkExtractor:
         org_n_size = org_network.num_vertices()
         org_n_edges = org_network.num_edges()
 
+        meta_sim.network.status = np.asarray(list(meta_sim.network.vp.state))
         NetworkExtractor.filter_criminal_network(meta_sim.network)
         assert not gt.isomorphism(
             meta_sim.network, org_network

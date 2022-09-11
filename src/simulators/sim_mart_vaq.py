@@ -6,18 +6,14 @@ Evolutionary dynamics of organised crime and terrorist networks. Scientific repo
 __author__ = Louis Weyland
 __date__   = 11/04/2022
 """
-import cProfile
 import gc
-import io
 import itertools
 import logging
 import math
 import multiprocessing
-import pstats
 import random
 import warnings
 from collections import defaultdict
-from pstats import SortKey
 from typing import Any
 from typing import DefaultDict
 from typing import Dict
@@ -89,6 +85,9 @@ class SimMartVaq:
         # Define name of simulator
         self._name = "sim_mart_vaq"
         self.network = network
+        self.network.status = np.asarray(list(network.vp.state))
+        self.network.fitness = np.zeros(network.num_vertices())
+        self.network.age = np.zeros(network.num_vertices())
 
         # Check if data is coherent
         assert isinstance(network, gt.Graph), "Network should be of type gt."
@@ -155,9 +154,6 @@ class SimMartVaq:
         network.fitness = np.zeros(network.num_vertices())
         network.age = np.zeros(network.num_vertices())
 
-        # Creating profile object
-        ob = cProfile.Profile()
-        ob.enable()
         # collectors which collects the ratio and fitness over each iteration
         data_collector = defaultdict(
             list,
@@ -241,10 +237,7 @@ class SimMartVaq:
                         mean_h_fit,
                         mean_c_fit,
                         mean_w_fit,
-                    ) = self.get_overall_fitness_distribution(
-                        network=network,
-                        group_members=list(range(0, network.num_vertices())),
-                    )
+                    ) = self.get_overall_fitness_distribution(network=network)
                     data_collector["fitness_honest"].append(mean_h_fit)
                     data_collector["fitness_criminal"].append(mean_c_fit)
                     data_collector["fitness_wolf"].append(mean_w_fit)
@@ -294,12 +287,6 @@ class SimMartVaq:
         if measure_likelihood_corr:
             data_collector["df"] = self.create_likelihood_corr_df(network)
 
-        ob.disable()
-        sec = io.StringIO()
-        sortby = SortKey.CUMULATIVE
-        ps = pstats.Stats(ob, stream=sec).sort_stats(sortby)
-        ps.print_stats("sim_mart_vaq.py")
-        print(sec.getvalue())
         gc.collect()
         return network, data_collector
 
@@ -641,17 +628,17 @@ class SimMartVaq:
         count_dict = dict(zip(unique, counts))
 
         if "h" in count_dict:
-            n_h = count_dict["h"]
+            n_h = int(count_dict["h"])
         else:
             n_h = 0
 
         if "c" in count_dict:
-            n_c = count_dict["c"]
+            n_c = int(count_dict["c"])
         else:
             n_c = 0
 
         if "w" in count_dict:
-            n_w = count_dict["w"]
+            n_w = int(count_dict["w"])
         else:
             n_w = 0
 
@@ -661,7 +648,7 @@ class SimMartVaq:
         return n_c, n_h, n_w, p_c, p_h, p_w
 
     def get_overall_fitness_distribution(
-        self, network: gt.Graph, group_members: List[int]
+        self, network: gt.Graph
     ) -> Tuple[float, float, float]:
         """Get the mean fitness for the different states in a group."""
         h_idx = np.where(network.status == "h")

@@ -69,6 +69,8 @@ class SensitivityAnalyser(ConfigParser):
                     [0, 100],
                 ],
             }
+        else:
+            self.problem = problem
 
     def save_results(func: Callable) -> Any:
         """Save the sensitivity analysis results.
@@ -120,7 +122,7 @@ class SensitivityAnalyser(ConfigParser):
             # Getting all param_values that haven't run yet
             latest_param_values = param_values[param_values.isnull().any(axis=1)]
 
-            for sub_pd in self.chunker(latest_param_values, 200):
+            for sub_pd in self.chunker(latest_param_values, 50):
                 latest_param_values_to_list = sub_pd.values.tolist()
                 list_of_param_comb = [
                     (gt_network, self.problem, params, output_value, rounds)
@@ -221,7 +223,7 @@ class SensitivityAnalyser(ConfigParser):
                 param_values, columns=self.problem["names"]
             )
             param_values["y"] = np.nan
-            param_values.to_csv(file, index=True)
+            param_values.to_csv(file, index=False)
         if not os.path.isfile(graph_file):
             # create graph
             meta_sim = MetaSimulator(
@@ -247,7 +249,7 @@ class SensitivityAnalyser(ConfigParser):
             + str(n_samples)
             + ".csv"
         )
-        param_values.to_csv(file, index=True)
+        param_values.to_csv(file, index=False)
 
     def load_file_and_graph(
         self, n_samples: int, rounds: int
@@ -273,4 +275,4 @@ class SensitivityAnalyser(ConfigParser):
 
     def chunker(self, seq: pd.DataFrame, size: int) -> pd.DataFrame:
         """Chucks the panda DataFrame."""
-        return (seq[pos: pos + size] for pos in range(0, len(seq), size))
+        return (seq[pos : pos + size] for pos in range(0, len(seq), size))
