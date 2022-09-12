@@ -1,0 +1,56 @@
+                        ST   ST_conf        S1   S1_conf        S2   S2_conf
+delta             1.052137  0.327903 -0.023972  0.110348       NaN       NaN
+tau               0.926007  0.227205  0.035461  0.130042       NaN       NaN
+gamma             1.095984  0.321725  0.092482  0.124293       NaN       NaN
+beta_s            1.110144  0.304396 -0.017690  0.102795       NaN       NaN
+beta_h            0.905204  0.220649  0.082152  0.104007       NaN       NaN
+beta_c            0.949725  0.245759  0.023829  0.113408       NaN       NaN
+c_w               0.967929  0.247107  0.059470  0.139511       NaN       NaN
+c_c               1.024219  0.201549  0.046538  0.127788       NaN       NaN
+r_w               0.866623  0.214793  0.039428  0.107471       NaN       NaN
+r_c               0.781700  0.186559  0.084063  0.118894       NaN       NaN
+(delta, tau)           NaN       NaN       NaN       NaN -0.042664  0.151299
+(delta, gamma)         NaN       NaN       NaN       NaN  0.006146  0.226352
+(delta, beta_s)        NaN       NaN       NaN       NaN -0.016970  0.150286
+(delta, beta_h)        NaN       NaN       NaN       NaN -0.059891  0.168013
+(delta, beta_c)        NaN       NaN       NaN       NaN -0.033974  0.145965
+(delta, c_w)           NaN       NaN       NaN       NaN -0.018601  0.194590
+(delta, c_c)           NaN       NaN       NaN       NaN  0.009495  0.190138
+(delta, r_w)           NaN       NaN       NaN       NaN  0.009534  0.181285
+(delta, r_c)           NaN       NaN       NaN       NaN  0.012747  0.188196
+(tau, gamma)           NaN       NaN       NaN       NaN -0.117888  0.244087
+(tau, beta_s)          NaN       NaN       NaN       NaN -0.022319  0.171826
+(tau, beta_h)          NaN       NaN       NaN       NaN -0.133452  0.153595
+(tau, beta_c)          NaN       NaN       NaN       NaN -0.095789  0.170240
+(tau, c_w)             NaN       NaN       NaN       NaN -0.059338  0.206839
+(tau, c_c)             NaN       NaN       NaN       NaN -0.129340  0.186265
+(tau, r_w)             NaN       NaN       NaN       NaN  0.018768  0.177611
+(tau, r_c)             NaN       NaN       NaN       NaN -0.072919  0.164475
+(gamma, beta_s)        NaN       NaN       NaN       NaN -0.102651  0.241155
+(gamma, beta_h)        NaN       NaN       NaN       NaN -0.157456  0.166771
+(gamma, beta_c)        NaN       NaN       NaN       NaN -0.156821  0.162780
+(gamma, c_w)           NaN       NaN       NaN       NaN -0.080467  0.157575
+(gamma, c_c)           NaN       NaN       NaN       NaN -0.096289  0.194924
+(gamma, r_w)           NaN       NaN       NaN       NaN -0.075014  0.183266
+(gamma, r_c)           NaN       NaN       NaN       NaN -0.127888  0.185628
+(beta_s, beta_h)       NaN       NaN       NaN       NaN -0.052683  0.143837
+(beta_s, beta_c)       NaN       NaN       NaN       NaN  0.032727  0.145700
+(beta_s, c_w)          NaN       NaN       NaN       NaN -0.062497  0.183599
+(beta_s, c_c)          NaN       NaN       NaN       NaN  0.001541  0.160582
+(beta_s, r_w)          NaN       NaN       NaN       NaN -0.036705  0.147563
+(beta_s, r_c)          NaN       NaN       NaN       NaN -0.044738  0.153373
+(beta_h, beta_c)       NaN       NaN       NaN       NaN -0.078090  0.186168
+(beta_h, c_w)          NaN       NaN       NaN       NaN -0.128992  0.185393
+(beta_h, c_c)          NaN       NaN       NaN       NaN -0.114249  0.191874
+(beta_h, r_w)          NaN       NaN       NaN       NaN -0.104801  0.147789
+(beta_h, r_c)          NaN       NaN       NaN       NaN -0.193353  0.145547
+(beta_c, c_w)          NaN       NaN       NaN       NaN -0.083783  0.208631
+(beta_c, c_c)          NaN       NaN       NaN       NaN -0.035473  0.159599
+(beta_c, r_w)          NaN       NaN       NaN       NaN -0.097069  0.157359
+(beta_c, r_c)          NaN       NaN       NaN       NaN -0.014680  0.180459
+(c_w, c_c)             NaN       NaN       NaN       NaN  0.005396  0.263636
+(c_w, r_w)             NaN       NaN       NaN       NaN -0.179746  0.173818
+(c_w, r_c)             NaN       NaN       NaN       NaN -0.126255  0.164756
+(c_c, r_w)             NaN       NaN       NaN       NaN  0.024413  0.210482
+(c_c, r_c)             NaN       NaN       NaN       NaN -0.127146  0.160879
+(r_w, r_c)             NaN       NaN       NaN       NaN -0.039168  0.153087
