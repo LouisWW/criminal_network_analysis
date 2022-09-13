@@ -177,6 +177,20 @@ class TestPlotter:
 
         assert isinstance(ax, (np.ndarray, np.generic))
 
+    @pytest.mark.essential
+    # @patch("matplotlib.pyplot.show")
+    def test_plot_violin(
+        self,
+        # mock_show: Mock,
+        fake_link_sensitivity_analysis: Dict[str, DefaultDict[str, List[Any]]],
+    ) -> None:
+        """Test if the violin plot is working correclty."""
+        plotter = Plotter()
+        ax = plotter.plot_violin(
+            fake_link_sensitivity_analysis, ylabel="Ratio (%)", xlabel="Link"
+        )
+        assert isinstance(ax, (np.ndarray, np.generic))
+
 
 if __name__ == "__main__":
     main()

@@ -229,6 +229,22 @@ def fake_correlation_data() -> Dict[str, DefaultDict[str, List[Any]]]:
     return fake_data
 
 
+@pytest.fixture(scope="session")
+def fake_link_sensitivity_analysis() -> Dict[str, Dict[str, List[Any]]]:
+    """Create fake correlation data."""
+    fake_data = {
+        "preferential": {},
+        "random": {},
+        "small-world": {},
+    }  # type: Dict[str, Dict[Any, Any]]
+    n_links = np.linspace(6, 40, 10, dtype=int)
+
+    for structure in fake_data.keys():
+        for link in n_links:
+            fake_data[structure][link] = np.random.normal(3, 2.5, 30)
+    return fake_data
+
+
 def pytest_deselected(items: List) -> None:
     """Print deselected tests."""
     if not items:
