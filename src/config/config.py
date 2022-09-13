@@ -136,6 +136,12 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "--sensitivity-analysis-links",
+            action="store_true",
+            help="""Defines to run a sensitivity analysis on one of the choices.""",
+        )
+
+        parser.add_argument(
             "-phase-diag",
             "--phase-diagram",
             action="store_true",

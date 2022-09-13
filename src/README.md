@@ -21,6 +21,9 @@ Explain src folder
 ### Run sensitvitiy analysis in chuncks
     python3 new_main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000 -n-samples 512  -exec parallel -output-value ratio_criminal -attach-meth preferential -k 2 -running-chunk -save
 
+## Run sensitivity analysis on the number of links
+    python3 new_main.py --sensitivity-analysis-links -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000  -exec parallel -output-value ratio_criminal
+
 ## Profiling the code
 
 To profile the code, the cprofile package was used together with the gprof package to visualise the critical part. To conduct such an analysis, please use the following commands
