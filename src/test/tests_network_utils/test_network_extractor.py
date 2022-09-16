@@ -33,8 +33,9 @@ class TestNetworkExtractor:
             attachment_method="random",
         )
 
-        meta_sim.network.status = np.asarray(list(meta_sim.network.vp.state))
-        filtered_network = NetworkExtractor.filter_criminal_network(meta_sim.network)
+        network = meta_sim.create_population(meta_sim.criminal_network)
+        network.status = np.asarray(list(network.vp.state))
+        filtered_network = NetworkExtractor.filter_criminal_network(network)
 
         assert (
             filtered_network.num_vertices() == org_n_size
@@ -56,27 +57,26 @@ class TestNetworkExtractor:
             attachment_method="random",
         )
 
-        org_network = deepcopy(meta_sim.network)
+        network = meta_sim.create_population(meta_sim.criminal_network)
+        org_network = deepcopy(network)
         # ensure it is not the same object
-        assert org_network != meta_sim.network
+        assert org_network != network
         org_n_size = org_network.num_vertices()
         org_n_edges = org_network.num_edges()
 
-        meta_sim.network.status = np.asarray(list(meta_sim.network.vp.state))
-        NetworkExtractor.filter_criminal_network(meta_sim.network)
+        network.status = np.asarray(list(network.vp.state))
+        NetworkExtractor.filter_criminal_network(network)
         assert not gt.isomorphism(
-            meta_sim.network, org_network
+            network, org_network
         ), "Should not be the same network"
-        assert org_n_size != meta_sim.network.num_vertices()
-        assert org_n_edges != meta_sim.network.num_edges()
+        assert org_n_size != network.num_vertices()
+        assert org_n_edges != network.num_edges()
 
         # reset filtering
-        NetworkExtractor.un_filter_criminal_network(meta_sim.network)
-        assert gt.isomorphism(
-            meta_sim.network, org_network
-        ), "Should be the same network"
-        assert org_n_size == meta_sim.network.num_vertices()
-        assert org_n_edges == meta_sim.network.num_edges()
+        NetworkExtractor.un_filter_criminal_network(network)
+        assert gt.isomorphism(network, org_network), "Should be the same network"
+        assert org_n_size == network.num_vertices()
+        assert org_n_edges == network.num_edges()
 
 
 if __name__ == "__main__":

@@ -245,6 +245,39 @@ def fake_link_sensitivity_analysis() -> Dict[str, Dict[str, List[Any]]]:
     return fake_data
 
 
+@pytest.fixture(scope="session")
+def fake_phase_diag_data() -> Dict[str, Dict[str, List[Any]]]:
+    """Create fake phase_diag data."""
+    fake_phase_diag = {
+        "case_1": {
+            "param_y": "gamma",
+            "y_range": np.linspace(0, 1, 10),
+            "x_range": np.linspace(0, 40, 10),
+            "param_x": "r_c",
+            "grid_status": np.random.choice(
+                ["mean_ratio_criminal", "mean_ratio_wolf", "mean_ratio_honest"], 100
+            ).reshape(10, 10),
+            "grid_value": np.random.random((10, 10)),
+        },
+        "case_2": {
+            "param_y": "gamma",
+            "y_range": np.linspace(0, 1, 10),
+            "x_range": np.linspace(0, 40, 10),
+            "param_x": "r_c",
+            "grid_status": np.random.choice(
+                ["mean_ratio_criminal", "mean_ratio_wolf", "mean_ratio_honest"], 100
+            ).reshape(10, 10),
+            "grid_value": np.random.random((10, 10)),
+        },
+    }
+    fake_meta_phase_diag = {
+        "preferential": fake_phase_diag,
+        "small-world": fake_phase_diag,
+    }
+
+    return fake_meta_phase_diag
+
+
 def pytest_deselected(items: List) -> None:
     """Print deselected tests."""
     if not items:

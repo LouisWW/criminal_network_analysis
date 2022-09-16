@@ -42,6 +42,12 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "--create-population",
+            action="store_true",
+            help="""Create and save the population (--save falg not needed)""",
+        )
+
+        parser.add_argument(
             "-get-network-stats",
             action="store_true",
             help="""Returns the mean characteristics of a population
@@ -72,6 +78,7 @@ class ConfigParser:
         parser.add_argument(
             "-k",
             type=int,
+            default=None,
             help="""Defines how many new connection a
                     new node is making while generating a population.""",
         )

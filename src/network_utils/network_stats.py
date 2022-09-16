@@ -47,7 +47,7 @@ class NetworkStats:
             "clustering_coeff": self.get_clustering_coefficient(),
             "relative_density": self.get_relative_density(),
             "diameter": int(self.get_diameter()),
-            "radius": int(self.get_radius()),
+            # "radius": int(self.get_radius()),
             "dispersion": self.get_degree_dispersion(),
             "avg_path_length": self.get_average_path_length(),
         }
@@ -123,7 +123,7 @@ class NetworkStats:
             return -1
 
     def get_average_path_length(self) -> float:
-        """Return the average_path_length"""
+        """Return the average_path_length."""
         # Initialse algorithm
         cc = nk.components.ConnectedComponents(self.network)
         cc.run()

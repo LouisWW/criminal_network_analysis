@@ -27,9 +27,16 @@ class DirectoryFinder:
         self.result_dir_data_sa = self.result_dir_data + "sensitivity_analysis/"
         self.result_dir_data_network_stats = self.result_dir_data + "network_stats/"
         self.result_dir_data_sim_mart_vaq = self.result_dir_data + "sim_mart_vaq/"
+        self.result_dir_data_sa_link = (
+            self.result_dir_data + "sensitivity_analysis_link/"
+        )
+        self.result_dir_data_phase_diag = self.result_dir_data + "phase_diag/"
 
         # Criminal Data
         self.criminal_data_dir = self.main_dir + "/data/"
+
+        # Saved criminal_data
+        self.population_data_dir = self.criminal_data_dir + "populations/"
 
         # Saving dir
         self.result_dir_fig = self.result_dir + "figures/"

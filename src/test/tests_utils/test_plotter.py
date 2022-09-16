@@ -178,10 +178,10 @@ class TestPlotter:
         assert isinstance(ax, (np.ndarray, np.generic))
 
     @pytest.mark.essential
-    # @patch("matplotlib.pyplot.show")
+    @patch("matplotlib.pyplot.show")
     def test_plot_violin(
         self,
-        # mock_show: Mock,
+        mock_show: Mock,
         fake_link_sensitivity_analysis: Dict[str, DefaultDict[str, List[Any]]],
     ) -> None:
         """Test if the violin plot is working correclty."""
@@ -189,6 +189,19 @@ class TestPlotter:
         ax = plotter.plot_violin(
             fake_link_sensitivity_analysis, ylabel="Ratio (%)", xlabel="Link"
         )
+        assert isinstance(ax, plt.Axes)
+
+    @pytest.mark.essential
+    @patch("matplotlib.pyplot.show")
+    def test_phase_diag(
+        self,
+        mock_show: Mock,
+        fake_phase_diag_data: Dict[str, DefaultDict[str, List[Any]]],
+    ) -> None:
+        """Test if the plt lines correlation function works."""
+        plotter = Plotter()
+        ax = plotter.plot_phase_diag(fake_phase_diag_data)
+        
         assert isinstance(ax, (np.ndarray, np.generic))
 
 

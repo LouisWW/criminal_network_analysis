@@ -18,6 +18,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
+import pandas as pd
 import powerlaw
 import seaborn as sns
 from config.config import ConfigParser
@@ -181,6 +182,72 @@ class Plotter(ConfigParser):
             return network, None
         else:
             return None
+
+    def plot_violin(
+        self,
+        dict_data: DefaultDict[str, List[int]],
+        *args: str,
+        **kwargs: Any,
+    ) -> Union[plt.Axes, np.ndarray, np.generic]:
+        """Plot violin graph from data  points.
+
+        Args:
+            dict_data (DefaultDict[str, List[Any]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+
+        Returns:
+            plt.Axes: matplotlib axes object
+        """
+        # data needs to be in df
+
+        df = pd.DataFrame(columns=["structure", "link", "data"])
+
+        for structure in dict_data.keys():
+            for link in dict_data[structure].keys():
+                for data_points in dict_data[structure][link]:
+                    df = df.append(
+                        {"structure": structure, "link": link, "data": data_points},
+                        ignore_index=True,
+                    )
+
+        df["structure"] = df["structure"].astype(str)
+        df["link"] = df["link"].astype(int)
+        df["data"] = df["data"].astype(float)
+
+        _, ax = plt.subplots()
+
+        ax = sns.violinplot(
+            data=df,
+            x="link",
+            y="data",
+            hue="structure",
+            width=0.7,
+            palette="Set2",
+            ax=ax,
+            cut=0,
+        )
+
+        if "xlabel" in kwargs:
+            ax.set_xlabel(kwargs["xlabel"].capitalize(), weight="bold", fontsize=35)
+        if "ylabel" in kwargs:
+            ax.set_ylabel(kwargs["ylabel"].capitalize(), weight="bold", fontsize=35)
+        # set legend
+        ax.legend(fancybox=True, shadow=True, fontsize=35)
+        ax.tick_params(labelsize=35)
+        plt.tight_layout()
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + "violin_plot"
+                + "_"
+                + timestamp()
+                + ".png"
+            )
+            self.save_figure(fig_name, ax)
+            return ax
+        else:
+            plt.show()
+            return ax
 
     def plot_lines(
         self,
@@ -374,11 +441,7 @@ class Plotter(ConfigParser):
 
     def plot_phase_diag(
         self,
-        grid: np.ndarray,
-        x_range: np.ndarray,
-        y_range: np.ndarray,
-        param_x: str,
-        param_y: str,
+        dict_data: DefaultDict[str, List[int]],
         *args: str,
         **kwargs: Any,
     ) -> plt.Axes:
@@ -386,53 +449,115 @@ class Plotter(ConfigParser):
 
         The colors correspond to the dominant status at the end of the run
 
-        Args:
-            grid (np.ndarray): 2-d array containing the dominant status for
-                                    each combination of param1 and param2
-            x_range (np.ndarray) : range of x
-            y_range (np.ndarray) : range of
-            param_x (str): parameter x of the model
-            parma_y (str): parameter y of the model
-
         Returns:
             plt.Axes: phase diagram figure
         """
-        # translate array into rgb code
-        rgb_array = np.zeros((grid.shape[0], grid.shape[1], 3), dtype=int)
-        for x_i in range(0, grid.shape[0]):
-            for y_i in range(0, grid.shape[1]):
-                if grid[x_i, y_i] == "mean_ratio_criminal":
-                    rgb_array[x_i, y_i, 0] = 255
-                    rgb_array[x_i, y_i, 1] = 0
-                    rgb_array[x_i, y_i, 2] = 0
-                elif grid[x_i, y_i] == "mean_ratio_wolf":
-                    rgb_array[x_i, y_i, 0] = 0
-                    rgb_array[x_i, y_i, 1] = 0
-                    rgb_array[x_i, y_i, 2] = 255
-                elif grid[x_i, y_i] == "mean_ratio_honest":
-                    rgb_array[x_i, y_i, 0] = 0
-                    rgb_array[x_i, y_i, 1] = 255
-                    rgb_array[x_i, y_i, 2] = 0
+        structures = list(dict_data.keys())
+        cases = list(dict_data[structures[0]].keys())
 
-        _, ax = plt.subplots()
-        ax.imshow(
-            rgb_array, extent=[min(y_range), max(y_range), max(x_range), min(x_range)]
-        )
+        mpl.rcParams["axes.spines.top"] = True
+        mpl.rcParams["axes.spines.right"] = True
+        fig, axs = plt.subplots(len(structures), len(cases))
 
-        cmap = {1: [1, 0, 0, 1], 3: [0, 1, 0, 1], 2: [0, 0, 1, 1]}
-        labels = {1: "criminal", 2: "lone wolf", 3: "honest"}
-        # create patches as legend
-        patches = [mpatches.Patch(color=cmap[i], label=labels[i]) for i in cmap]
-        plt.legend(handles=patches)
+        for case, k in zip(cases, range(axs.shape[0])):
+            for structure, i in zip(structures, range(axs.shape[1])):
+                # translate array into rgb
+                dict_data[structure][case]["grid_status"] = np.asarray(
+                    dict_data[structure][case]["grid_status"]
+                )
+                dict_data[structure][case]["grid_value"] = np.asarray(
+                    dict_data[structure][case]["grid_value"]
+                )
+                rgb_array = np.zeros(
+                    (
+                        dict_data[structure][case]["grid_status"].shape[0],
+                        dict_data[structure][case]["grid_status"].shape[1],
+                        3,
+                    ),
+                    dtype=int,
+                )
+                for x_i in range(0, dict_data[structure][case]["grid_status"].shape[1]):
+                    for y_i in range(
+                        0, dict_data[structure][case]["grid_status"].shape[0]
+                    ):
+                        if (
+                            dict_data[structure][case]["grid_status"][y_i, x_i]
+                            == "mean_ratio_criminal"
+                        ):
+                            rgb_array[y_i, x_i, 0] = (
+                                255 * dict_data[structure][case]["grid_value"][y_i, x_i]
+                            )
+                            rgb_array[y_i, x_i, 1] = 0
+                            rgb_array[y_i, x_i, 2] = 0
+                        elif (
+                            dict_data[structure][case]["grid_status"][y_i, x_i]
+                            == "mean_ratio_wolf"
+                        ):
+                            rgb_array[y_i, x_i, 0] = 0
+                            rgb_array[y_i, x_i, 1] = 0
+                            rgb_array[y_i, x_i, 2] = (
+                                255 * dict_data[structure][case]["grid_value"][y_i, x_i]
+                            )
+                        elif (
+                            dict_data[structure][case]["grid_status"][y_i, x_i]
+                            == "mean_ratio_honest"
+                        ):
+                            rgb_array[y_i, x_i, 0] = 0
+                            rgb_array[y_i, x_i, 1] = (
+                                255 * dict_data[structure][case]["grid_value"][y_i, x_i]
+                            )
+                            rgb_array[y_i, x_i, 2] = 0
 
-        # Add the \ to the param to print it in latex format
-        if param_x in ["beata_c", "beta_s", "beta_h", "delta", "tau", "gamma"]:
-            param_x = "\\" + param_x
-        if param_y in ["beata_c", "beta_s", "beta_h", "delta", "tau", "gamma"]:
-            param_y = "\\" + param_y
+                axs[k, i].imshow(
+                    rgb_array,
+                    aspect="auto",
+                    interpolation="bilinear",
+                    extent=[
+                        min(dict_data[structure][case]["y_range"]),
+                        max(dict_data[structure][case]["y_range"]),
+                        max(dict_data[structure][case]["x_range"]),
+                        min(dict_data[structure][case]["x_range"]),
+                    ],
+                )
 
-        ax.set_xlabel(fr"${param_y}$")
-        ax.set_ylabel(fr"${param_x}$")
+                cmap = {1: [1, 0, 0, 1], 3: [0, 1, 0, 1], 2: [0, 0, 1, 1]}
+                labels = {1: "c", 2: "w", 3: "h"}
+                # create patches as legend
+                patches = [mpatches.Patch(color=cmap[i], label=labels[i]) for i in cmap]
+                axs[k, i].legend(handles=patches, fancybox=True, shadow=True)
+
+                # Add the \ to the param to print it in latex format
+                if dict_data[structure][case]["param_x"] in [
+                    "beata_c",
+                    "beta_s",
+                    "beta_h",
+                    "delta",
+                    "tau",
+                    "gamma",
+                ]:
+                    dict_data[structure][case]["param_x"] = (
+                        "\\" + dict_data[structure][case]["param_x"]
+                    )
+                if dict_data[structure][case]["param_y"] in [
+                    "beata_c",
+                    "beta_s",
+                    "beta_h",
+                    "delta",
+                    "tau",
+                    "gamma",
+                ]:
+                    dict_data[structure][case]["param_y"] = (
+                        "\\" + dict_data[structure][case]["param_y"]
+                    )
+
+                param_y = dict_data[structure][case]["param_y"]
+                param_x = dict_data[structure][case]["param_x"]
+                axs[k, i].set_xlabel(fr"${param_x}$")
+                axs[k, i].set_ylabel(fr"${param_y}$", rotation=0)
+                axs[k, i].grid(b=None)
+
+        for ax, structure in zip(axs[0], structures):
+            ax.set_title(structure.capitalize(), weight="bold")
 
         plt.tight_layout()
 
