@@ -7,6 +7,8 @@ __date__   = 22/02/2022
 import json
 import logging
 import os
+import re
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -17,6 +19,7 @@ from network_utils.network_stats import NetworkStats
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 from utils.animation import Animateur
+from utils.numpy_arrayy_encoder import NumpyArrayEncoder
 from utils.plotter import Plotter
 from utils.sensitivity_analysis import SensitivityAnalyser
 from utils.stats import compare_time_series
@@ -45,6 +48,20 @@ logger.propagate = False
 
 if args.verbose:
     logger.setLevel(logging.INFO)
+
+
+if args.create_population:
+    """Creating population and save them."""
+    meta_sim = MetaSimulator(
+        network_name=args.read_data,
+        attachment_method=args.attach_meth,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
+        k=args.k,
+        random_fit_init=False,
+    )
+
+    meta_sim.create_network_and_save(args.n_samples)
 
 if args.sim_mart_vaq:
     """Simulate the simulation form
@@ -103,8 +120,9 @@ if args.sim_mart_vaq:
 
             # get the number of runs already done
             n_prev_runs = max(int(key) for key in previous_results.keys())
+            data_collector
             simple_runs = {
-                str(int(k) + n_prev_runs): v
+                str(int(k) + 1 + n_prev_runs): v
                 for k, v in data_collector.items()
                 if k.isdigit()
             }
@@ -137,7 +155,6 @@ if args.sim_mart_vaq:
             ylabel="Ratio (%)",
             plot_deviation="std",
         )
-
 
 elif args.plot:
     """Plot the results collected over the different runs.
@@ -203,7 +220,7 @@ elif args.plot:
         xlabel="Rounds",
         ylabel="Ratio (%)",
         plot_deviation="sem",
-        ylim=[0, 0.2],
+        ylim=[0, 0.03],
         legend_size=20,
         axes_size=25,
         thick_size=20,
@@ -238,7 +255,6 @@ elif args.plot:
         y_data_to_plot=[
             "degree",
             "betweenness",
-            "katz",
             "closeness",
             "eigen vector",
         ],
@@ -258,7 +274,7 @@ elif args.whole_pipeline:
         attachment_method="preferential",
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        k=17,
+        k=74,
         random_fit_init=False,
     )
 
@@ -266,7 +282,7 @@ elif args.whole_pipeline:
         network_name=args.read_data,
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        k=17,
+        k=74,
         attachment_method="random",
     )
     meta_sim_sw = MetaSimulator(
@@ -274,7 +290,7 @@ elif args.whole_pipeline:
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
         prob=0.2,
-        k=35,
+        k=145,
         attachment_method="small-world",
     )
 
@@ -288,7 +304,6 @@ elif args.whole_pipeline:
     complete_network_stats_sw = NetworkStats(
         NetworkConverter.gt_to_nk(meta_sim_sw.network)
     )
-
     complete_network_stats_pref.get_overview()
     complete_network_stats_rand.get_overview()
     complete_network_stats_sw.get_overview()
@@ -431,85 +446,213 @@ elif args.sensitivity_analysis:
             rounds=args.rounds,
         )
 
-elif args.phase_diagram:
-    parameter_dict = {
-        "1": "beta_s",
-        "2": "beta_h",
-        "3": "beta_c",
-        "4": "delta",
-        "5": "gamma",
-        "6": "tau",
-        "7": "r_w",
-        "8": "r_c",
-    }
+elif args.sensitivity_analysis_links:
+    """Performs an kinda sensitivity analysis on the impact of links on the network."""
+    n_links = np.linspace(20, 80, 5, dtype=int)
+    file_name = DirectoryFinder().result_dir_data_sa_link + args.case + ".json"
+    if os.path.isfile(file_name) and os.access(file_name, os.R_OK):
+        with open(file_name) as fp:
+            whole_data = json.load(fp)
 
-    print("Which parameters to test? Please give a number:")
-    for k, v in parameter_dict.items():
-        print(f"{k:<2}|{v:<15}")
-    param_x = input("Parameter 1:\n")
-    param_y = input("Parameter 2:\n")
-    x_input = input("Range of parameter 1:  example: 0,5\n")
-    x_input_tpl = tuple(int(x) for x in x_input.split(","))
-    y_input = input("Range of parameter 2:  example: 0,5\n")
-    y_input_tpl = tuple(int(x) for x in y_input.split(","))
+    elif not os.path.isfile(file_name):
+        whole_data = {"preferential": {}, "random": {}, "small-world": {}}
 
-    assert param_x != param_y, " Parameter can't be the same!"
-    # create a mesh grid
-    nx, ny = (10, 10)
-    x_range = np.linspace(x_input_tpl[0], x_input_tpl[1], nx)
-    y_range = np.linspace(y_input_tpl[0], y_input_tpl[1], ny)
-    grid = np.empty((nx, ny), dtype=object)
-
-    # init simulation
-    # Add nodes to network
-    # First convert to gt
-    # Get actual criminal network
-    nx_network = NetworkReader().get_data(args.read_data)
-
-    meta_sim = MetaSimulator(
-        network_name=nx_network.name,
-        ratio_honest=0.33,
-        ratio_wolf=0.33,
-        random_fit_init=False,
-    )
-    for x_i in range(0, nx):
-        for y_i in range(0, ny):
-            variable_dict = dict(
-                zip(
-                    [parameter_dict[param_x], parameter_dict[param_y]],
-                    [x_range[x_i], y_range[y_i]],
+    for structure in whole_data.keys():
+        for link in n_links:
+            if str(link) in whole_data[structure]:
+                pass
+            else:
+                print(f"Doing {structure=}, {link=}")
+                # create meta_simulator
+                meta_sim = MetaSimulator(
+                    network_name=args.read_data,
+                    attachment_method=structure,
+                    ratio_honest=args.ratio_honest,
+                    ratio_wolf=args.ratio_wolf,
+                    k=link,
+                    random_fit_init=False,
                 )
-            )
-            simulators = SimMartVaq(
-                network=meta_sim.network,
-                **variable_dict,
-                mutation_prob=0.0001,  # only fermi function
-            )
-            data_collector = simulators.avg_play(
-                network=simulators.network,
-                rounds=args.rounds,
-                n_groups=1,
-                ith_collect=args.rounds,  # only need the last measurement
-                repetition=args.n_samples,
-            )
 
-            # Only look at the ratio and get the status with the highest ratio at the end
-            filtered_dict = {
-                k: v
-                for k, v in data_collector.items()
-                if k in ["mean_ratio_criminal", "mean_ratio_wolf", "mean_ratio_honest"]
-            }
+                # Play the games parallel
+                logger.info(f"Doing {structure} simulation")
+                data_collector = meta_sim.avg_play(
+                    rounds=args.rounds,
+                    n_groups=args.n_groups,
+                    repetition=args.n_samples,
+                    ith_collect=args.rounds,
+                    execute=args.execute,
+                    show_no_bar=False,
+                )
+                whole_data[structure][str(link)] = list(
+                    data_collector["m_ratio_criminal"][:, 1]
+                )
 
-            grid[x_i, y_i] = max(filtered_dict, key=lambda x: filtered_dict[x][-1])
+                # saving each step to a dictionary
+                with open(
+                    file_name,
+                    "w",
+                ) as fp:
+                    json.dump(whole_data, fp, indent=4)
 
-    ax = plotter.plot_phase_diag(
-        grid,
-        x_range,
-        y_range,
-        parameter_dict[param_x],
-        parameter_dict[param_y],
-        simulator=simulators,
-    )
+    plotter.plot_violin(whole_data, ylabel="Ratio (%)", xlabel="Link")
+
+elif args.phase_diagram:
+
+    file_name = DirectoryFinder().result_dir_data_phase_diag + "data.json"
+
+    resolution = 10  # of the grid
+
+    if os.path.isfile(file_name) and os.access(file_name, os.R_OK):
+        with open(file_name) as fp:
+            meta_phase_diag = json.load(fp)
+
+    elif not os.path.isfile(file_name):
+        # Get the simple runs
+        phase_diag = {
+            "case_1": {
+                "param_y": "gamma",
+                "y_range": np.linspace(0, 1, resolution),
+                "x_range": np.linspace(0, 300, resolution),
+                "param_x": "r_c",
+            },
+            "case_2": {
+                "param_y": "beta_s",
+                "y_range": np.linspace(0, 300, resolution),
+                "x_range": np.linspace(0, 300, resolution),
+                "param_x": "r_c",
+            },
+            "case_3": {
+                "param_y": "beta_h",
+                "y_range": np.linspace(0, 300, resolution),
+                "x_range": np.linspace(0, 300, resolution),
+                "param_x": "r_c",
+            },
+        }
+
+        meta_phase_diag = {}
+        meta_phase_diag["preferential"] = deepcopy(phase_diag)
+        meta_phase_diag["random"] = deepcopy(phase_diag)
+        meta_phase_diag["small-world"] = deepcopy(phase_diag)
+
+    for structure in meta_phase_diag.keys():
+        # init simulation
+        # Add nodes to network
+        # First convert to gt
+        # Get actual criminal network
+        nx_network = NetworkReader().get_data(args.read_data)
+
+        meta_sim = MetaSimulator(
+            attachment_method=structure,
+            network_name=args.read_data,
+            ratio_honest=args.ratio_honest,
+            ratio_wolf=args.ratio_wolf,
+            prob=0.2,
+            k=74 if structure in ["preferential", "random"] else 145,
+        )
+        for case in meta_phase_diag[structure].keys():
+            # check if grid is already been calculated
+            if "grid_status" in meta_phase_diag[structure][case].keys():
+                pass
+            else:
+                logger.info(f"Doing {case=} of {structure=}")
+                nx = resolution
+                ny = resolution
+                meta_phase_diag[structure][case]["grid_status"] = np.empty(
+                    (ny, nx), dtype=object
+                )
+                meta_phase_diag[structure][case]["grid_value"] = np.empty(
+                    (ny, nx), dtype=float
+                )
+                meta_phase_diag[structure][case]["ratio_criminal"] = np.empty(
+                    (ny, nx), dtype=float
+                )
+
+                for x_i in range(0, nx):
+                    for y_i in range(0, ny):
+                        variable_dict = dict(
+                            zip(
+                                [
+                                    meta_phase_diag[structure][case]["param_x"],
+                                    meta_phase_diag[structure][case]["param_y"],
+                                    "c_c",
+                                ],
+                                [
+                                    meta_phase_diag[structure][case]["x_range"][x_i],
+                                    meta_phase_diag[structure][case]["y_range"][y_i],
+                                    meta_phase_diag[structure][case]["x_range"][x_i],
+                                ],
+                            )
+                        )
+
+                        all_files = [
+                            file
+                            for file in os.listdir(
+                                DirectoryFinder().population_data_dir
+                            )
+                            if re.search(structure, file)
+                        ]
+                        matches = [
+                            f"h_{meta_sim.ratio_honest}",
+                            f"w_{meta_sim.ratio_wolf}",
+                            f"k_{meta_sim.k}",
+                        ]
+                        matching_files = [
+                            file
+                            for file in all_files
+                            if all(word in file for word in matches)
+                        ]
+                        if len(matching_files) != 0:
+                            list_of_population = meta_sim.load_list_of_populations(
+                                args.n_samples, matching_files
+                            )
+
+                        simulators = SimMartVaq(
+                            network=meta_sim.network, **variable_dict
+                        )
+
+                        data_collector = simulators.avg_play(
+                            network=list_of_population,
+                            rounds=args.rounds,
+                            n_groups=args.n_groups,
+                            ith_collect=args.rounds,  # only need the last measurement
+                            repetition=args.n_samples,
+                            show_no_bar=True,
+                        )
+
+                        # Only look at the ratio and get the status with the highest ratio
+                        # at the end
+                        filtered_dict = {
+                            k: v
+                            for k, v in data_collector.items()
+                            if k
+                            in [
+                                "mean_ratio_criminal",
+                                "mean_ratio_wolf",
+                                "mean_ratio_honest",
+                            ]
+                        }
+
+                        meta_phase_diag[structure][case]["grid_status"][y_i, x_i] = max(
+                            filtered_dict, key=lambda x: filtered_dict[x][-1]
+                        )
+                        meta_phase_diag[structure][case]["grid_value"][
+                            y_i, x_i
+                        ] = filtered_dict[
+                            meta_phase_diag[structure][case]["grid_status"][y_i, x_i]
+                        ][
+                            -1
+                        ]
+                        meta_phase_diag[structure][case]["ratio_criminal"][
+                            y_i, x_i
+                        ] = data_collector["mean_ratio_criminal"][-1]
+
+                with open(
+                    file_name,
+                    "w",
+                ) as fp:
+                    json.dump(meta_phase_diag, fp, indent=4, cls=NumpyArrayEncoder)
+
+    ax = plotter.plot_phase_diag(meta_phase_diag)
 
 elif args.animate_simulation:
     """Create an animation of the simulation."""
@@ -528,17 +671,14 @@ elif args.get_network_stats:
     """
 
     nx_network = NetworkReader().get_data(args.read_data)
-    ratio_honest = 0.95
-    ratio_wolf = 0.01
-    logger.info(f"Ration : {ratio_honest=}, {ratio_wolf=}")
 
     # Preferential
     meta_sim_pref = MetaSimulator(
         network_name=nx_network.name,
         attachment_method="preferential",
-        ratio_honest=ratio_honest,
-        ratio_wolf=ratio_wolf,
-        k=17,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
+        k=74,
         random_fit_init=False,
     )
 
@@ -546,9 +686,9 @@ elif args.get_network_stats:
     meta_sim_rnd = MetaSimulator(
         network_name=nx_network.name,
         attachment_method="random",
-        ratio_honest=ratio_honest,
-        ratio_wolf=ratio_wolf,
-        k=17,  # 0.0034 for random
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
+        k=74,  # 0.0034 for random
         random_fit_init=False,
     )
 
@@ -556,10 +696,10 @@ elif args.get_network_stats:
     meta_sim_sw = MetaSimulator(
         network_name=nx_network.name,
         attachment_method="small-world",
-        ratio_honest=ratio_honest,
-        ratio_wolf=ratio_wolf,
+        ratio_honest=args.ratio_honest,
+        ratio_wolf=args.ratio_wolf,
         prob=0.2,
-        k=35,
+        k=145,
         random_fit_init=False,
     )
 
