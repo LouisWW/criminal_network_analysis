@@ -9,7 +9,7 @@ from typing import Tuple
 import graph_tool.all as gt
 import numpy as np
 from network_utils.network_combiner_helper_c import (
-    combine_by_small_world_attachment_helper,
+    combine_by_small_world_attachment_helper_faster,
 )
 from network_utils.network_combiner_helper_c import random_attachment_c
 from tqdm import tqdm
@@ -84,7 +84,7 @@ class NetworkCombiner:
         network.add_vertex(n=new_nodes)
         n_number_of_nodes = network.num_vertices()
         assert 4 <= k <= n_number_of_nodes, "4 << k << netowork_size"
-        accepted_edges = combine_by_small_world_attachment_helper(
+        accepted_edges = combine_by_small_world_attachment_helper_faster(
             n_number_of_nodes, new_nodes, k, prob
         )
         network.add_edge_list(accepted_edges)

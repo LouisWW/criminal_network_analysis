@@ -103,3 +103,46 @@ cpdef list combine_by_small_world_attachment_helper(int network_size,int new_nod
                         possible_links.remove((j,i))
 
     return possible_links
+
+
+@cython.wraparound(False)
+@cython.boundscheck(False) # turn off bounds-checking for entire function
+cpdef list combine_by_small_world_attachment_helper_faster(int network_size,int new_nodes,int k,float prob):
+    """Generate a Erdös-Rény Random Network around the given network.
+
+        The code is based on the pseudo-code described in
+        https://www.frontiersin.org/articles/10.3389/fncom.2011.00011/full
+    """
+    cdef:
+        int i
+        int j
+        list possible_links
+
+    possible_links = []
+    # First create a ring lattice
+    # The criminal network with th new nodes
+    for i in range(0,network_size-new_nodes):
+        for j in range(network_size-new_nodes+i,network_size-new_nodes+i-1+int(k/2)):
+                if j >= network_size:
+                    pass
+                else:
+                    possible_links.append((i,j))
+
+    # New nodes amongst them
+    for i in range(network_size-new_nodes,network_size):
+        for j in range(i+1,i+int(k/2)):
+                if j >= network_size:
+                    j=j-network_size
+                possible_links.append((i,j))
+
+    # Second rewire edges randomly with probability pw
+    all_nodes = list(range(0,network_size))
+    for idx, links in enumerate(possible_links):
+        if prob > drand48():
+            i,j = links
+            new_link = random.choice(all_nodes)
+            while new_link == j or (new_link <network_size-new_nodes and i <= network_size-new_nodes) or new_link == i:
+                new_link = random.choice(all_nodes)
+            possible_links[idx] = (i,new_link)
+
+    return possible_links

@@ -26,7 +26,7 @@ Explain src folder
 
 ## Run the phase-diagramms
     python3 new_main.py --phase-diagram -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -k17 -n-groups 1  -r 250000 -attach-meth random  -exec parallel
-    
+
 ## Profiling the code
 
 To profile the code, the cprofile package was used together with the gprof package to visualise the critical part. To conduct such an analysis, please use the following commands
