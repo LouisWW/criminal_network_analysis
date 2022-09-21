@@ -10,6 +10,9 @@ __date__ = 17/05/2022
 import itertools
 import logging
 import multiprocessing
+import os
+import random
+import re
 from copy import deepcopy
 from typing import Any
 from typing import DefaultDict
@@ -24,6 +27,8 @@ from network_utils.network_combiner import NetworkCombiner
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from simulators.sim_mart_vaq import SimMartVaq
+from utils.tools import DirectoryFinder
+from utils.tools import timestamp
 
 
 logger = logging.getLogger("logger")
@@ -84,12 +89,15 @@ class MetaSimulator:
         self.prob = prob
         self.random_fit_init = random_fit_init
 
-        self.network = self.create_population(self.criminal_network)
-
     @property
     def name(self) -> str:
         """Return the name of the simulator."""
         return self._name
+
+    @property
+    def network(self) -> gt.Graph:
+        """Create a graph if called."""
+        return self.create_population(self.criminal_network)
 
     def prepare_network(self, network_name: str) -> gt.Graph:
         """Get the network."""
@@ -182,10 +190,37 @@ class MetaSimulator:
                 total=repetition,
                 desc="Creating populations....",
             ):
-                list_of_population.append(population)
-            p.close()
-            p.join()
+                list_of_population.append(self.create_population(self.criminal_network))
+
+                p.close()
+                p.join()
+
+                # for i in  tqdm.tqdm(range(0,repetition),desc="Creating populations...."):
+                #    list_of_population.append(self.create_population(self.criminal_network))
         return list_of_population
+
+    def create_network_and_save(self, repetition: int) -> None:
+        """Create a list of populations and saves it in the folder."""
+        population_name = (
+            DirectoryFinder().population_data_dir
+            + f"{self.attachment_method}_h_{self.ratio_honest:.2f}_w_{self.ratio_wolf:.2f}_k_{self.k}"
+        )
+        list_of_population = self.create_list_of_populations(repetition)
+        for population in list_of_population:
+            population.save(population_name + "_" + timestamp() + "_graph.xml.gz")
+
+    def load_list_of_populations(
+        self, repetition: int, matching_files: List[str]
+    ) -> List[gt.Graph]:
+        """Load the created populations and return repetition amount of populations."""
+        list_of_populations = random.choices(matching_files, k=repetition)
+
+        list_of_loaded_population = []
+        for population in list_of_populations:
+            list_of_loaded_population.append(
+                gt.load_graph(DirectoryFinder().population_data_dir + population)
+            )
+        return list_of_loaded_population
 
     def avg_play(
         self,
@@ -214,7 +249,35 @@ class MetaSimulator:
                                                             Returns network and collected data.
         """
         # create n different populations
-        list_of_population = self.create_list_of_populations(repetition)
+        if len(
+            [
+                file
+                for file in os.listdir(DirectoryFinder().population_data_dir)
+                if re.search(self.attachment_method, file)
+            ]
+        ):
+
+            all_files = [
+                file
+                for file in os.listdir(DirectoryFinder().population_data_dir)
+                if re.search(self.attachment_method, file)
+            ]
+            matches = [f"h_{self.ratio_honest}", f"w_{self.ratio_wolf}", f"k_{self.k}"]
+            matching_files = [
+                file for file in all_files if all(word in file for word in matches)
+            ]
+            print(matching_files)
+            if len(matching_files) != 0:
+                list_of_population = self.load_list_of_populations(
+                    repetition, matching_files
+                )
+            elif len(matching_files) == 0:
+                logger.info("No exisiting networks could be loaded")
+                list_of_population = self.create_list_of_populations(repetition)
+
+        else:
+            logger.info("No exisiting networks could be loaded")
+            list_of_population = self.create_list_of_populations(repetition)
 
         # init simulator and use a place holder population
         simulator = SimMartVaq(list_of_population[0], execute=execute)

@@ -14,7 +14,6 @@ from typing import Union
 
 import graph_tool.all as gt
 import matplotlib as mpl
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
@@ -23,8 +22,7 @@ import powerlaw
 import seaborn as sns
 from config.config import ConfigParser
 from cycler import cycler
-from PIL import Image
-from PIL import PngImagePlugin
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from utils.stats import get_correlation
 from utils.tools import DirectoryFinder
 from utils.tools import timestamp
@@ -457,74 +455,30 @@ class Plotter(ConfigParser):
 
         mpl.rcParams["axes.spines.top"] = True
         mpl.rcParams["axes.spines.right"] = True
+        plt.rcParams["axes.labelsize"] = "xx-large"
+        plt.rcParams["axes.titlesize"] = "xx-large"
+        plt.rcParams["xtick.labelsize"] = "large"
+        plt.rcParams["ytick.labelsize"] = "large"
         fig, axs = plt.subplots(len(structures), len(cases))
 
         for case, k in zip(cases, range(axs.shape[0])):
             for structure, i in zip(structures, range(axs.shape[1])):
-                # translate array into rgb
-                dict_data[structure][case]["grid_status"] = np.asarray(
-                    dict_data[structure][case]["grid_status"]
-                )
-                dict_data[structure][case]["grid_value"] = np.asarray(
-                    dict_data[structure][case]["grid_value"]
-                )
-                rgb_array = np.zeros(
-                    (
-                        dict_data[structure][case]["grid_status"].shape[0],
-                        dict_data[structure][case]["grid_status"].shape[1],
-                        3,
-                    ),
-                    dtype=int,
-                )
-                for x_i in range(0, dict_data[structure][case]["grid_status"].shape[1]):
-                    for y_i in range(
-                        0, dict_data[structure][case]["grid_status"].shape[0]
-                    ):
-                        if (
-                            dict_data[structure][case]["grid_status"][y_i, x_i]
-                            == "mean_ratio_criminal"
-                        ):
-                            rgb_array[y_i, x_i, 0] = (
-                                255 * dict_data[structure][case]["grid_value"][y_i, x_i]
-                            )
-                            rgb_array[y_i, x_i, 1] = 0
-                            rgb_array[y_i, x_i, 2] = 0
-                        elif (
-                            dict_data[structure][case]["grid_status"][y_i, x_i]
-                            == "mean_ratio_wolf"
-                        ):
-                            rgb_array[y_i, x_i, 0] = 0
-                            rgb_array[y_i, x_i, 1] = 0
-                            rgb_array[y_i, x_i, 2] = (
-                                255 * dict_data[structure][case]["grid_value"][y_i, x_i]
-                            )
-                        elif (
-                            dict_data[structure][case]["grid_status"][y_i, x_i]
-                            == "mean_ratio_honest"
-                        ):
-                            rgb_array[y_i, x_i, 0] = 0
-                            rgb_array[y_i, x_i, 1] = (
-                                255 * dict_data[structure][case]["grid_value"][y_i, x_i]
-                            )
-                            rgb_array[y_i, x_i, 2] = 0
 
-                axs[k, i].imshow(
-                    rgb_array,
+                divider = make_axes_locatable(axs[k, i])
+                cax = divider.append_axes("right", size="5%", pad=0.05)
+                mat = axs[k, i].matshow(
+                    dict_data[structure][case]["ratio_criminal"],
                     aspect="auto",
                     interpolation="bilinear",
+                    cmap="viridis",
                     extent=[
-                        min(dict_data[structure][case]["y_range"]),
-                        max(dict_data[structure][case]["y_range"]),
-                        max(dict_data[structure][case]["x_range"]),
                         min(dict_data[structure][case]["x_range"]),
+                        max(dict_data[structure][case]["x_range"]),
+                        max(dict_data[structure][case]["y_range"]),
+                        min(dict_data[structure][case]["y_range"]),
                     ],
                 )
-
-                cmap = {1: [1, 0, 0, 1], 3: [0, 1, 0, 1], 2: [0, 0, 1, 1]}
-                labels = {1: "c", 2: "w", 3: "h"}
-                # create patches as legend
-                patches = [mpatches.Patch(color=cmap[i], label=labels[i]) for i in cmap]
-                axs[k, i].legend(handles=patches, fancybox=True, shadow=True)
+                fig.colorbar(mat, cax=cax, orientation="vertical")
 
                 # Add the \ to the param to print it in latex format
                 if dict_data[structure][case]["param_x"] in [
@@ -559,13 +513,12 @@ class Plotter(ConfigParser):
         for ax, structure in zip(axs[0], structures):
             ax.set_title(structure.capitalize(), weight="bold")
 
-        plt.tight_layout()
-
+        # plt.tight_layout()
         if self.args.save:
 
             fig_name = (
                 DirectoryFinder().result_dir_fig
-                + +"phase_diag_"
+                + "phase_diag_"
                 + param_x
                 + "_"
                 + param_y
@@ -573,23 +526,7 @@ class Plotter(ConfigParser):
                 + timestamp()
                 + ".png"
             )
-            plt.savefig(fig_name, dpi=300, bbox_inches="tight")
-            if "simulators" in kwargs:
-                simulators_str_dict = dict(
-                    {
-                        str(key): str(value)
-                        for key, value in kwargs["simulators"].__dict__.items()
-                    }
-                )
-                meta = PngImagePlugin.PngInfo()
-                for x in simulators_str_dict:
-                    meta.add_text(x, simulators_str_dict[x])
-
-                # Add the meta to it
-                im = Image.open(fig_name)
-                im.save(fig_name, "png", pnginfo=meta)
-                with open(fig_name.replace("png", "pkl"), "wb") as fig:
-                    pickle.dump(ax, fig)
+            self.save_figure(fig_name, axs)
         else:
             plt.show()
             return ax
@@ -787,6 +724,10 @@ class Plotter(ConfigParser):
                 filtered_data = dict_data[key]["df_total"][
                     dict_data[key]["df_total"][x_data_to_plot] != 0
                 ]
+                # remove inf and NaN entries
+                filtered_data = filtered_data.replace([np.inf, -np.inf], np.nan).dropna(
+                    axis=1
+                )
 
                 corr = get_correlation(
                     filtered_data[x_data_to_plot],
