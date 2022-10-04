@@ -9,6 +9,7 @@ import functools
 import logging
 import multiprocessing
 import os
+import sys
 from collections import OrderedDict
 from typing import Any
 from typing import Callable
@@ -122,16 +123,19 @@ class SensitivityAnalyser(ConfigParser):
             # Getting all param_values that haven't run yet
             latest_param_values = param_values[param_values.isnull().any(axis=1)]
 
-            for sub_pd in self.chunker(latest_param_values, 50):
-                latest_param_values_to_list = sub_pd.values.tolist()
-                list_of_param_comb = [
-                    (gt_network, self.problem, params, output_value, rounds)
-                    for params in latest_param_values_to_list
-                ]
+            if len(latest_param_values) == 0:
+                sys.exit(0)
+            else:
+                for sub_pd in self.chunker(latest_param_values, 50):
+                    latest_param_values_to_list = sub_pd.values.tolist()
+                    list_of_param_comb = [
+                        (gt_network, self.problem, params, output_value, rounds)
+                        for params in latest_param_values_to_list
+                    ]
 
-                y = self.sensitivity_analysis_parallel(list_of_param_comb)
-                param_values.loc[sub_pd.index, "y"] = y
-                self.overwrite_file(param_values, n_samples, rounds)
+                    y = self.sensitivity_analysis_parallel(list_of_param_comb)
+                    param_values.loc[sub_pd.index, "y"] = y
+                    self.overwrite_file(param_values, n_samples, rounds)
 
             # analyse
             sobol_indices = sobol.analyze(self.problem, np.asarray(param_values["y"]))
@@ -215,6 +219,7 @@ class SensitivityAnalyser(ConfigParser):
         graph_file = (
             DirectoryFinder().result_dir_data_sa
             + self.args.attach_meth
+            + f"_h_{self.args.ratio_honest:.2f}_w_{self.args.ratio_wolf}_k_{self.args.k}"
             + "_graph.xml.gz"
         )
         if not os.path.isfile(file):
@@ -267,6 +272,7 @@ class SensitivityAnalyser(ConfigParser):
         graph_file = (
             DirectoryFinder().result_dir_data_sa
             + self.args.attach_meth
+            + f"_h_{self.args.ratio_honest:.2f}_w_{self.args.ratio_wolf}_k_{self.args.k}"
             + "_graph.xml.gz"
         )
         param_values = pd.read_csv(file)

@@ -4,6 +4,7 @@ __author__ = Louis Weyland
 __date__ = 10/09/2022
 """
 import itertools
+from copy import deepcopy
 from typing import Any
 from typing import DefaultDict
 from typing import Dict
@@ -102,15 +103,26 @@ def get_correlation(x: List[Union[float, int]], y: List[Union[float, int]]) -> s
     return corr_with_p
 
 
+def bootstrapping(data: np.ndarray) -> np.ndarray:
+    """Return a bootstrapping of the matrix data.
+
+    Data needs to be a 2 dimensional matrix
+    """
+    shuffle_array = deepcopy(data)
+    for row in range(0, shuffle_array.shape[0]):
+        np.random.shuffle(shuffle_array[row, :].reshape((-1, 4)))
+    return shuffle_array
+
+
 def compare_time_series(
-    time_series: DefaultDict[str, DefaultDict[str, List[Any]]]
+    whole_data: DefaultDict[str, DefaultDict[str, List[Any]]]
 ) -> None:
     """Compare the time series by fitting a model and perform a anova-test on it."""
-    attachment_methods = list(time_series.keys())
+    attachment_methods = list(whole_data.keys())
     attachment_methods_comb = list(itertools.combinations(attachment_methods, 2))
     metrics = [
         metric
-        for metric in list(time_series[attachment_methods[0]].keys())
+        for metric in list(whole_data[attachment_methods[0]].keys())
         if metric.startswith("mean_")
         if "fitness" not in metric
         if "ratio" not in metric
@@ -121,15 +133,15 @@ def compare_time_series(
         for method in ["pcm", "frechet_dist", "area_between_two_curves", "dtw"]:
             for comb in attachment_methods_comb:
 
-                time_serie_a = np.zeros((len(time_series[comb[0]][metric]), 2))
-                time_serie_a[:, 0] = time_series[comb[0]][metric]
-                time_serie_a[:, 1] = time_series[comb[0]]["mean_iteration"]
+                time_serie_a = np.zeros((len(whole_data[comb[0]][metric]), 2))
+                time_serie_a[:, 0] = whole_data[comb[0]][metric]
+                time_serie_a[:, 1] = whole_data[comb[0]]["mean_iteration"]
 
-                time_serie_b = np.zeros((len(time_series[comb[1]][metric]), 2))
-                time_serie_b[:, 0] = time_series[comb[1]][metric]
-                time_serie_b[:, 1] = time_series[comb[1]]["mean_iteration"]
+                time_serie_b = np.zeros((len(whole_data[comb[1]][metric]), 2))
+                time_serie_b[:, 0] = whole_data[comb[1]][metric]
+                time_serie_b[:, 1] = whole_data[comb[1]]["mean_iteration"]
 
-                if method == "pmc":
+                if method == "pcm":
                     print(
                         f"{str(comb):50} : {'pcm':12} \
                         {similaritymeasures.pcm(time_serie_a,time_serie_b)}"
@@ -149,13 +161,46 @@ def compare_time_series(
                         f"{str(comb):50} : {'dtw':12} \
                             {similaritymeasures.dtw(time_serie_a,time_serie_b)[0]}"
                     )
+
+                # https://stats.stackexchange.com/questions/156864/comparing-2-sets-of-longitudinal-data
+                series_1, series_2 = comb
+                final_diff = []
+                for i in range(0, 10000):
+                    series_1_boot_samp_1 = bootstrapping(
+                        data=whole_data[series_1][metric.replace("mean", "m")]
+                    )
+                    series_1_boot_samp_2 = bootstrapping(
+                        data=whole_data[series_1][metric.replace("mean", "m")]
+                    )
+
+                    series_2_boot_samp_1 = bootstrapping(
+                        data=whole_data[series_2][metric.replace("mean", "m")]
+                    )
+
+                    # average aboslute differences
+                    aad = np.abs(
+                        np.mean(series_1_boot_samp_1) - np.mean(series_2_boot_samp_1)
+                    )
+                    var = np.abs(
+                        np.mean(series_1_boot_samp_1) - np.mean(series_1_boot_samp_2)
+                    )
+
+                    # Final Diff" can be interpreted to be the final difference between
+                    # the AAD of series 1 and series 2 after accounting for natural
+                    # variation in series 1.
+                    final_diff.append(aad - var)
+
+                print(
+                    f"Bootstrapping :  {str(comb):50}, value {np.percentile(final_diff, 1)}"
+                )
+
         print(30 * "-")
 
         # stats f_oneway functions takes the groups as input and returns F and P-value
         fvalue, pvalue = stats.f_oneway(
-            time_series["preferential"][metric.replace("mean", "m")][:, -1],
-            time_series["random"][metric.replace("mean", "m")][:, -1],
-            time_series["small-world"][metric.replace("mean", "m")][:, -1],
+            whole_data["preferential"][metric.replace("mean", "m")].flatten(),
+            whole_data["random"][metric.replace("mean", "m")].flatten(),
+            whole_data["small-world"][metric.replace("mean", "m")].flatten(),
         )
         print(
             f"Results of ANOVA test:\nThe F-statistic is: {fvalue}\nThe p-value is: {pvalue}"
@@ -163,21 +208,23 @@ def compare_time_series(
 
         df_pref = pd.DataFrame(
             {
-                "score": time_series["preferential"][metric.replace("mean", "m")][
-                    :, -1
-                ],
+                "score": whole_data["preferential"][
+                    metric.replace("mean", "m")
+                ].flatten(),
                 "group": "preferential",
             }
         )
         df_rand = pd.DataFrame(
             {
-                "score": time_series["random"][metric.replace("mean", "m")][:, -1],
+                "score": whole_data["random"][metric.replace("mean", "m")].flatten(),
                 "group": "random",
             }
         )
         df_sw = pd.DataFrame(
             {
-                "score": time_series["small-world"][metric.replace("mean", "m")][:, -1],
+                "score": whole_data["small-world"][
+                    metric.replace("mean", "m")
+                ].flatten(),
                 "group": "small-world",
             }
         )

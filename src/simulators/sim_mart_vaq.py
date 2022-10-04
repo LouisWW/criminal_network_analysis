@@ -142,6 +142,7 @@ class SimMartVaq:
         measure_topology: bool = False,
         measure_likelihood_corr: bool = False,
         show_no_bar: bool = True,
+        rnd_fit_init: bool = False,
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
         """Run the simulation.
 
@@ -151,7 +152,10 @@ class SimMartVaq:
         damage is inflicted on others.
         """
         network.status = np.asarray(list(network.vp.state))
-        network.fitness = np.zeros(network.num_vertices())
+        if rnd_fit_init:
+            network.fitness = np.random.uniform(50, -50, network.num_vertices())
+        else:
+            network.fitness = np.zeros(network.num_vertices())
         network.age = np.zeros(network.num_vertices())
 
         # collectors which collects the ratio and fitness over each iteration
@@ -301,6 +305,7 @@ class SimMartVaq:
         measure_likelihood_corr: bool = False,
         collect_fitness: bool = False,
         show_no_bar: bool = False,
+        rnd_fit_init: bool = False,
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
@@ -338,6 +343,7 @@ class SimMartVaq:
                                 measure_topology,
                                 measure_likelihood_corr,
                                 show_no_bar,
+                                rnd_fit_init,
                             )
                             for i in range(0, repetition)
                         ]
@@ -359,6 +365,7 @@ class SimMartVaq:
                                 measure_topology,
                                 measure_likelihood_corr,
                                 show_no_bar,
+                                rnd_fit_init,
                             )
                             for i in range(0, repetition)
                         ]
@@ -389,6 +396,7 @@ class SimMartVaq:
                         measure_topology,
                         measure_likelihood_corr,
                         show_no_bar,
+                        rnd_fit_init,
                     )
                 )
 
@@ -410,6 +418,7 @@ class SimMartVaq:
             measure_topology,
             measure_likelihood_corr,
             show_no_bar,
+            rnd_fit_init,
         ) = tuple_of_variable
 
         _, data_collector = self.play(
@@ -421,6 +430,7 @@ class SimMartVaq:
             measure_topology,
             measure_likelihood_corr,
             show_no_bar,
+            rnd_fit_init,
         )
         return data_collector
 

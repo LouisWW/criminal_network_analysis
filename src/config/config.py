@@ -55,6 +55,12 @@ class ConfigParser:
         )
 
         parser.add_argument(
+            "--compare-w-rnd-init",
+            action="store_true",
+            help="""Compares the outcome of the simulations if a random init was used or not.""",
+        )
+
+        parser.add_argument(
             "-read-data",
             type=str,
             default=None,

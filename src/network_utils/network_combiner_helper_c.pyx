@@ -122,7 +122,7 @@ cpdef list combine_by_small_world_attachment_helper_faster(int network_size,int 
     # First create a ring lattice
     # The criminal network with th new nodes
     for i in range(0,network_size-new_nodes):
-        for j in range(network_size-new_nodes+i,network_size-new_nodes+i-1+int(k/2)):
+        for j in range(network_size-new_nodes+i,network_size-new_nodes+i-1+int(k)):
                 if j >= network_size:
                     pass
                 else:
@@ -130,7 +130,7 @@ cpdef list combine_by_small_world_attachment_helper_faster(int network_size,int 
 
     # New nodes amongst them
     for i in range(network_size-new_nodes,network_size):
-        for j in range(i+1,i+int(k/2)):
+        for j in range(i+1,i+int(k)):
                 if j >= network_size:
                     j=j-network_size
                 possible_links.append((i,j))

@@ -14,6 +14,7 @@ from typing import Union
 
 import graph_tool.all as gt
 import matplotlib as mpl
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
@@ -22,6 +23,7 @@ import powerlaw
 import seaborn as sns
 from config.config import ConfigParser
 from cycler import cycler
+from matplotlib.colors import Normalize
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from utils.stats import get_correlation
 from utils.tools import DirectoryFinder
@@ -229,6 +231,12 @@ class Plotter(ConfigParser):
             ax.set_xlabel(kwargs["xlabel"].capitalize(), weight="bold", fontsize=35)
         if "ylabel" in kwargs:
             ax.set_ylabel(kwargs["ylabel"].capitalize(), weight="bold", fontsize=35)
+
+        if "density_conv" in kwargs:
+            ax.set_xticks(
+                np.arange(0, len(kwargs["density_conv"])), labels=kwargs["density_conv"]
+            )
+
         # set legend
         ax.legend(fancybox=True, shadow=True, fontsize=35)
         ax.tick_params(labelsize=35)
@@ -278,6 +286,11 @@ class Plotter(ConfigParser):
                     raise KeyError(
                         f"Given key doesn't exist,{dict_data[keys_diff_structure[0]].keys()=}"
                     )
+                print(key_diff_structure, data)
+                print(
+                    dict_data[key_diff_structure][x_data_to_plot],
+                    dict_data[key_diff_structure][data],
+                )
                 ax.plot(
                     dict_data[key_diff_structure][x_data_to_plot],
                     dict_data[key_diff_structure][data],
@@ -411,7 +424,13 @@ class Plotter(ConfigParser):
                 )
 
                 if "xlabel" in kwargs:
-                    ax.set_xlabel(data.replace("_", " ").capitalize(), weight="bold")
+                    ax.set_xlabel(
+                        data.replace("mean_", "").replace("_", " ").capitalize(),
+                        weight="bold",
+                    )
+                    if "information" in data:
+                        ax.set_xlabel("Flow of information", weight="bold")
+
                 # set legend
                 ax.legend(fancybox=True, shadow=True)
                 ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
@@ -459,9 +478,16 @@ class Plotter(ConfigParser):
         plt.rcParams["axes.titlesize"] = "xx-large"
         plt.rcParams["xtick.labelsize"] = "large"
         plt.rcParams["ytick.labelsize"] = "large"
-        fig, axs = plt.subplots(len(structures), len(cases))
+        fig, axs = plt.subplots(len(cases), len(structures))
 
         for case, k in zip(cases, range(axs.shape[0])):
+
+            # data 1 normalizer=iter([Normalize(0,0.8),Normalize(0,0.03),Normalize(0,0.035)])
+            # data 2 normalizer=iter([Normalize(0,0.75),Normalize(0,0.025),Normalize(0,0.05)])
+
+            normalizer = iter(
+                [Normalize(0, 0.8), Normalize(0, 0.03), Normalize(0, 0.035)]
+            )
             for structure, i in zip(structures, range(axs.shape[1])):
 
                 divider = make_axes_locatable(axs[k, i])
@@ -470,6 +496,7 @@ class Plotter(ConfigParser):
                     dict_data[structure][case]["ratio_criminal"],
                     aspect="auto",
                     interpolation="bilinear",
+                    norm=next(normalizer),
                     cmap="viridis",
                     extent=[
                         min(dict_data[structure][case]["x_range"]),
@@ -477,6 +504,7 @@ class Plotter(ConfigParser):
                         max(dict_data[structure][case]["y_range"]),
                         min(dict_data[structure][case]["y_range"]),
                     ],
+                    # norm=normalizer
                 )
                 fig.colorbar(mat, cax=cax, orientation="vertical")
 
@@ -576,7 +604,12 @@ class Plotter(ConfigParser):
                 ax.ticklabel_format(
                     axis="x", style="sci", scilimits=(0, 0), useMathText="True"
                 )
-                ax.set_ylabel(data.replace("_", " ").capitalize(), weight="bold")
+                ax.set_ylabel(
+                    data.replace("mean_", "").replace("_", " ").capitalize(),
+                    weight="bold",
+                )
+                if "information" in data:
+                    ax.set_ylabel("Flow of information", weight="bold")
                 # set legend
                 ax.legend(
                     fancybox=True,

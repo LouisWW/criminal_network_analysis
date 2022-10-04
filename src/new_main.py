@@ -16,6 +16,7 @@ from config.config import ConfigParser
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
+from scipy import stats
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 from utils.animation import Animateur
@@ -185,7 +186,9 @@ elif args.plot:
     # Get the mean of the data
     for structure, data in whole_data.items():
         whole_data[structure] = get_mean_std_over_list(data)
-        whole_data[structure] = concat_df(whole_data[structure], 250000)
+        whole_data[structure] = concat_df(whole_data[structure], 100000)
+
+    compare_time_series(whole_data)
 
     # Ready to be plotted
     ax_0 = plotter.plot_lines(
@@ -220,10 +223,10 @@ elif args.plot:
         xlabel="Rounds",
         ylabel="Ratio (%)",
         plot_deviation="sem",
-        ylim=[0, 0.03],
+        ylim=[0, 0.5],
         legend_size=20,
-        axes_size=25,
-        thick_size=20,
+        axes_size=30,
+        tick_size=30,
     )
 
     # compare_time_series(whole_data)
@@ -290,7 +293,7 @@ elif args.whole_pipeline:
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
         prob=0.2,
-        k=145,
+        k=74,
         attachment_method="small-world",
     )
 
@@ -494,13 +497,18 @@ elif args.sensitivity_analysis_links:
                 ) as fp:
                     json.dump(whole_data, fp, indent=4)
 
-    plotter.plot_violin(whole_data, ylabel="Ratio (%)", xlabel="Link")
+    plotter.plot_violin(
+        whole_data,
+        ylabel="Ratio (%)",
+        xlabel="Density",
+        density_conv=[0.0074, 0.013, 0.018, 0.023, 0.029],
+    )
 
 elif args.phase_diagram:
 
     file_name = DirectoryFinder().result_dir_data_phase_diag + "data.json"
 
-    resolution = 10  # of the grid
+    resolution = 6  # of the grid
 
     if os.path.isfile(file_name) and os.access(file_name, os.R_OK):
         with open(file_name) as fp:
@@ -512,20 +520,26 @@ elif args.phase_diagram:
             "case_1": {
                 "param_y": "gamma",
                 "y_range": np.linspace(0, 1, resolution),
-                "x_range": np.linspace(0, 300, resolution),
+                "x_range": np.linspace(0, 1000, resolution),
                 "param_x": "r_c",
             },
             "case_2": {
                 "param_y": "beta_s",
-                "y_range": np.linspace(0, 300, resolution),
-                "x_range": np.linspace(0, 300, resolution),
+                "y_range": np.linspace(0, 1000, resolution),
+                "x_range": np.linspace(0, 1000, resolution),
                 "param_x": "r_c",
             },
             "case_3": {
                 "param_y": "beta_h",
-                "y_range": np.linspace(0, 300, resolution),
-                "x_range": np.linspace(0, 300, resolution),
+                "y_range": np.linspace(0, 1000, resolution),
+                "x_range": np.linspace(0, 1000, resolution),
                 "param_x": "r_c",
+            },
+            "case_4": {
+                "param_y": "delta",
+                "y_range": np.linspace(0, 1, resolution),
+                "x_range": np.linspace(0, 1, resolution),
+                "param_x": "tau",
             },
         }
 
@@ -547,7 +561,7 @@ elif args.phase_diagram:
             ratio_honest=args.ratio_honest,
             ratio_wolf=args.ratio_wolf,
             prob=0.2,
-            k=74 if structure in ["preferential", "random"] else 145,
+            k=74,
         )
         for case in meta_phase_diag[structure].keys():
             # check if grid is already been calculated
@@ -569,20 +583,45 @@ elif args.phase_diagram:
 
                 for x_i in range(0, nx):
                     for y_i in range(0, ny):
-                        variable_dict = dict(
-                            zip(
-                                [
-                                    meta_phase_diag[structure][case]["param_x"],
-                                    meta_phase_diag[structure][case]["param_y"],
-                                    "c_c",
-                                ],
-                                [
-                                    meta_phase_diag[structure][case]["x_range"][x_i],
-                                    meta_phase_diag[structure][case]["y_range"][y_i],
-                                    meta_phase_diag[structure][case]["x_range"][x_i],
-                                ],
+
+                        if case != "case_4":
+                            variable_dict = dict(
+                                zip(
+                                    [
+                                        meta_phase_diag[structure][case]["param_x"],
+                                        meta_phase_diag[structure][case]["param_y"],
+                                        "c_c",
+                                    ],
+                                    [
+                                        meta_phase_diag[structure][case]["x_range"][
+                                            x_i
+                                        ],
+                                        meta_phase_diag[structure][case]["y_range"][
+                                            y_i
+                                        ],
+                                        meta_phase_diag[structure][case]["x_range"][
+                                            x_i
+                                        ],
+                                    ],
+                                )
                             )
-                        )
+                        else:
+                            variable_dict = dict(
+                                zip(
+                                    [
+                                        meta_phase_diag[structure][case]["param_x"],
+                                        meta_phase_diag[structure][case]["param_y"],
+                                    ],
+                                    [
+                                        meta_phase_diag[structure][case]["x_range"][
+                                            x_i
+                                        ],
+                                        meta_phase_diag[structure][case]["y_range"][
+                                            y_i
+                                        ],
+                                    ],
+                                )
+                            )
 
                         all_files = [
                             file
@@ -617,6 +656,13 @@ elif args.phase_diagram:
                             ith_collect=args.rounds,  # only need the last measurement
                             repetition=args.n_samples,
                             show_no_bar=True,
+                        )
+
+                        print(f"{variable_dict=}")
+                        print(f"{simulators.r_c=},{simulators.c_c=}")
+                        print(
+                            "criminal_ratio = "
+                            + str(data_collector["mean_ratio_criminal"][-1])
                         )
 
                         # Only look at the ratio and get the status with the highest ratio
@@ -678,7 +724,7 @@ elif args.get_network_stats:
         attachment_method="preferential",
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        k=74,
+        k=80,
         random_fit_init=False,
     )
 
@@ -688,7 +734,7 @@ elif args.get_network_stats:
         attachment_method="random",
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        k=74,  # 0.0034 for random
+        k=80,  # 0.0034 for random
         random_fit_init=False,
     )
 
@@ -699,7 +745,7 @@ elif args.get_network_stats:
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
         prob=0.2,
-        k=145,
+        k=80,
         random_fit_init=False,
     )
 
@@ -744,3 +790,97 @@ elif args.get_network_stats:
             fp,
             indent=4,
         )
+
+elif args.compare_w_rnd_init:
+    """Compare simulations with random fitness init or not."""
+
+    structures = [
+        "preferential",
+        "random",
+        "small-world",
+        "preferential_rnd",
+        "random_rnd",
+        "small-world_rnd",
+    ]
+    whole_data = {}
+    for structure in structures:
+        # Add nodes to network
+        # First convert to gt
+        meta_sim = MetaSimulator(
+            network_name=args.read_data,
+            attachment_method=structure.replace("_rnd", ""),
+            ratio_honest=args.ratio_honest,
+            ratio_wolf=args.ratio_wolf,
+            k=args.k,
+        )
+
+        logger.info(f"Doing {structure} simulation")
+        data_collector = meta_sim.avg_play(
+            rounds=args.rounds,
+            n_groups=args.n_groups,
+            repetition=args.n_samples,
+            ith_collect=int(args.rounds / 15),
+            measure_topology=args.topo_meas,
+            measure_likelihood_corr=args.criminal_likelihood_corr,
+            execute=args.execute,
+            rnd_fit_init=False if "rnd" not in structure else True,
+        )
+        logger.info("Done")
+
+        whole_data[structure] = data_collector
+    print(whole_data.keys())
+    ax_1 = plotter.plot_lines(
+        dict_data={
+            " ": {
+                "mean_preferential": whole_data["preferential"]["mean_ratio_criminal"],
+                "sem_preferential": whole_data["preferential"]["sem_ratio_criminal"],
+                "std_preferential": whole_data["preferential"]["std_ratio_criminal"],
+                "mean_random": whole_data["random"]["mean_ratio_criminal"],
+                "sem_random": whole_data["random"]["sem_ratio_criminal"],
+                "std_random": whole_data["random"]["std_ratio_criminal"],
+                "mean_small-world": whole_data["small-world"]["mean_ratio_criminal"],
+                "sem_small-world": whole_data["small-world"]["sem_ratio_criminal"],
+                "std_small-world": whole_data["small-world"]["std_ratio_criminal"],
+                "mean_iteration": whole_data["preferential"]["mean_iteration"],
+                "mean_preferential_rnd": whole_data["preferential_rnd"][
+                    "mean_ratio_criminal"
+                ],
+                "sem_preferential_rnd": whole_data["preferential_rnd"][
+                    "sem_ratio_criminal"
+                ],
+                "std_preferential_rnd": whole_data["preferential_rnd"][
+                    "std_ratio_criminal"
+                ],
+                "mean_random_rnd": whole_data["random_rnd"]["mean_ratio_criminal"],
+                "sem_random_rnd": whole_data["random_rnd"]["sem_ratio_criminal"],
+                "std_random_rnd": whole_data["random_rnd"]["std_ratio_criminal"],
+                "mean_small-world_rnd": whole_data["small-world_rnd"][
+                    "mean_ratio_criminal"
+                ],
+                "sem_small-world_rnd": whole_data["small-world_rnd"][
+                    "sem_ratio_criminal"
+                ],
+                "std_small-world_rnd": whole_data["small-world_rnd"][
+                    "std_ratio_criminal"
+                ],
+                "mean_iteration_rnd": whole_data["preferential_rnd"]["mean_iterations"],
+            }
+        },
+        y_data_to_plot=[
+            "mean_preferential",
+            "mean_random",
+            "mean_small-world",
+            "mean_preferential_rnd",
+            "mean_random_rnd",
+            "mean_small-world_rnd",
+        ],
+        x_data_to_plot="mean_iteration",
+        title=False,
+        xlabel="Rounds",
+        ylabel="Ratio (%)",
+        plot_deviation="sem",
+        # ylim=[0, 0.1],
+        legend_size=20,
+        axes_size=30,
+        tick_size=30,
+    )

@@ -233,6 +233,7 @@ class MetaSimulator:
         collect_fitness: bool = False,
         execute: str = "parallel",
         show_no_bar: bool = False,
+        rnd_fit_init: bool = False,
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
@@ -266,7 +267,6 @@ class MetaSimulator:
             matching_files = [
                 file for file in all_files if all(word in file for word in matches)
             ]
-            print(matching_files)
             if len(matching_files) != 0:
                 list_of_population = self.load_list_of_populations(
                     repetition, matching_files
@@ -292,5 +292,6 @@ class MetaSimulator:
             measure_likelihood_corr=measure_likelihood_corr,
             collect_fitness=collect_fitness,
             show_no_bar=show_no_bar,
+            rnd_fit_init=rnd_fit_init,
         )
         return data_collector
