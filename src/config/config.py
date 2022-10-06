@@ -29,7 +29,7 @@ class ConfigParser:
             nargs="?",
             const="c",
             choices=["c", "n"],
-            help="""Defines if the network should be visualized.
+            help="""Define if the network should be visualized.
                             c = circular network,
                             n = normal/random""",
         )
@@ -38,13 +38,13 @@ class ConfigParser:
             "-execute",
             type=str,
             choices=["parallel", "sequential"],
-            help="""Runs the simulation in parallel or sequential.""",
+            help="""Run the simulation in parallel or sequential.""",
         )
 
         parser.add_argument(
-            "--create-population",
+            "-create-population",
             action="store_true",
-            help="""Create and save the population (--save falg not needed)""",
+            help="""Create and save the population (-save flag not needed)""",
         )
 
         parser.add_argument(
@@ -55,9 +55,9 @@ class ConfigParser:
         )
 
         parser.add_argument(
-            "--compare-w-rnd-init",
+            "-compare-w-rnd-init",
             action="store_true",
-            help="""Compares the outcome of the simulations if a random init was used or not.""",
+            help="""Compare the outcome of the simulations if a random init was used or not.""",
         )
 
         parser.add_argument(
@@ -67,8 +67,7 @@ class ConfigParser:
             nargs="?",
             const="montagna_calls",
             choices=["cunha", "montagna_calls", "montagna_meetings"],
-            help="""Defines which network to read; cunha, montagna_meetings, montagna_calls.
-                    (MetaSimulator)""",
+            help="""Define which network to read; cunha, montagna_meetings, montagna_calls.""",
         )
 
         parser.add_argument(
@@ -78,14 +77,14 @@ class ConfigParser:
             nargs="?",
             const="preferential",
             choices=["preferential", "random", "small-world"],
-            help="""Defines the attachment methods around the criminal network. (MetaSimulator)""",
+            help="""Define the attachment methods around the criminal network""",
         )
 
         parser.add_argument(
             "-k",
             type=int,
             default=None,
-            help="""Defines how many new connection a
+            help="""Define how many new connection a
                     new node is making while generating a population.""",
         )
 
@@ -98,7 +97,7 @@ class ConfigParser:
         parser.add_argument(
             "-sim-mart-vaq",
             action="store_true",
-            help="""Defines if the simulation based on Martinez-Vaquero is run.
+            help="""Define if the simulation based on Martinez-Vaquero is run.
                     Thereby, for each repetition the another network is used.""",
         )
 
@@ -106,24 +105,24 @@ class ConfigParser:
             "-case",
             type=str,
             choices=["const", "growth", "decline"],
-            help="""Defines which case is simulated""",
+            help="""Define which case is simulated""",
         )
 
         parser.add_argument(
             "-whole-pipeline",
             action="store_true",
-            help="""Runs the whole simulation for the different structures in one go.
+            help="""Run the whole simulation for the different structures in one go.
                     Caution: Might be unstable!!!""",
         )
         parser.add_argument(
             "-criminal-likelihood-corr",
             action="store_true",
-            help="""Defines if a correlation between criminal and node centrality exists.""",
+            help="""Define if a correlation between criminal and node centrality exists.""",
         )
         parser.add_argument(
             "-sim-mart-vaq-w-net",
             action="store_true",
-            help="""Defines if the simulation based on Martinez-Vaquero is run.
+            help="""Define if the simulation based on Martinez-Vaquero is run.
                     Thereby, for each repetition an new network is created.""",
         )
 
@@ -145,59 +144,59 @@ class ConfigParser:
             nargs="?",
             const="sim-mart-vaq",
             choices=["sim-mart-vaq"],
-            help="""Defines to run a sensitivity analysis on one of the choices.""",
+            help="""Define to run a sensitivity analysis on one of the choices.""",
         )
 
         parser.add_argument(
             "--sensitivity-analysis-links",
             action="store_true",
-            help="""Defines to run a sensitivity analysis on one of the choices.""",
+            help="""Define to run a sensitivity analysis on one of the choices.""",
         )
 
         parser.add_argument(
             "-phase-diag",
             "--phase-diagram",
             action="store_true",
-            help="""Creates a phase diagram with the defined parameters.""",
+            help="""Create a phase diagram with the defined parameters.""",
         )
 
         parser.add_argument(
             "-topo-meas",
             action="store_true",
-            help="""Defines to run a comparative analysis of the different simulations.
+            help="""Define to run a comparative analysis of the different simulations.
                     Thereby, for each repetition the same network is used.""",
         )
 
         parser.add_argument(
             "-topo-meas-w-net",
             action="store_true",
-            help="""Defines to run a comparative analysis of the different simulations.
+            help="""Define to run a comparative analysis of the different simulations.
                     Thereby, for each repetition an new network is created.""",
         )
         parser.add_argument(
             "-n-samples",
             type=int,
             default=15,
-            help="""Defines the sampling number for the saltelli method.(default: %(default)s) """,
+            help="""Define the sampling number for the saltelli method.(default: %(default)s) """,
         )
 
         parser.add_argument(
             "-output-value",
             type=str,
             default=None,
-            help="""Defines on which output value to focus for the sensitivity analysis.""",
+            help="""Define on which output value to focus for the sensitivity analysis.""",
         )
 
         parser.add_argument(
             "-save",
             action="store_true",
-            help="""Defines if the results should be saved.""",
+            help="""Define if the results should be saved.""",
         )
 
         parser.add_argument(
             "-plot",
             action="store_true",
-            help="""Defines if the results should be plotted.ss""",
+            help="""Define if the results should be plotted.ss""",
         )
 
         parser.add_argument(
@@ -205,7 +204,7 @@ class ConfigParser:
             "--rounds",
             type=int,
             default=10,
-            help="""Defines the numbers of rounds played. Can be applied to  SimMartVaq.play and
+            help="""Define the numbers of rounds played. Can be applied to SimMartVaq.play and
             SensitivityAnalyser.sim_mart_vaq_sa
             """,
         )
@@ -214,72 +213,72 @@ class ConfigParser:
             "-n-groups",
             type=int,
             default=1,
-            help="""Defines the number of groups for each round.
+            help="""Define the number of groups for each round.
             """,
         )
         parser.add_argument(
             "-ratio-honest",
             type=float,
-            help="""Defines the initial ratio of honest in a population.
+            help="""Define the initial ratio of honest in a population.
             """,
         )
 
         parser.add_argument(
             "-ratio-wolf",
             type=float,
-            help="""Defines the initial ratio of wolves in a population.
+            help="""Define the initial ratio of wolves in a population.
             """,
         )
 
         parser.add_argument(
-            "--delta",
+            "-delta",
             type=float,
-            help="""Defines the influence of criminals on the acting of the wolf (SimMartVaq)
+            help="""Define the influence of criminals on the acting of the wolf (SimMartVaq)
             """,
         )
 
         parser.add_argument(
-            "--tau",
+            "-tau",
             type=float,
             help="""Influence of wolf's action on criminals (SimMartVaq)""",
         )
 
         parser.add_argument(
-            "--gamma",
+            "-gamma",
             type=float,
             help="""Punishment ratio for the members of a criminal organization  (SimMartVaq)""",
         )
 
         parser.add_argument(
-            "--beta-s", type=int, help="""State punishment value (SimMartVaq)"""
+            "-beta-s", type=int, help="""State punishment value (SimMartVaq)"""
         )
 
         parser.add_argument(
-            "--beta-h", type=int, help="""Civil punishment value (SimMartVaq)"""
+            "-beta-h", type=int, help="""Civil punishment value (SimMartVaq)"""
         )
 
         parser.add_argument(
-            "--beta-c", type=int, help="""Criminal punishment value (SimMartVaq)"""
+            "-beta-c", type=int, help="""Criminal punishment value (SimMartVaq)"""
         )
 
         parser.add_argument(
-            "--c-w", type=int, help="""Damage caused by wolf (SimMartVaq)"""
+            "-c-w", type=int, help="""Damage caused by wolf (SimMartVaq)"""
         )
 
         parser.add_argument(
-            "--c-c", type=int, help="""Damage caused by criminal (SimMartVaq)"""
+            "-c-c", type=int, help="""Damage caused by criminal (SimMartVaq)"""
         )
 
         parser.add_argument(
-            "--r-w", type=int, help="""Reward ratio for wolf (SimMartVaq)"""
+            "-r-w", type=int, help="""Reward ratio for wolf (SimMartVaq)"""
         )
 
         parser.add_argument(
-            "--r-c", type=int, help="""Reward ratio for criminal (SimMartVaq)"""
+            "-r-c", type=int, help="""Reward ratio for criminal (SimMartVaq)"""
         )
 
         parser.add_argument(
-            "--r-h", type=int, help="""Reward ratio for honest (SimMartVaq)"""
+            "-r-h", type=int, help="""Reward ratio for honest (SimMartVaq)"""
         )
 
         parser.add_argument(
@@ -290,7 +289,7 @@ class ConfigParser:
         )
 
         parser.add_argument(
-            "--mutation-prob", type=float, help="""Mutation probability (SimMartVaq)"""
+            "-mutation-prob", type=float, help="""Mutation probability (SimMartVaq)"""
         )
 
         parser.add_argument("-verbose", action="store_true", help="Print extra info")
