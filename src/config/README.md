@@ -1,6 +1,4 @@
-Explain config folder
-
-The [config.py](config.py) file captures all the flags given to main.py. Below, you can find the list of all possible flags can can be used in different combinations.
+The [config.py](config.py) file captures all the flags given to main.py. Below, you can find the list of all possible flags can be used in different combinations.
 
 ````
 usage: CRIMINAL NETWORK ANALYSIS [-h] [-draw-network [{c,n}]] [-execute {parallel,sequential}] [-create-population] [-get-network-stats] [-compare-w-rnd-init]
