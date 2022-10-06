@@ -40,3 +40,5 @@ dependencies:
     - gprof2dot
     - statsmodel
     - similaritymeasures
+    - numpy
+    - seaborn
