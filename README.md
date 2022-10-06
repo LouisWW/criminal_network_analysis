@@ -1,5 +1,6 @@
-# Criminal_network_analysis
-Analysing the resilience of criminal networks in an iterative fashion.
+# Longitudinal analysis of the topology of criminal networks using a simple cost-benefit agent-based model
+
+
 
 <p align="center">
 
@@ -11,8 +12,22 @@ Analysing the resilience of criminal networks in an iterative fashion.
 
 ---
 
+In the context of the master thesis for the [Computational Science](https://www.uva.nl/en/programmes/masters/computational-science/computational-science.html) programme at the [University of Amsterdam](https://www.uva.nl/en) and the [Vrije Universiteit Amsterdam](https://vu.nl/nl),  the following repository contains all the code to reproduce the simulations and the results presented in the thesis. The subject of the thesis is the understanding of the dynamics of a criminal network within a population. Thus, based on the following [article](https://pubmed.ncbi.nlm.nih.gov/31278354/), a cost-benefit model was further developed by implementing an explicit network structure. In other words, the interactions between agents are dictated by their social ties. In this way, the evolution of the criminal network can be simulated and analysed.  Thus, characteristics such as density, information flow or size of the largest component are analysed. The figure below visualise the simulation of a social network, where red nodes correspond to members of a criminal organisation, blue nodes correspond to independent criminals and green nodes represent law-abiding civilians.
+
+
 ![Alt Text](src/results/video/simulation_preferential.gif)
 
+Based on the population shown above, the members of a criminal organisation are filtered out, generating the following criminal network. The evolution of this specific network is analysed using social network analysis.
+
+![Alt Text](src/results/video/simulation_filtered_preferential.gif)
+
+---
+
+## Code
+
+Folder [src](/src) contains all  the code for this project.
+
+---
 
 ## Setup
 ### Requirements
@@ -20,7 +35,7 @@ Analysing the resilience of criminal networks in an iterative fashion.
 * Python 3.8
 
 ### Environment
-In this repo two environments are used, Pipenv and conda. Pipenv is a light tool, which makes sure that the versions and dependencies are correct. However, to install tools that build on other languages such as C/C++, for mac, conda is preferred. Conda has its own complier which makes it really easy to install packages
+In this repo two environments are used, Pipenv and conda. Pipenv is a light tool, which makes sure that the versions and dependencies are correct. However, to install tools that build on other languages such as C/C++, for mac, conda is preferred. Conda has its compiler which makes it easy to install packages. **It is possible that some packages are missing in Pipfile/conda_environment.yml and need to be manually added with pipenv install.../pip3 install... respectively!!!**
 
 ### Ubuntu 20.04
 #### Pipenv (preferred for Ubuntu)
@@ -113,6 +128,6 @@ What you need to do it either change your stuff, if an error is shown and/or do 
 #### Compile cython
 
 The last step to run the code is to compile the cython code (.pyx files)
-To do so, run in src/ the following command
+To do so, run in [src](/src) the following command
 
-    python3 setup.py build_ext --inplace
+    make compile_cython
