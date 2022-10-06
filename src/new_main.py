@@ -16,7 +16,6 @@ from config.config import ConfigParser
 from network_utils.network_converter import NetworkConverter
 from network_utils.network_reader import NetworkReader
 from network_utils.network_stats import NetworkStats
-from scipy import stats
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 from utils.animation import Animateur
@@ -724,7 +723,7 @@ elif args.get_network_stats:
         attachment_method="preferential",
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        k=80,
+        k=args.k,
         random_fit_init=False,
     )
 
@@ -734,7 +733,7 @@ elif args.get_network_stats:
         attachment_method="random",
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
-        k=80,  # 0.0034 for random
+        k=args.k,  # 0.0034 for random
         random_fit_init=False,
     )
 
@@ -745,7 +744,7 @@ elif args.get_network_stats:
         ratio_honest=args.ratio_honest,
         ratio_wolf=args.ratio_wolf,
         prob=0.2,
-        k=80,
+        k=args.k,
         random_fit_init=False,
     )
 
