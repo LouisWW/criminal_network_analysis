@@ -1,4 +1,4 @@
-"""This script's intention is to combined a given network with a synthetical network.
+"""This script's intention is to combined a given network with a synthetical population.
 
 __author__ = Louis Weyland
 __date__   = 6/02/2022
@@ -16,9 +16,10 @@ from tqdm import tqdm
 
 
 class NetworkCombiner:
-    """Combines two network together.
+    """Creates a network around an initial criminal network.
 
     In other words, it creates/attach nodes to an existing network.
+    Thereby, the ties within the network are not modified.
     """
 
     def __init__(self) -> None:
