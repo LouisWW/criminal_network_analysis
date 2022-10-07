@@ -1,33 +1,86 @@
-Explain src folder
+## Code
+---
+### First steps
 
+Through the *make* command, various processes can be initialised. Firstly, the following command needs to be run in order to compile the Cython code
 
+    make compile_cython
+
+Next to this command, with *make* the following commands are possible
+
+* make tests               (to run the tests)
+* make test_notebooks     (to test the notebooks (not necessary))
+* make docs_view          (generate the documentation)
+* make profiling_sim_mart (profiles the simulations and returns .pstasts file)
+* make clean              (deleted cache and other garbage files)
+
+In this folder, all the code is included for reproducing the simulation. The following tree shows the structure of the code.
+
+```
+./
+├── config/                            (contains the flag/args.parser)
+├── data/                              (contains data about criminal networks)
+├── network_utils/                     (contains all the code to analyse a social network)
+├── research/                          (contains notebook for quick researches (garbage folder))
+├── results/
+│   ├── data/                          (contains the generated time-demanding results)
+│   │   ├── network_stats/             (contains the results about the populations' characteristics)
+│   │   ├── sensitivity_analysis/      (contains the sensitivity analysis results)
+│   │   └── sim_mart_vaq/              (contains the results of the simulation including topological measurements)
+│   ├── figures/                       (contains all the generated & saved figures)
+│   ├── notebooks/                     (contains the results shown in a notebook)
+│   └── video/                         (contains the visualisation of the populations as gifs)
+├── simulators/                        (contains the code for the simulation as well as creating the populations)
+├── test/                              (contains the testing framework using pytest)
+└── utils/                             (contains all the utility functions)
+.main.py                               (contains all the helper functions to run the different analysis/simulations)
+```
 
 ---
 # Running commands
-### Run a comparsion analysis on the characterisitcs of a network
-    python3 new_main.py -get-network-stats -read-data montagna_calls -ratio-honest 0.99 -ratio-wolf 0.001 -n-samples 10 -save
+The different results/simulations are run through [main.py](main.py) using various commands as shown below. Thereby, it is important to run all the commands. In case a programme takes too long, it is possible to run it in the background using the [bash.script](bash_script.sh)  with the following command
+
+    nohup ./bash_script.sh &
+
+
+### Run a comparison analysis on the characteristics of a network
+To get an overview of the different characteristics of the populations, the following command computes the mean of various social network analysis concepts and saves them in the folder [network_stats](results/data/network_stats/). The network changes depending on the ratio of honest/wolf but also depending on k, the number of links the added nodes have.
+
+    python3 main.py -get-network-stats -read-data montagna_calls -ratio-honest 0.99 -ratio-wolf 0.001 -k 80 -n-samples 10 -save
 
 
 ### Run the whole pipeline
-    nohup python3 new_main.py -read-data montagna_calls -whole-pipeline -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec sequential &
+This function will run the whole pipeline, create the different populations and collect the data along the simulation before plotting the results (Takes a lot of time!!!)
 
+    python3 main.py -whole-pipeline -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec sequential
 
-### Run the simulation chunck vise
-    nohup python3 new_main.py -read-data montagna_calls -sim-mart-vaq -case const -attach-meth preferential -k 17 -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save  -exec parallel &
+### Run the simulation chunkwise
+To overcome the aforementioned constraints, the simulation can be run in chunks. Thereby, one needs to specify which population structure needs to be simulated. The results are appended in the folder [sim_mart_vaq](results/data/sim_mart_vaq/).
+
+    python3 main.py -sim-mart-vaq -read-data montagna_calls  -case const -attach-meth preferential -k 17 -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec parallel &
 
 ### Run sensitivity analysis
-    python3 new_main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 2500 -n-samples 32  -exec parallel -output-value ratio_criminal -attach-meth random -k 2 -save
+To run the sensitivity analysis, the following command can be used.
+The resulting table is saved in [sensitivity_analysis](results/data/sensitivity_analysis/)
 
-### Run sensitvitiy analysis in chuncks
-    python3 new_main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000 -n-samples 512  -exec parallel -output-value ratio_criminal -attach-meth preferential -k 2 -running-chunk -save
+    python3 main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 2500 -k 2 -n-samples 32  -exec parallel -output-value ratio_criminal -attach-meth random -save
 
-## Run sensitivity analysis on the number of links
-    python3 new_main.py --sensitivity-analysis-links -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000  -exec parallel -output-value ratio_criminal
+### Run sensitivity analysis in chunkwise
+Since the sensitivity analysis takes up some time, it is possible to run it chunkwise. The results are saved in [sensitivity_analysis](results/data/sensitivity_analysis/).
 
-## Run the phase-diagramms
-    python3 new_main.py --phase-diagram -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -k17 -n-groups 1  -r 250000 -attach-meth random  -exec parallel
+    python3 main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000 -n-samples 512  -exec parallel -output-value ratio_criminal -attach-meth preferential -k 2 -running-chunk -save
 
-## Profiling the code
+### Run sensitivity analysis on the number of links
+To analyse the impact of paramters *k* on the simulation, an analysis is conducted computing on various *k*. The results are saved in [sensitivity_links](results/data/sensitivity_links)
+
+    python3 main.py --sensitivity-analysis-links -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000  -exec parallel -output-value ratio_criminal
+
+### Run the phase-diagramms
+The following command runs the phase diagram of different parameters defined in main.py. The results are saved in [phase_diag](results/data/phase_diag).
+
+    python3 main.py --phase-diagram -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -k 17 -n-groups 1  -r 250000 -attach-meth random  -exec parallel
+
+### Profiling the code
 
 To profile the code, the cprofile package was used together with the gprof package to visualise the critical part. To conduct such an analysis, please use the following commands
 
