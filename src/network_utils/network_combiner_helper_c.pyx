@@ -41,7 +41,7 @@ cdef extern from "stdlib.h":
 
 @cython.wraparound(False)
 @cython.boundscheck(False) # turn off bounds-checking for entire function
-cpdef list combine_by_small_world_attachment_helper_faster(int network_size,int new_nodes,int k,float prob):
+cpdef list combine_by_small_world_attachment_helper(int network_size,int new_nodes,int k,float prob):
     """Generate a Watts-Strogatz Network around the given network.
 
         The code is based on the pseudo-code described in
