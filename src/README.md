@@ -54,7 +54,7 @@ This function will run the whole pipeline, create the different populations and 
 
     python3 main.py -whole-pipeline -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec sequential
 
-### Run the simulation chunkwise
+### Run the simulation in chunks
 To overcome the aforementioned constraints, the simulation can be run in chunks. Thereby, one needs to specify which population structure needs to be simulated. The results are appended in the folder [sim_mart_vaq](results/data/sim_mart_vaq/).
 
     python3 main.py -sim-mart-vaq -read-data montagna_calls  -case const -attach-meth preferential -k 17 -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec parallel &
@@ -65,7 +65,7 @@ The resulting table is saved in [sensitivity_analysis](results/data/sensitivity_
 
     python3 main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 2500 -k 2 -n-samples 32  -exec parallel -output-value ratio_criminal -attach-meth random -save
 
-### Run sensitivity analysis in chunkwise
+### Run sensitivity analysis in chunks
 Since the sensitivity analysis takes up some time, it is possible to run it chunkwise. The results are saved in [sensitivity_analysis](results/data/sensitivity_analysis/).
 
     python3 main.py --sensitivity-analysis -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000 -n-samples 512  -exec parallel -output-value ratio_criminal -attach-meth preferential -k 2 -running-chunk -save
