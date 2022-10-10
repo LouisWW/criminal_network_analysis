@@ -30,7 +30,16 @@ class NetworkCombiner:
     def combine_by_preferential_attachment_faster(
         network: gt.Graph, new_nodes: int, k: int
     ) -> Tuple[gt.Graph, List[Tuple[int, int]]]:
-        """Apply preferential attachment to a existing network."""
+        """Apply preferential attachment to a existing network.
+
+        Args:
+            network (gt.Graph): criminal network.
+            new_nodes (int): number of new nodes to add.
+            k (int): number of links each new node comes with.
+
+        Returns:
+            Tuple[gt.Graph, List[Tuple[int, int]]]: returns the new network.
+        """
         # Get the number of nodes of the existing network
         accepted_edges = []
         for _ in tqdm(
@@ -60,10 +69,19 @@ class NetworkCombiner:
     def combine_by_random_attachment_faster(
         network: gt.Graph, new_nodes: int, k: int
     ) -> Tuple[gt.Graph, List[Tuple[int, int]]]:
-        """Generate a Erdös-Rény Random Network around the given network.
+        """Apply random attachment to a existing network.
 
+        Generate a Erdös-Rény Random Network around the given network.
         The code is based on the pseudo-code described in
         https://www.frontiersin.org/articles/10.3389/fncom.2011.00011/full
+
+        Args:
+            network (gt.Graph): criminal network
+            new_nodes (int): number of new nodes to add.
+            k (int): number of links each new node comes with.
+
+        Returns:
+            Tuple[gt.Graph, List[Tuple[int, int]]]:returns the new network.
         """
         # Add new nodes
         network.add_vertex(n=new_nodes)
@@ -76,10 +94,20 @@ class NetworkCombiner:
     def combine_by_small_world_attachment(
         network: gt.Graph, new_nodes: int, k: int, prob: float
     ) -> Tuple[gt.Graph, List[Tuple[int, int]]]:
-        """Generate a Watts-Strogatz Small-World Network.
+        """Apply small-world attachment to a existing network.
 
+        Generate a Watts-Strogatz Small-World Network.
         The code is based on the pseudo-code described in
         https://www.frontiersin.org/articles/10.3389/fncom.2011.00011/full
+
+        Args:
+            network (gt.Graph): criminal network.
+            new_nodes (int): number of new nodes to add.
+            k (int): number of links each new node comes with.
+            prob (float): rewiring probability.
+
+        Returns:
+            Tuple[gt.Graph, List[Tuple[int, int]]]: returns the new network
         """
         # Add new nodes
         network.add_vertex(n=new_nodes)
