@@ -62,7 +62,6 @@ class NetworkCombiner:
             for new_e in new_edges:
                 network.add_edge(network.vertex(network.num_vertices() - 1), new_e)
                 accepted_edges.append((new_e, (network.num_vertices() - 1)))
-
         return network, accepted_edges
 
     @staticmethod
