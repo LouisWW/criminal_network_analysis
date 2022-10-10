@@ -10,7 +10,11 @@ from utils.tools import DirectoryFinder
 
 
 class NetworkReader:
-    """The NetworkReader reads the data from various files and return a graph."""
+    """The NetworkReader reads the data from various files and return a graph.
+
+    For newly added data in data/ folder, a function needs to be created which is
+    called in get_data.
+    """
 
     def __init__(self) -> None:
         """Set the directory right."""
@@ -26,7 +30,6 @@ class NetworkReader:
         )
 
         graph_obj = nx.Graph(list(zip(data["vertex1"], data["vertex2"])))
-
         # Set state of the nodes to be criminals
         state = "c"
         nx.set_node_attributes(graph_obj, state, "state")
@@ -72,7 +75,17 @@ class NetworkReader:
         return graph_obj
 
     def get_data(self, data_type: str) -> nx.Graph:
-        """Return a data."""
+        """Return the data as network.
+
+        Args:
+            data_type (str): Data name.
+
+        Raises:
+            RuntimeError: If function for the data name doesn't exist.
+
+        Returns:
+            nx.Graph: a networkx graph of the data.
+        """
         if data_type == "cunha":
             return self.read_cunha()
         elif data_type == "montagna_calls":
