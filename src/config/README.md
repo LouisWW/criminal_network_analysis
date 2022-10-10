@@ -25,7 +25,7 @@ optional arguments:
                         Define which network to read; cunha, montagna_meetings, montagna_calls.
   -attach-meth [{preferential,random,small-world}]
                         Define the attachment methods around the criminal network
-  -k K                  Define how many new connection a new node is making while generating a population.
+  -k K                  Define how many new connection a new node is making while generating a population (default: 10).
   -animate-attachment-process
                         Create an animation of the attachment process.
   -sim-mart-vaq         Define if the simulation based on Martinez-Vaquero is run. Thereby, for each repetition the another network is used.
