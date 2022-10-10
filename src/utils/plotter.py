@@ -14,7 +14,6 @@ from typing import Union
 
 import graph_tool.all as gt
 import matplotlib as mpl
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
@@ -91,12 +90,12 @@ class Plotter(ConfigParser):
         # draw circular
         if self.args.draw_network == "c":
             g = gt.GraphView(network)
-            state = gt.minimize_nested_blockmodel_dl(g)
-            t = gt.get_hierarchy_tree(state)[0]
+            status = gt.minimize_nested_blockmodel_dl(g)
+            t = gt.get_hierarchy_tree(status)[0]
             tpos = pos = gt.radial_tree_layout(t, t.vertex(t.num_vertices() - 1))
             cts = gt.get_hierarchy_control_points(g, t, tpos)
             pos = g.own_property(tpos)
-            b = state.levels[0].b
+            b = status.levels[0].b
             shape = b.copy()
             shape.a %= 14
             gt.graph_draw(
@@ -168,13 +167,13 @@ class Plotter(ConfigParser):
         self, network: gt.Graph, color_vertex_property: str = None
     ) -> gt.PropertyMap:
         """Define the color of the vertex based on the vertex property."""
-        if color_vertex_property == "state_color":
+        if color_vertex_property == "status_color":
             # c = red, h = blue, w = green
             color_map = {"c": (1, 0, 0, 1), "h": (0, 0, 1, 1), "w": (0, 1, 0, 1)}
             color_code = network.new_vertex_property("vector<double>")
-            network.vertex_properties["state_color"] = color_code
+            network.vertex_properties["status_color"] = color_code
             for v in network.vertices():
-                color_code[v] = color_map[network.vertex_properties["state"][v]]
+                color_code[v] = color_map[network.vertex_properties["status"][v]]
             return network, color_code
 
         elif color_vertex_property == "group_color":

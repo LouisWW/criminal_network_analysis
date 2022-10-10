@@ -34,7 +34,7 @@ class TestNetworkExtractor:
         )
 
         network = meta_sim.create_population(meta_sim.criminal_network)
-        network.status = np.asarray(list(network.vp.state))
+        network.status = np.asarray(list(network.vp.status))
         filtered_network = NetworkExtractor.filter_criminal_network(network)
 
         assert (
@@ -64,7 +64,7 @@ class TestNetworkExtractor:
         org_n_size = org_network.num_vertices()
         org_n_edges = org_network.num_edges()
 
-        network.status = np.asarray(list(network.vp.state))
+        network.status = np.asarray(list(network.vp.status))
         NetworkExtractor.filter_criminal_network(network)
         assert not gt.isomorphism(
             network, org_network

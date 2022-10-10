@@ -68,7 +68,7 @@ class SimMartVaq:
             tau (int, optional):Influence of the wolf's action on criminals. Defaults to 0.8.
             gamma (float, optional): Punishment ratio for the other members of the criminal
                                                                     organization. Defaults to 0.1.
-            beta_s (int, optional): State punishment value. Defaults to 5.
+            beta_s (int, optional): state punishment value. Defaults to 5.
             beta_h (int, optional): Civil punishment value. Defaults to 5.
             beta_c (int, optional): Criminal punishment value. Defaults to 5.
             c_w (int, optional): Damage caused by wolf. Defaults to 1.
@@ -78,30 +78,30 @@ class SimMartVaq:
             r_h (int, optional): Bonus ratio for honest. Defaults to 1.
             temperature (int, optional): Temperature used in the fermi function. Defaults to 10.
             mutation_prob (float, optional): Mutation probability to either randomly pick a
-                                new state or switch state with an other agent. Defaults to 0.0001.
+                                new status or switch status with an other agent. Defaults to 0.0001.
             execute (str,optional): Defines if some process should run parallel or sequential.
                                     Default to parallel.
         """
         # Define name of simulator
         self._name = "sim_mart_vaq"
         self.network = network
-        self.network.status = np.asarray(list(network.vp.state))
+        self.network.status = np.asarray(list(network.vp.status))
         self.network.fitness = np.zeros(network.num_vertices())
         self.network.age = np.zeros(network.num_vertices())
 
         # Check if data is coherent
         assert isinstance(network, gt.Graph), "Network should be of type gt."
-        assert network.vp.state, "Network has no attribute state"
+        assert network.vp.status, "Network has no attribute status"
         self.ratio_honest = (
-            len(gt.find_vertex(network, network.vp.state, "h"))
+            len(gt.find_vertex(network, network.vp.status, "h"))
             / self.network.num_vertices()
         )
         self.ratio_wolf = (
-            len(gt.find_vertex(network, network.vp.state, "w"))
+            len(gt.find_vertex(network, network.vp.status, "w"))
             / self.network.num_vertices()
         )
         self.ratio_criminal = (
-            len(gt.find_vertex(network, network.vp.state, "c"))
+            len(gt.find_vertex(network, network.vp.status, "c"))
             / self.network.num_vertices()
         )
 
@@ -151,7 +151,7 @@ class SimMartVaq:
         If selected person is a wolf or criminal,
         damage is inflicted on others.
         """
-        network.status = np.asarray(list(network.vp.state))
+        network.status = np.asarray(list(network.vp.status))
         if rnd_fit_init:
             network.fitness = np.random.uniform(50, -50, network.num_vertices())
         else:
@@ -660,7 +660,7 @@ class SimMartVaq:
     def get_overall_fitness_distribution(
         self, network: gt.Graph
     ) -> Tuple[float, float, float]:
-        """Get the mean fitness for the different states in a group."""
+        """Get the mean fitness for the different status in a group."""
         h_idx = np.where(network.status == "h")
         c_idx = np.where(network.status == "c")
         w_idx = np.where(network.status == "w")

@@ -19,10 +19,10 @@ class TestNetworkReader:
 
         # Check if attributes are set right for all the nodes
         assert (
-            network_obj.nodes["d02e9bdc27a894e882fa0c9055c99722"]["state"] == "c"
+            network_obj.nodes["d02e9bdc27a894e882fa0c9055c99722"]["status"] == "c"
         ), "Attributes are set wrong"
         assert (
-            network_obj.nodes["adad9e1c91a7e0f63a139458941b1c66"]["state"] == "c"
+            network_obj.nodes["adad9e1c91a7e0f63a139458941b1c66"]["status"] == "c"
         ), "Attributes are set wrong"
 
         assert network_obj.name == "cunha", "Network name is not correct"
@@ -35,8 +35,8 @@ class TestNetworkReader:
         assert isinstance(network_obj, nx.Graph), "Network type is not correct!"
 
         # Check if attributes are set right for all the nodes
-        assert network_obj.nodes["N1"]["state"] == "c", "Attributes are set wrong"
-        assert network_obj.nodes["N20"]["state"] == "c", "Attributes are set wrong"
+        assert network_obj.nodes["N1"]["status"] == "c", "Attributes are set wrong"
+        assert network_obj.nodes["N20"]["status"] == "c", "Attributes are set wrong"
 
         assert network_obj.name == "montagna_meetings", "Network name is not correct"
 
@@ -48,8 +48,8 @@ class TestNetworkReader:
         assert isinstance(network_obj, nx.Graph), "Network type is not correct!"
 
         # Check if attributes are set right for all the nodes
-        assert network_obj.nodes["N100"]["state"] == "c", "Attributes are set wrong"
-        assert network_obj.nodes["N80"]["state"] == "c", "Attributes are set wrong"
+        assert network_obj.nodes["N100"]["status"] == "c", "Attributes are set wrong"
+        assert network_obj.nodes["N80"]["status"] == "c", "Attributes are set wrong"
 
         assert network_obj.name == "montagna_calls", "Network name is not correct"
 

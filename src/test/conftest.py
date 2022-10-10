@@ -60,12 +60,12 @@ def create_networkx() -> nx.Graph:
     network.nodes[3]["age"] = 60
     network.nodes[4]["age"] = 4
 
-    # set nodes attributes state
-    network.nodes[0]["state"] = "c"
-    network.nodes[1]["state"] = "h"
-    network.nodes[2]["state"] = "h"
-    network.nodes[3]["state"] = "w"
-    network.nodes[4]["state"] = "w"
+    # set nodes attributes status
+    network.nodes[0]["status"] = "c"
+    network.nodes[1]["status"] = "h"
+    network.nodes[2]["status"] = "h"
+    network.nodes[3]["status"] = "w"
+    network.nodes[4]["status"] = "w"
 
     return network
 

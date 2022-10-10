@@ -106,13 +106,13 @@ class TestMetaSimualtor:
         # Criminal network size should be 95
         # Honest and Wolf ratio should be within a range given the init is stochastic
         assert (
-            len(gt.find_vertex(network, network.vp.state, "c")) == 95
+            len(gt.find_vertex(network, network.vp.status, "c")) == 95
         ), "Criminal ratio not correct"
         assert (
-            38 - 15 <= len(gt.find_vertex(network, network.vp.state, "h")) <= 38 + 15
+            38 - 15 <= len(gt.find_vertex(network, network.vp.status, "h")) <= 38 + 15
         ), "Honest ratio not correct"
         assert (
-            57 - 15 <= len(gt.find_vertex(network, network.vp.state, "w")) <= 57 + 15
+            57 - 15 <= len(gt.find_vertex(network, network.vp.status, "w")) <= 57 + 15
         ), "Wolf ratio not correct"
 
     @pytest.mark.essential

@@ -75,7 +75,7 @@ class MetaSimulator:
 
         # Network needs to have a base criminal network
         self.n_criminal = len(
-            gt.find_vertex(self.criminal_network, self.criminal_network.vp.state, "c")
+            gt.find_vertex(self.criminal_network, self.criminal_network.vp.status, "c")
         )
         (
             self.new_nodes,
@@ -107,7 +107,7 @@ class MetaSimulator:
 
         # Convert to gt.Graph
         gt_network = NetworkConverter.nx_to_gt(nx_network)
-        assert gt_network.vp.state, "Network has no attribute state"
+        assert gt_network.vp.status, "Network has no attribute status"
         return gt_network
 
     def create_population(self, network: gt.Graph) -> gt.Graph:
@@ -161,17 +161,17 @@ class MetaSimulator:
                 "Define a network attachment method : 'preferential','random','small-world'"
             )
 
-        # Get all the agents with no states
-        nodes_no_states = gt.find_vertex(new_network, new_network.vp.state, "")
+        # Get all the agents with no status
+        nodes_no_status = gt.find_vertex(new_network, new_network.vp.status, "")
         tq = tqdm.tqdm(
-            nodes_no_states,
+            nodes_no_status,
             desc="Adding attributes to nodes",
             total=self.new_nodes,
             leave=False,
             disable=True,
         )
         for i in tq:
-            new_network.vp.state[new_network.vertex(i)] = np.random.choice(
+            new_network.vp.status[new_network.vertex(i)] = np.random.choice(
                 ["h", "w"], 1, p=[self.relative_ratio_honest, self.relative_ratio_wolf]
             )[0]
 

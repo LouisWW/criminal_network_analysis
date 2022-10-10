@@ -30,9 +30,9 @@ class NetworkReader:
         )
 
         graph_obj = nx.Graph(list(zip(data["vertex1"], data["vertex2"])))
-        # Set state of the nodes to be criminals
-        state = "c"
-        nx.set_node_attributes(graph_obj, state, "state")
+        # Set status of the nodes to be criminals
+        status = "c"
+        nx.set_node_attributes(graph_obj, status, "status")
 
         # Set the name of the graph
         graph_obj.name = "cunha"
@@ -48,9 +48,9 @@ class NetworkReader:
             data, source="Source", target="Target", edge_attr=["Weight"]
         )
 
-        # Set state of the nodes to be criminals
-        state = "c"
-        nx.set_node_attributes(graph_obj, state, "state")
+        # Set status of the nodes to be criminals
+        status = "c"
+        nx.set_node_attributes(graph_obj, status, "status")
 
         # Set the name of the graph
         graph_obj.name = "montagna_meetings"
@@ -66,9 +66,9 @@ class NetworkReader:
             data, source="Source", target="Target", edge_attr=["Weight"]
         )
 
-        # Set state of the nodes to be criminals
-        state = "c"
-        nx.set_node_attributes(graph_obj, state, "state")
+        # Set status of the nodes to be criminals
+        status = "c"
+        nx.set_node_attributes(graph_obj, status, "status")
 
         # Set the name of the graph
         graph_obj.name = "montagna_calls"

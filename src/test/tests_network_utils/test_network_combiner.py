@@ -45,7 +45,7 @@ class TestNetworkCombiner:
         filtering = new_gt_network.new_vertex_property("bool")
         new_gt_network.vertex_properties["filtering"] = filtering
         for i in range(0, new_gt_network.num_vertices()):
-            if new_gt_network.vp.state[new_gt_network.vertex(i)] == "c":
+            if new_gt_network.vp.status[new_gt_network.vertex(i)] == "c":
                 new_gt_network.vp.filtering[new_gt_network.vertex(i)] = 1
             else:
                 new_gt_network.vp.filtering[new_gt_network.vertex(i)] = 0
@@ -81,7 +81,7 @@ class TestNetworkCombiner:
         filtering = new_gt_network.new_vertex_property("bool")
         new_gt_network.vertex_properties["filtering"] = filtering
         for i in range(0, new_gt_network.num_vertices()):
-            if new_gt_network.vp.state[new_gt_network.vertex(i)] == "c":
+            if new_gt_network.vp.status[new_gt_network.vertex(i)] == "c":
                 new_gt_network.vp.filtering[new_gt_network.vertex(i)] = 1
             else:
                 new_gt_network.vp.filtering[new_gt_network.vertex(i)] = 0
@@ -117,7 +117,7 @@ class TestNetworkCombiner:
         filtering = new_gt_network.new_vertex_property("bool")
         new_gt_network.vertex_properties["filtering"] = filtering
         for i in range(0, new_gt_network.num_vertices()):
-            if new_gt_network.vp.state[new_gt_network.vertex(i)] == "c":
+            if new_gt_network.vp.status[new_gt_network.vertex(i)] == "c":
                 new_gt_network.vp.filtering[new_gt_network.vertex(i)] = 1
             else:
                 new_gt_network.vp.filtering[new_gt_network.vertex(i)] = 0

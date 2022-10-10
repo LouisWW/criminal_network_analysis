@@ -146,7 +146,7 @@ class TestNetworkConverter:
         assert list(nx_converted_network.nodes["0"].keys()) == [
             "fitness",
             "age",
-            "state",
+            "status",
         ], "Not all attributes are copied"
 
         # Check if the attributes are correct

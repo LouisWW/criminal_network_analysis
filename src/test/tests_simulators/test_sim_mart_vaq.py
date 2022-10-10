@@ -502,10 +502,10 @@ class TestSimMartVaq:
         )
         # Check if wolf turned criminal based on the criminal's fitness
         assert (
-            network.vp.state[network.vertex(4)] == "w"
+            network.vp.status[network.vertex(4)] == "w"
         ), "Wolf didn't copied criminal...."
         assert (
-            network.vp.state[network.vertex(0)] == "c"
+            network.vp.status[network.vertex(0)] == "c"
         ), "Criminal didn't copied wolf...."
 
     @pytest.mark.essential
@@ -549,12 +549,12 @@ class TestSimMartVaq:
         network = simulators.evolutionary_stage(network, protagonist, mbrs)
 
         assert (
-            network.vp.state[network.vertex(864)]
-            == untouched_network.vp.state[untouched_network.vertex(573)]
+            network.vp.status[network.vertex(864)]
+            == untouched_network.vp.status[untouched_network.vertex(573)]
         ), "Interchange function didn't work properly"
         assert (
-            network.vp.state[network.vertex(573)]
-            == untouched_network.vp.state[untouched_network.vertex(573)]
+            network.vp.status[network.vertex(573)]
+            == untouched_network.vp.status[untouched_network.vertex(573)]
         ), "Interchange function didn't work properly"
 
         # Check if the players changed status
@@ -564,7 +564,7 @@ class TestSimMartVaq:
         mbrs = dict_of_communities[protagonist]
         network = simulators.evolutionary_stage(network, protagonist, mbrs)
         assert (
-            network.vp.state[network.vertex(394)] == "h"
+            network.vp.status[network.vertex(394)] == "h"
         ), "Mutation function didn't work properly"
 
     @pytest.mark.essential

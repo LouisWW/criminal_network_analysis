@@ -91,15 +91,15 @@ class Animateur(ConfigParser):
         if self.args.animate_attachment_process:
             self.pos = gt.sfdp_layout(self.network)
             self.color_code = self.network.new_vertex_property("vector<double>")
-            self.network.vertex_properties["state_color"] = self.color_code
+            self.network.vertex_properties["status_color"] = self.color_code
             for v in self.network.vertices():
                 self.color_code[v] = self.color_map[
-                    self.network.vertex_properties["state"][v]
+                    self.network.vertex_properties["status"][v]
                 ]
             self.win.graph = gt.GraphWidget(
                 self.network,
                 self.pos,
-                vertex_fill_color=self.network.vertex_properties["state_color"],
+                vertex_fill_color=self.network.vertex_properties["status_color"],
             )
             self.win.add(self.win.graph)
             if self.args.attach_meth == "preferential":
@@ -133,10 +133,10 @@ class Animateur(ConfigParser):
             self.color_code = self.simulator.network.new_vertex_property(
                 "vector<double>"
             )
-            self.simulator.network.vertex_properties["state_color"] = self.color_code
+            self.simulator.network.vertex_properties["status_color"] = self.color_code
             for v in self.simulator.network.vertices():
                 self.color_code[v] = self.color_map[
-                    self.simulator.network.vertex_properties["state"][v]
+                    self.simulator.network.vertex_properties["status"][v]
                 ]
 
             if self.args.animate_simulation == "filtered":
@@ -145,7 +145,7 @@ class Animateur(ConfigParser):
                 self.simulator.network,
                 self.pos,
                 vertex_fill_color=self.simulator.network.vertex_properties[
-                    "state_color"
+                    "status_color"
                 ],
             )
             self.win.add(self.win.graph)
@@ -174,7 +174,7 @@ class Animateur(ConfigParser):
         # Update the color
         for v in self.simulator.network.vertices():
             self.color_code[v] = self.color_map[
-                self.simulator.network.vertex_properties["state"][v]
+                self.simulator.network.vertex_properties["status"][v]
             ]
 
         if self.args.animate_simulation == "filtered":
@@ -225,11 +225,11 @@ class Animateur(ConfigParser):
                         [np.random.uniform(-20, -10), np.random.uniform(10, 20)]
                     ),
                 )
-                self.network.vp.state[self.network.vertex(v_y)] = np.random.choice(
+                self.network.vp.status[self.network.vertex(v_y)] = np.random.choice(
                     ["w", "h"], p=[0.6, 0.4]
                 )
                 self.color_code[self.network.vertex(v_y)] = self.color_map[
-                    self.network.vertex_properties["state"][self.network.vertex(v_y)]
+                    self.network.vertex_properties["status"][self.network.vertex(v_y)]
                 ]
 
             self.win.graph.regenerate_surface()
