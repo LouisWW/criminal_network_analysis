@@ -1,5 +1,5 @@
 """
-This script's intention is to get the convert graphs between packages.
+This script's intention is to convert graphs between packages.
 
 It converts graph objects from networkx to networkit
 vice versa and networkx to graph-tool.
