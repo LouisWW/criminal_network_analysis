@@ -109,13 +109,23 @@ def bootstrapping(data: np.ndarray) -> np.ndarray:
     Data needs to be a 2 dimensional matrix
     """
     shuffle_array = deepcopy(data)
+
+    if shuffle_array.shape[1] % 4 == 0:
+        modulo = 4
+    elif shuffle_array.shape[1] % 5 == 0:
+        modulo = 5
+    elif shuffle_array.shape[1] % 6 == 0:
+        modulo = 6
+    else:
+        raise RuntimeError("Need to find/add modulo yourself!!")
+
     for row in range(0, shuffle_array.shape[0]):
-        np.random.shuffle(shuffle_array[row, :].reshape((-1, 4)))
+        np.random.shuffle(shuffle_array[row, :].reshape((-1, modulo)))
     return shuffle_array
 
 
 def compare_time_series(
-    whole_data: DefaultDict[str, DefaultDict[str, List[Any]]]
+    whole_data: DefaultDict[str, DefaultDict[str, Union[List[Any], np.ndarray]]]
 ) -> None:
     """Compare the time series by fitting a model and perform a anova-test on it."""
     attachment_methods = list(whole_data.keys())

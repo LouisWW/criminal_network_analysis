@@ -258,6 +258,7 @@ def fake_phase_diag_data() -> Dict[str, Dict[str, List[Any]]]:
                 ["mean_ratio_criminal", "mean_ratio_wolf", "mean_ratio_honest"], 100
             ).reshape(10, 10),
             "grid_value": np.random.random((10, 10)),
+            "ratio_criminal": np.random.random((10, 10)),
         },
         "case_2": {
             "param_y": "gamma",
@@ -268,6 +269,7 @@ def fake_phase_diag_data() -> Dict[str, Dict[str, List[Any]]]:
                 ["mean_ratio_criminal", "mean_ratio_wolf", "mean_ratio_honest"], 100
             ).reshape(10, 10),
             "grid_value": np.random.random((10, 10)),
+            "ratio_criminal": np.random.random((10, 10)),
         },
         "case_3": {
             "param_y": "gamma",
@@ -278,6 +280,7 @@ def fake_phase_diag_data() -> Dict[str, Dict[str, List[Any]]]:
                 ["mean_ratio_criminal", "mean_ratio_wolf", "mean_ratio_honest"], 100
             ).reshape(10, 10),
             "grid_value": np.random.random((10, 10)),
+            "ratio_criminal": np.random.random((10, 10)),
         },
     }
     fake_meta_phase_diag = {

@@ -73,7 +73,7 @@ class TestSimMartVaq:
                 assert network_aft_dmge.fitness[node] == untouched_network.fitness[
                     node
                 ] + ((simulators.r_c * simulators.c_c) / n_c)
-            elif network.vp.status[node] in ["h", "w"]:
+            elif network.status[node] in ["h", "w"]:
                 assert network_aft_dmge.fitness[node] == untouched_network.vp.fitness[
                     node
                 ] - (simulators.r_c * simulators.c_c)
@@ -123,7 +123,7 @@ class TestSimMartVaq:
         """
         # Set delta to 0 to make sure wolf will never act
         simulators = SimMartVaq(meta_simulator_network, delta=0, r_h=0)
-        network = simulators.network
+        network, _ = simulators.play(simulators.network, rounds=0)
         # Network and network_aft_dmge are same object
         # To compare network create an independent copy
         untouched_network = deepcopy(network)

@@ -201,8 +201,7 @@ class TestPlotter:
         """Test if the plt lines correlation function works."""
         plotter = Plotter()
         ax = plotter.plot_phase_diag(fake_phase_diag_data)
-        
-        assert isinstance(ax, (np.ndarray, np.generic))
+        assert isinstance(ax, plt.Axes)
 
 
 if __name__ == "__main__":
