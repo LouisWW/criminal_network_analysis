@@ -83,7 +83,7 @@ class ConfigParser:
         parser.add_argument(
             "-k",
             type=int,
-            default=None,
+            default=10,
             help="""Define how many new connection a
                     new node is making while generating a population.""",
         )
