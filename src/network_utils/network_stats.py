@@ -1,4 +1,4 @@
-"""This script's intention is to get the properties of an given network.
+"""This script's intention is to get the overall properties of a given network.
 
 __author__ = Louis Weyland
 __date__   = 5/02/2022
@@ -27,7 +27,11 @@ class NetworkStats:
         self.network = network
 
     def get_overview(self) -> Dict[str, Union[int, float]]:
-        """Get an overview of the network."""
+        """Get an overview of the network.
+
+        Returns:
+            Dict[str, Union[int, float]]: A dictionary of various metrics.
+        """
         if logging.getLevelName(logger.level) == "INFO":
             print("----------------------------")
             nk.overview(self.network)
