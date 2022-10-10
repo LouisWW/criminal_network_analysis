@@ -15,7 +15,14 @@ class NetworkExtractor:
 
     @staticmethod
     def filter_criminal_network(network: gt.Graph) -> gt.Graph:
-        """Filter the criminal network out of the whole network."""
+        """Filter the criminal network out of the whole network.
+
+        Args:
+            network (gt.Graph): network having nodes with attribute status.
+
+        Returns:
+            gt.Graph: the network with nodes.status = 'c' and links to each other.
+        """
         filtering = network.new_vertex_property("bool")
         filtering.a = (network.status == "c").astype(int)
         network.vertex_properties["filtering"] = filtering
@@ -24,6 +31,13 @@ class NetworkExtractor:
 
     @staticmethod
     def un_filter_criminal_network(network: gt.Graph) -> gt.Graph:
-        """Reset the filtering and return the total graph."""
+        """Reset the filtering and return the total graph.
+
+        Args:
+            network (gt.Graph): Any gt.network which is filtered or not.
+
+        Returns:
+            gt.Graph: returns an unfiltered network.
+        """
         network.set_vertex_filter(None)
         return network
