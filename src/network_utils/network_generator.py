@@ -1,4 +1,4 @@
-"""This script's intention is generate random, scale-free or other kinds of networks using netowkx.
+"""This script's intention is generate random, scale-free or other kinds of networks using networkx.
 
 __author__ = Louis Weyland
 __date__   = 6/02/2022
