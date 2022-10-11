@@ -39,17 +39,27 @@ More specifically, generated data is visualized.
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 &#34;&#34;&#34;
+import pickle
 from typing import Any
 from typing import DefaultDict
 from typing import List
+from typing import Union
 
 import graph_tool.all as gt
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import numpy as np
+import pandas as pd
 import powerlaw
-from cycler import cycler
+import seaborn as sns
 from config.config import ConfigParser
+from cycler import cycler
+from matplotlib.colors import Normalize
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from utils.stats import get_correlation
+from utils.tools import DirectoryFinder
+from utils.tools import timestamp
 
 
 class Plotter(ConfigParser):
@@ -60,13 +70,40 @@ class Plotter(ConfigParser):
         super().__init__()
 
         # Making sure all the plots have the same parameters
-        plt.rcParams[&#34;figure.figsize&#34;] = (5, 4)
+        # plt.style.use(&#39;ggplot&#39;)
+        plt.rcParams[&#34;figure.figsize&#34;] = (20, 12)
         plt.rcParams[&#34;figure.autolayout&#34;] = True
+        plt.rcParams[&#34;xtick.direction&#34;] = &#34;in&#34;
+        plt.rcParams[&#34;ytick.direction&#34;] = &#34;in&#34;
+        plt.rcParams[&#34;xtick.major.size&#34;] = 5.0
+        plt.rcParams[&#34;xtick.minor.size&#34;] = 3.0
+        plt.rcParams[&#34;ytick.major.size&#34;] = 5.0
+        plt.rcParams[&#34;ytick.minor.size&#34;] = 3.0
+        plt.rcParams[&#34;axes.labelsize&#34;] = &#34;xx-large&#34;
+        plt.rcParams[&#34;axes.titlesize&#34;] = &#34;x-large&#34;
+        plt.rcParams[&#34;xtick.labelsize&#34;] = &#34;xx-large&#34;
+        plt.rcParams[&#34;ytick.labelsize&#34;] = &#34;xx-large&#34;
+        mpl.rcParams[&#34;lines.linewidth&#34;] = 2
+        mpl.rcParams[&#34;lines.markersize&#34;] = 4
 
         # Change the default color list
-        mpl.rcParams[&#34;axes.prop_cycle&#34;] = cycler(color=&#34;krbgmyc&#34;)
+        mpl.rcParams[&#34;axes.prop_cycle&#34;] = cycler(color=&#34;gbrgmyc&#34;)
         mpl.rcParams[&#34;figure.dpi&#34;] = 100
         mpl.rcParams[&#34;savefig.dpi&#34;] = 300
+        mpl.rcParams[&#34;axes.spines.top&#34;] = False
+        mpl.rcParams[&#34;axes.spines.right&#34;] = False
+
+    def save_figure(sefl, fig_name: str, axs: plt.Axes) -&gt; None:
+        &#34;&#34;&#34;Save figures to png files and pickle data.&#34;&#34;&#34;
+        plt.savefig(fig_name, dpi=300, bbox_inches=&#34;tight&#34;)
+        with open(fig_name.replace(&#34;png&#34;, &#34;pkl&#34;), &#34;wb&#34;) as fig:
+            pickle.dump(axs, fig)
+
+    def load_figure(self, fig_name: str) -&gt; plt.Axes:
+        &#34;&#34;&#34;Load a pickle saved figure and returns an axes.&#34;&#34;&#34;
+        with open(fig_name, &#34;rb&#34;) as fid:
+            ax = pickle.load(fid)
+        return ax
 
     def draw_network(
         self,
@@ -76,7 +113,12 @@ class Plotter(ConfigParser):
         &#34;&#34;&#34;Visualizes the Network.
 
         If vertex_property is given, then the vertex are colored based on their
-        property
+        property.
+
+        Args:
+            network (gt.Graph): population network containing honest/lone wovles/criminals.
+            color_vertex_property (str, optional): property to show in the plot (&#34;status&#34; for now).
+                                                    Defaults to None.
         &#34;&#34;&#34;
         assert isinstance(network, gt.Graph), &#34;network type is not from graph-tool&#34;
 
@@ -86,12 +128,12 @@ class Plotter(ConfigParser):
         # draw circular
         if self.args.draw_network == &#34;c&#34;:
             g = gt.GraphView(network)
-            state = gt.minimize_nested_blockmodel_dl(g)
-            t = gt.get_hierarchy_tree(state)[0]
+            status = gt.minimize_nested_blockmodel_dl(g)
+            t = gt.get_hierarchy_tree(status)[0]
             tpos = pos = gt.radial_tree_layout(t, t.vertex(t.num_vertices() - 1))
             cts = gt.get_hierarchy_control_points(g, t, tpos)
             pos = g.own_property(tpos)
-            b = state.levels[0].b
+            b = status.levels[0].b
             shape = b.copy()
             shape.a %= 14
             gt.graph_draw(
@@ -105,7 +147,13 @@ class Plotter(ConfigParser):
             )
 
         elif self.args.draw_network == &#34;n&#34; and color_vertex_property is None:
-            gt.graph_draw(network, pos=pos)
+            gt.graph_draw(
+                network,
+                pos=pos,
+                output=f&#34;{DirectoryFinder().result_dir_fig}{network.graph_properties.name}.png&#34;
+                if self.args.save
+                else None,
+            )
 
         elif self.args.draw_network == &#34;n&#34; and color_vertex_property is not None:
             # Add a color map corresponding to the chosen vertex_property
@@ -117,13 +165,23 @@ class Plotter(ConfigParser):
                 network,
                 pos=pos,
                 vertex_fill_color=network.vertex_properties[color_vertex_property],
+                output=f&#34;{DirectoryFinder().result_dir_fig}{network.graph_properties.name}.png&#34;
+                if self.args.save
+                else None,
             )
 
     def plot_log_log(self, data: List[float], x_label: str, y_label: str) -&gt; plt.Axes:
-        &#34;&#34;&#34;
-        Plot the data in a log-log scale to visualize the powerlaw.
+        &#34;&#34;&#34;Plot the data in a log-log scale to visualize the powerlaw.
 
         Important: Sort the data in ascending way
+
+        Args:
+            data (List[float]): containing the centrality (avg. degree,...) of each node
+            x_label (str): x label
+            y_label (str): y label
+
+        Returns:
+            plt.Axes: returns the figure object
         &#34;&#34;&#34;
         data = sorted(data, reverse=True)
         fit = powerlaw.Fit(data)
@@ -146,6 +204,7 @@ class Plotter(ConfigParser):
         ax.legend()
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
+        plt.tight_layout()
 
         return ax
 
@@ -153,13 +212,13 @@ class Plotter(ConfigParser):
         self, network: gt.Graph, color_vertex_property: str = None
     ) -&gt; gt.PropertyMap:
         &#34;&#34;&#34;Define the color of the vertex based on the vertex property.&#34;&#34;&#34;
-        if color_vertex_property == &#34;state_color&#34;:
+        if color_vertex_property == &#34;status_color&#34;:
             # c = red, h = blue, w = green
             color_map = {&#34;c&#34;: (1, 0, 0, 1), &#34;h&#34;: (0, 0, 1, 1), &#34;w&#34;: (0, 1, 0, 1)}
             color_code = network.new_vertex_property(&#34;vector&lt;double&gt;&#34;)
-            network.vertex_properties[&#34;state_color&#34;] = color_code
+            network.vertex_properties[&#34;status_color&#34;] = color_code
             for v in network.vertices():
-                color_code[v] = color_map[network.vertex_properties[&#34;state&#34;][v]]
+                color_code[v] = color_map[network.vertex_properties[&#34;status&#34;][v]]
             return network, color_code
 
         elif color_vertex_property == &#34;group_color&#34;:
@@ -168,58 +227,206 @@ class Plotter(ConfigParser):
         else:
             return None
 
-    def plot_lines(
+    def plot_violin(
         self,
         dict_data: DefaultDict[str, List[int]],
-        data_to_plot: List[str],
         *args: str,
         **kwargs: Any,
-    ) -&gt; plt.Axes:
-        &#34;&#34;&#34;Plot line graph from data  points.
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot violin graph from data  points.
 
         Args:
-            dict_data (DefaultDict[str, List[int]]): Contains all the data
+            dict_data (DefaultDict[str, List[Any]]): Contains all the data
             data_to_plot (List[str]): Defines which data to choose from the dict_data
 
         Returns:
             plt.Axes: matplotlib axes object
         &#34;&#34;&#34;
+        # data needs to be in df
+
+        df = pd.DataFrame(columns=[&#34;structure&#34;, &#34;link&#34;, &#34;data&#34;])
+
+        for structure in dict_data.keys():
+            for link in dict_data[structure].keys():
+                for data_points in dict_data[structure][link]:
+                    df = df.append(
+                        {&#34;structure&#34;: structure, &#34;link&#34;: link, &#34;data&#34;: data_points},
+                        ignore_index=True,
+                    )
+
+        df[&#34;structure&#34;] = df[&#34;structure&#34;].astype(str)
+        df[&#34;link&#34;] = df[&#34;link&#34;].astype(int)
+        df[&#34;data&#34;] = df[&#34;data&#34;].astype(float)
+
         _, ax = plt.subplots()
-        if ax is None:
-            ax = plt.gca()
 
-        for data in data_to_plot:
-            if data not in dict_data.keys():
-                raise KeyError(f&#34;Given key doens&#39;t exist,{dict_data.keys()=}&#34;)
-            ax.plot(dict_data[data], label=data)
-            if &#34;plot_std&#34; in kwargs:
-                std = data.replace(&#34;mean&#34;, &#34;std&#34;)
-                ax.fill_between(
-                    range(0, len(dict_data[data])),
-                    np.array(dict_data[data]) - np.array(dict_data[std]),
-                    np.array(dict_data[data]) + np.array(dict_data[std]),
-                    alpha=0.5,
-                )
+        ax = sns.violinplot(
+            data=df,
+            x=&#34;link&#34;,
+            y=&#34;data&#34;,
+            hue=&#34;structure&#34;,
+            width=0.7,
+            palette=&#34;Set2&#34;,
+            ax=ax,
+            cut=0,
+        )
 
-        if &#34;title&#34; in kwargs:
-            ax.set_title(kwargs[&#34;title&#34;])
         if &#34;xlabel&#34; in kwargs:
-            ax.set_xlabel(kwargs[&#34;xlabel&#34;])
+            ax.set_xlabel(kwargs[&#34;xlabel&#34;].capitalize(), weight=&#34;bold&#34;, fontsize=35)
         if &#34;ylabel&#34; in kwargs:
-            ax.set_ylabel(kwargs[&#34;ylabel&#34;])
+            ax.set_ylabel(kwargs[&#34;ylabel&#34;].capitalize(), weight=&#34;bold&#34;, fontsize=35)
+
+        if &#34;density_conv&#34; in kwargs:
+            ax.set_xticks(
+                np.arange(0, len(kwargs[&#34;density_conv&#34;])), labels=kwargs[&#34;density_conv&#34;]
+            )
 
         # set legend
-        ax.legend()
-        return ax
+        ax.legend(fancybox=True, shadow=True, fontsize=35)
+        ax.tick_params(labelsize=35)
+        plt.tight_layout()
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;violin_plot&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, ax)
+            return ax
+        else:
+            plt.show()
+            return ax
+
+    def plot_lines(
+        self,
+        dict_data: DefaultDict[str, List[int]],
+        y_data_to_plot: List[str],
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot line graph from data  points.
+
+        Args:
+            dict_data (DefaultDict[str, List[Any]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+
+        Returns:
+            plt.Axes: matplotlib axes object
+        &#34;&#34;&#34;
+        keys_diff_structure = list(dict_data.keys())
+        _, axs = plt.subplots(1, len(keys_diff_structure))
+        if axs is None:
+            axs = plt.gca()
+
+        if not isinstance(axs, (np.ndarray, np.generic)):
+            axs = np.array([axs])
+
+        for key_diff_structure, ax in zip(keys_diff_structure, axs):
+            for data in y_data_to_plot:
+                if data not in dict_data[keys_diff_structure[0]].keys():
+                    raise KeyError(
+                        f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+                    )
+                ax.plot(
+                    dict_data[key_diff_structure][x_data_to_plot],
+                    dict_data[key_diff_structure][data],
+                    label=data.replace(&#34;_&#34;, &#34; &#34;).capitalize(),
+                )
+
+                if &#34;plot_deviation&#34; in kwargs:
+                    if kwargs[&#34;plot_deviation&#34;] == &#34;std&#34;:  # standard deviation
+                        dev = data.replace(&#34;mean&#34;, &#34;std&#34;)
+                    elif (
+                        kwargs[&#34;plot_deviation&#34;] == &#34;sem&#34;
+                    ):  # standard error of the mean
+                        dev = data.replace(&#34;mean&#34;, &#34;sem&#34;)
+
+                    upper_dev = np.array(
+                        dict_data[key_diff_structure][data]
+                    ) + np.array(dict_data[key_diff_structure][dev])
+                    lower_dev = np.array(
+                        dict_data[key_diff_structure][data]
+                    ) - np.array(dict_data[key_diff_structure][dev])
+
+                    # if values are above 1 or below 0 is not possible
+                    if &#34;mean_ratio&#34; in data:
+                        upper_dev = np.where(upper_dev &gt; 1, 1, upper_dev)
+                        lower_dev = np.where(lower_dev &lt; 0, 0, lower_dev)
+
+                    ax.fill_between(
+                        dict_data[key_diff_structure][x_data_to_plot],
+                        lower_dev,
+                        upper_dev,
+                        alpha=0.5,
+                    )
+
+            # set label to percentage
+            ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+            if &#34;ylim&#34; in kwargs:
+                ax.set_ylim(kwargs[&#34;ylim&#34;][0], kwargs[&#34;ylim&#34;][1])
+            else:
+                ax.set_ylim(0, 1)
+            ax.ticklabel_format(
+                axis=&#34;x&#34;, style=&#34;sci&#34;, scilimits=(0, 0), useMathText=&#34;True&#34;
+            )
+            if &#34;title&#34; in kwargs:
+                ax.set_title(
+                    key_diff_structure.replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+                )
+            if &#34;xlabel&#34; in kwargs:
+                ax.set_xlabel(
+                    kwargs[&#34;xlabel&#34;].replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+                )
+            if &#34;ylabel&#34; in kwargs:
+                ax.set_ylabel(
+                    kwargs[&#34;ylabel&#34;].replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+                )
+
+            if &#34;tick_size&#34; in kwargs:
+                ax.tick_params(labelsize=kwargs[&#34;tick_size&#34;])
+
+            if &#34;axes_size&#34; in kwargs:
+                ax.xaxis.label.set_size(kwargs[&#34;axes_size&#34;])
+                ax.yaxis.label.set_size(kwargs[&#34;axes_size&#34;])
+
+            if &#34;legend_size&#34; in kwargs:
+                ax.legend(fancybox=True, shadow=True, fontsize=kwargs[&#34;legend_size&#34;])
+            else:
+                # set legend
+                ax.legend(
+                    fancybox=True,
+                    shadow=True,
+                )
+
+            # only do it if multiple plots are made
+            if &#34;square_plot&#34; in kwargs:
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;population_ratio_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs
 
     def plot_hist(
         self,
         dict_data: DefaultDict[str, List[Any]],
-        data_to_plot: List[str],
-        n_bins: int = None,
+        y_data_to_plot: List[str],
         *args: str,
         **kwargs: Any,
-    ) -&gt; plt.Axes:
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
         &#34;&#34;&#34;Plot a histogram from data points.
 
         Args:
@@ -229,25 +436,432 @@ class Plotter(ConfigParser):
         Returns:
             plt.Axes: matplotlib axes object
         &#34;&#34;&#34;
-        _, ax = plt.subplots()
-        if ax is None:
-            ax = plt.gca()
+        _, axs = plt.subplots(1, len(y_data_to_plot))
+        if axs is None:
+            axs = plt.gca()
 
-        for data in data_to_plot:
-            if data not in dict_data.keys():
-                raise KeyError(f&#34;Given key doens&#39;t exist,{dict_data.keys()=}&#34;)
-            ax.hist(dict_data[data], label=data, bins=n_bins)
+        keys_diff_structure = list(dict_data.keys())
 
-        if &#34;title&#34; in kwargs:
-            ax.set_title(kwargs[&#34;title&#34;])
-        if &#34;xlabel&#34; in kwargs:
-            ax.set_xlabel(kwargs[&#34;xlabel&#34;])
-        if &#34;ylabel&#34; in kwargs:
-            ax.set_ylabel(kwargs[&#34;ylabel&#34;])
+        for data, ax in zip(y_data_to_plot, axs):
+            if data not in dict_data[keys_diff_structure[0]].keys():
+                raise KeyError(
+                    f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+                )
 
-        # set legend
-        ax.legend()
-        return ax</code></pre>
+            color_list = iter(list(sns.color_palette(&#34;Set2&#34;)))
+            for key_diff_structure in keys_diff_structure:
+                color = next(color_list)
+                sns.kdeplot(
+                    dict_data[key_diff_structure][data],
+                    color=color,
+                    common_norm=True,
+                    multiple=&#34;stack&#34;,
+                    alpha=0.8,
+                    linewidth=0,
+                    label=key_diff_structure,
+                    ax=ax,
+                )
+
+                if &#34;xlabel&#34; in kwargs:
+                    ax.set_xlabel(
+                        data.replace(&#34;mean_&#34;, &#34;&#34;).replace(&#34;_&#34;, &#34; &#34;).capitalize(),
+                        weight=&#34;bold&#34;,
+                    )
+                    if &#34;information&#34; in data:
+                        ax.set_xlabel(&#34;Flow of information&#34;, weight=&#34;bold&#34;)
+
+                # set legend
+                ax.legend(fancybox=True, shadow=True)
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+            if &#34;ylabel&#34; in kwargs:
+                axs[0].set_ylabel(&#34;Density&#34;.capitalize(), weight=&#34;bold&#34;)
+                axs[1].set_ylabel(&#34; &#34;.capitalize(), weight=&#34;bold&#34;)
+                axs[2].set_ylabel(&#34; &#34;.capitalize(), weight=&#34;bold&#34;)
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;topo_meas_hist&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs
+
+    def plot_phase_diag(
+        self,
+        dict_data: DefaultDict[str, List[int]],
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; plt.Axes:
+        &#34;&#34;&#34;Generate a phase diagram of param1 and param2.
+
+        The colors correspond to the dominant status at the end of the run
+
+        Returns:
+            plt.Axes: phase diagram figure
+        &#34;&#34;&#34;
+        structures = list(dict_data.keys())
+        cases = list(dict_data[structures[0]].keys())
+
+        mpl.rcParams[&#34;axes.spines.top&#34;] = True
+        mpl.rcParams[&#34;axes.spines.right&#34;] = True
+        plt.rcParams[&#34;axes.labelsize&#34;] = &#34;xx-large&#34;
+        plt.rcParams[&#34;axes.titlesize&#34;] = &#34;xx-large&#34;
+        plt.rcParams[&#34;xtick.labelsize&#34;] = &#34;large&#34;
+        plt.rcParams[&#34;ytick.labelsize&#34;] = &#34;large&#34;
+        fig, axs = plt.subplots(len(cases), len(structures))
+
+        for case, k in zip(cases, range(axs.shape[0])):
+
+            # data 1 normalizer=iter([Normalize(0,0.8),Normalize(0,0.03),Normalize(0,0.035)])
+            # data 2 normalizer=iter([Normalize(0,0.75),Normalize(0,0.025),Normalize(0,0.05)])
+
+            normalizer = iter(
+                [Normalize(0, 0.8), Normalize(0, 0.03), Normalize(0, 0.035)]
+            )
+            for structure, i in zip(structures, range(axs.shape[1])):
+
+                divider = make_axes_locatable(axs[k, i])
+                cax = divider.append_axes(&#34;right&#34;, size=&#34;5%&#34;, pad=0.05)
+                mat = axs[k, i].matshow(
+                    dict_data[structure][case][&#34;ratio_criminal&#34;],
+                    aspect=&#34;auto&#34;,
+                    interpolation=&#34;bilinear&#34;,
+                    norm=next(normalizer),
+                    cmap=&#34;viridis&#34;,
+                    extent=[
+                        min(dict_data[structure][case][&#34;x_range&#34;]),
+                        max(dict_data[structure][case][&#34;x_range&#34;]),
+                        max(dict_data[structure][case][&#34;y_range&#34;]),
+                        min(dict_data[structure][case][&#34;y_range&#34;]),
+                    ],
+                    # norm=normalizer
+                )
+                fig.colorbar(mat, cax=cax, orientation=&#34;vertical&#34;)
+
+                # Add the \ to the param to print it in latex format
+                if dict_data[structure][case][&#34;param_x&#34;] in [
+                    &#34;beata_c&#34;,
+                    &#34;beta_s&#34;,
+                    &#34;beta_h&#34;,
+                    &#34;delta&#34;,
+                    &#34;tau&#34;,
+                    &#34;gamma&#34;,
+                ]:
+                    dict_data[structure][case][&#34;param_x&#34;] = (
+                        &#34;\\&#34; + dict_data[structure][case][&#34;param_x&#34;]
+                    )
+                if dict_data[structure][case][&#34;param_y&#34;] in [
+                    &#34;beata_c&#34;,
+                    &#34;beta_s&#34;,
+                    &#34;beta_h&#34;,
+                    &#34;delta&#34;,
+                    &#34;tau&#34;,
+                    &#34;gamma&#34;,
+                ]:
+                    dict_data[structure][case][&#34;param_y&#34;] = (
+                        &#34;\\&#34; + dict_data[structure][case][&#34;param_y&#34;]
+                    )
+
+                param_y = dict_data[structure][case][&#34;param_y&#34;]
+                param_x = dict_data[structure][case][&#34;param_x&#34;]
+                axs[k, i].set_xlabel(fr&#34;${param_x}$&#34;)
+                axs[k, i].set_ylabel(fr&#34;${param_y}$&#34;, rotation=0)
+                axs[k, i].grid(b=None)
+
+        for ax, structure in zip(axs[0], structures):
+            ax.set_title(structure.capitalize(), weight=&#34;bold&#34;)
+
+        # plt.tight_layout()
+        if self.args.save:
+
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;phase_diag_&#34;
+                + param_x
+                + &#34;_&#34;
+                + param_y
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+        else:
+            plt.show()
+            return ax
+
+    def plot_lines_comparative(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: List[str],
+        x_data_to_plot: str = None,
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot line graph from data points.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        &#34;&#34;&#34;
+        _, axs = plt.subplots(1, len(y_data_to_plot))
+        if axs is None:
+            axs = plt.gca()
+
+        keys_diff_structure = list(dict_data.keys())
+
+        for data, ax in zip(y_data_to_plot, axs):
+            if data not in dict_data[keys_diff_structure[0]].keys():
+                raise KeyError(
+                    f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+                )
+
+            color_list = iter(list(sns.color_palette(&#34;Set2&#34;)))
+            for key_diff_structure in keys_diff_structure:
+                color = next(color_list)
+                deviation = data.replace(&#34;mean&#34;, &#34;sem&#34;)
+                ax.errorbar(
+                    dict_data[key_diff_structure][x_data_to_plot],
+                    dict_data[key_diff_structure][data],
+                    yerr=dict_data[key_diff_structure][deviation],
+                    color=color,
+                    capsize=5,
+                    label=key_diff_structure,
+                )
+
+                ax.set_xlabel(&#34;Rounds&#34;, weight=&#34;bold&#34;)
+                ax.ticklabel_format(
+                    axis=&#34;x&#34;, style=&#34;sci&#34;, scilimits=(0, 0), useMathText=&#34;True&#34;
+                )
+                ax.set_ylabel(
+                    data.replace(&#34;mean_&#34;, &#34;&#34;).replace(&#34;_&#34;, &#34; &#34;).capitalize(),
+                    weight=&#34;bold&#34;,
+                )
+                if &#34;information&#34; in data:
+                    ax.set_ylabel(&#34;Flow of information&#34;, weight=&#34;bold&#34;)
+                # set legend
+                ax.legend(
+                    fancybox=True,
+                    shadow=True,
+                )
+                ax.grid(alpha=0.5, linestyle=&#34;:&#34;)
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;topological_meas&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs
+
+    def plot_lines_correlation(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: str,
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot line graph from correlation points with correlatio factor.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        &#34;&#34;&#34;
+        keys = list(dict_data.keys())
+
+        mpl.rcParams[&#34;axes.spines.top&#34;] = True
+        mpl.rcParams[&#34;axes.spines.right&#34;] = True
+
+        fig, axs = plt.subplots(1, len(y_data_to_plot))
+
+        if axs is None:
+            axs = plt.gca()
+
+        for centrality_measure, ax in zip(y_data_to_plot, axs):
+
+            line_plot_style = iter([&#34;k-&#34;, &#34;k--&#34;, &#34;k:&#34;])
+            for key in keys:
+                corr = get_correlation(
+                    dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                    dict_data[key][&#34;df_total&#34;][centrality_measure],
+                )
+
+                m, b = np.polyfit(
+                    dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                    dict_data[key][&#34;df_total&#34;][centrality_measure],
+                    1,
+                )
+
+                ax.plot(
+                    dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                    m * dict_data[key][&#34;df_total&#34;][x_data_to_plot] + b,
+                    next(line_plot_style),
+                    # label=key + f&#34; --- {corr=}&#34;,
+                    label=corr,
+                )
+
+                ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+                ax.set_xlabel(&#34;Criminal likelihood&#34;, weight=&#34;bold&#34;)
+                ax.set_ylabel(centrality_measure.capitalize(), weight=&#34;bold&#34;)
+                ax.patch.set_edgecolor(&#34;black&#34;)
+                ax.patch.set_linewidth(&#34;2&#34;)
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+                ax.legend(
+                    loc=&#34;upper center&#34;,
+                    bbox_to_anchor=(0.5, 1.05),
+                    ncol=3,
+                    fancybox=True,
+                    shadow=True,
+                )
+
+        line_labels = [&#34;Preferential&#34;, &#34;Random&#34;, &#34;Small-world&#34;]
+        fig.legend(
+            ax.get_lines(),  # The line objects
+            labels=line_labels,  # The labels for each line
+            loc=&#34;upper center&#34;,  # Position of legend
+            bbox_to_anchor=(0.5, 0.8),
+            borderaxespad=0.1,  # Small spacing around legend box
+            ncol=3,
+            fontsize=&#34;large&#34;,
+        )
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;correlation_fig&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs
+
+    def plot_lines_correlation_grid(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: str,
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot line graph from correlation points with correlatio factor.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        &#34;&#34;&#34;
+        keys = list(dict_data.keys())
+
+        mpl.rcParams[&#34;axes.spines.top&#34;] = True
+        mpl.rcParams[&#34;axes.spines.right&#34;] = True
+
+        fig, axs = plt.subplots(len(y_data_to_plot), len(keys))
+
+        if axs is None:
+            axs = plt.gca()
+
+        for centrality_measure, i in zip(y_data_to_plot, range(axs.shape[0])):
+            for key, k in zip(keys, range(0, axs.shape[1])):
+
+                # filter the nodes that have not been affected at all by the simulation
+                filtered_data = dict_data[key][&#34;df_total&#34;][
+                    dict_data[key][&#34;df_total&#34;][x_data_to_plot] != 0
+                ]
+                # remove inf and NaN entries
+                filtered_data = filtered_data.replace([np.inf, -np.inf], np.nan).dropna(
+                    axis=1
+                )
+
+                corr = get_correlation(
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
+                )
+
+                m, b = np.polyfit(
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
+                    1,
+                )
+
+                axs[i, k].plot(
+                    filtered_data[x_data_to_plot],
+                    m * filtered_data[x_data_to_plot] + b,
+                    color=&#34;k&#34;,
+                    label=corr,
+                )
+
+                axs[i, k].scatter(
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
+                    s=0.5,
+                    color=&#34;grey&#34;,
+                )
+
+                axs[i, k].set_xlim(0, 1)
+                axs[i, k].xaxis.set_major_formatter(mtick.PercentFormatter())
+                axs[i, k].patch.set_edgecolor(&#34;black&#34;)
+                axs[i, k].patch.set_linewidth(&#34;2&#34;)
+                axs[i, k].legend(
+                    loc=&#34;upper center&#34;,
+                    bbox_to_anchor=(0.5, 1.05),
+                    ncol=3,
+                    fancybox=True,
+                    shadow=True,
+                )
+
+        for ax, col in zip(axs[0], keys):
+            ax.set_title(col.capitalize(), weight=&#34;bold&#34;)
+
+        for ax, col in zip(axs[-1], keys):
+            ax.set_xlabel(&#34;Criminal likelihood&#34;.capitalize(), weight=&#34;bold&#34;)
+
+        for ax, row in zip(axs[:, 0], y_data_to_plot):
+            ax.set_ylabel(row.capitalize(), weight=&#34;bold&#34;)
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;correlation_grid_fig&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs</code></pre>
 </details>
 </section>
 <section>
@@ -277,13 +891,40 @@ class Plotter(ConfigParser):
         super().__init__()
 
         # Making sure all the plots have the same parameters
-        plt.rcParams[&#34;figure.figsize&#34;] = (5, 4)
+        # plt.style.use(&#39;ggplot&#39;)
+        plt.rcParams[&#34;figure.figsize&#34;] = (20, 12)
         plt.rcParams[&#34;figure.autolayout&#34;] = True
+        plt.rcParams[&#34;xtick.direction&#34;] = &#34;in&#34;
+        plt.rcParams[&#34;ytick.direction&#34;] = &#34;in&#34;
+        plt.rcParams[&#34;xtick.major.size&#34;] = 5.0
+        plt.rcParams[&#34;xtick.minor.size&#34;] = 3.0
+        plt.rcParams[&#34;ytick.major.size&#34;] = 5.0
+        plt.rcParams[&#34;ytick.minor.size&#34;] = 3.0
+        plt.rcParams[&#34;axes.labelsize&#34;] = &#34;xx-large&#34;
+        plt.rcParams[&#34;axes.titlesize&#34;] = &#34;x-large&#34;
+        plt.rcParams[&#34;xtick.labelsize&#34;] = &#34;xx-large&#34;
+        plt.rcParams[&#34;ytick.labelsize&#34;] = &#34;xx-large&#34;
+        mpl.rcParams[&#34;lines.linewidth&#34;] = 2
+        mpl.rcParams[&#34;lines.markersize&#34;] = 4
 
         # Change the default color list
-        mpl.rcParams[&#34;axes.prop_cycle&#34;] = cycler(color=&#34;krbgmyc&#34;)
+        mpl.rcParams[&#34;axes.prop_cycle&#34;] = cycler(color=&#34;gbrgmyc&#34;)
         mpl.rcParams[&#34;figure.dpi&#34;] = 100
         mpl.rcParams[&#34;savefig.dpi&#34;] = 300
+        mpl.rcParams[&#34;axes.spines.top&#34;] = False
+        mpl.rcParams[&#34;axes.spines.right&#34;] = False
+
+    def save_figure(sefl, fig_name: str, axs: plt.Axes) -&gt; None:
+        &#34;&#34;&#34;Save figures to png files and pickle data.&#34;&#34;&#34;
+        plt.savefig(fig_name, dpi=300, bbox_inches=&#34;tight&#34;)
+        with open(fig_name.replace(&#34;png&#34;, &#34;pkl&#34;), &#34;wb&#34;) as fig:
+            pickle.dump(axs, fig)
+
+    def load_figure(self, fig_name: str) -&gt; plt.Axes:
+        &#34;&#34;&#34;Load a pickle saved figure and returns an axes.&#34;&#34;&#34;
+        with open(fig_name, &#34;rb&#34;) as fid:
+            ax = pickle.load(fid)
+        return ax
 
     def draw_network(
         self,
@@ -293,7 +934,12 @@ class Plotter(ConfigParser):
         &#34;&#34;&#34;Visualizes the Network.
 
         If vertex_property is given, then the vertex are colored based on their
-        property
+        property.
+
+        Args:
+            network (gt.Graph): population network containing honest/lone wovles/criminals.
+            color_vertex_property (str, optional): property to show in the plot (&#34;status&#34; for now).
+                                                    Defaults to None.
         &#34;&#34;&#34;
         assert isinstance(network, gt.Graph), &#34;network type is not from graph-tool&#34;
 
@@ -303,12 +949,12 @@ class Plotter(ConfigParser):
         # draw circular
         if self.args.draw_network == &#34;c&#34;:
             g = gt.GraphView(network)
-            state = gt.minimize_nested_blockmodel_dl(g)
-            t = gt.get_hierarchy_tree(state)[0]
+            status = gt.minimize_nested_blockmodel_dl(g)
+            t = gt.get_hierarchy_tree(status)[0]
             tpos = pos = gt.radial_tree_layout(t, t.vertex(t.num_vertices() - 1))
             cts = gt.get_hierarchy_control_points(g, t, tpos)
             pos = g.own_property(tpos)
-            b = state.levels[0].b
+            b = status.levels[0].b
             shape = b.copy()
             shape.a %= 14
             gt.graph_draw(
@@ -322,7 +968,13 @@ class Plotter(ConfigParser):
             )
 
         elif self.args.draw_network == &#34;n&#34; and color_vertex_property is None:
-            gt.graph_draw(network, pos=pos)
+            gt.graph_draw(
+                network,
+                pos=pos,
+                output=f&#34;{DirectoryFinder().result_dir_fig}{network.graph_properties.name}.png&#34;
+                if self.args.save
+                else None,
+            )
 
         elif self.args.draw_network == &#34;n&#34; and color_vertex_property is not None:
             # Add a color map corresponding to the chosen vertex_property
@@ -334,13 +986,23 @@ class Plotter(ConfigParser):
                 network,
                 pos=pos,
                 vertex_fill_color=network.vertex_properties[color_vertex_property],
+                output=f&#34;{DirectoryFinder().result_dir_fig}{network.graph_properties.name}.png&#34;
+                if self.args.save
+                else None,
             )
 
     def plot_log_log(self, data: List[float], x_label: str, y_label: str) -&gt; plt.Axes:
-        &#34;&#34;&#34;
-        Plot the data in a log-log scale to visualize the powerlaw.
+        &#34;&#34;&#34;Plot the data in a log-log scale to visualize the powerlaw.
 
         Important: Sort the data in ascending way
+
+        Args:
+            data (List[float]): containing the centrality (avg. degree,...) of each node
+            x_label (str): x label
+            y_label (str): y label
+
+        Returns:
+            plt.Axes: returns the figure object
         &#34;&#34;&#34;
         data = sorted(data, reverse=True)
         fit = powerlaw.Fit(data)
@@ -363,6 +1025,7 @@ class Plotter(ConfigParser):
         ax.legend()
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
+        plt.tight_layout()
 
         return ax
 
@@ -370,13 +1033,13 @@ class Plotter(ConfigParser):
         self, network: gt.Graph, color_vertex_property: str = None
     ) -&gt; gt.PropertyMap:
         &#34;&#34;&#34;Define the color of the vertex based on the vertex property.&#34;&#34;&#34;
-        if color_vertex_property == &#34;state_color&#34;:
+        if color_vertex_property == &#34;status_color&#34;:
             # c = red, h = blue, w = green
             color_map = {&#34;c&#34;: (1, 0, 0, 1), &#34;h&#34;: (0, 0, 1, 1), &#34;w&#34;: (0, 1, 0, 1)}
             color_code = network.new_vertex_property(&#34;vector&lt;double&gt;&#34;)
-            network.vertex_properties[&#34;state_color&#34;] = color_code
+            network.vertex_properties[&#34;status_color&#34;] = color_code
             for v in network.vertices():
-                color_code[v] = color_map[network.vertex_properties[&#34;state&#34;][v]]
+                color_code[v] = color_map[network.vertex_properties[&#34;status&#34;][v]]
             return network, color_code
 
         elif color_vertex_property == &#34;group_color&#34;:
@@ -385,58 +1048,206 @@ class Plotter(ConfigParser):
         else:
             return None
 
-    def plot_lines(
+    def plot_violin(
         self,
         dict_data: DefaultDict[str, List[int]],
-        data_to_plot: List[str],
         *args: str,
         **kwargs: Any,
-    ) -&gt; plt.Axes:
-        &#34;&#34;&#34;Plot line graph from data  points.
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot violin graph from data  points.
 
         Args:
-            dict_data (DefaultDict[str, List[int]]): Contains all the data
+            dict_data (DefaultDict[str, List[Any]]): Contains all the data
             data_to_plot (List[str]): Defines which data to choose from the dict_data
 
         Returns:
             plt.Axes: matplotlib axes object
         &#34;&#34;&#34;
+        # data needs to be in df
+
+        df = pd.DataFrame(columns=[&#34;structure&#34;, &#34;link&#34;, &#34;data&#34;])
+
+        for structure in dict_data.keys():
+            for link in dict_data[structure].keys():
+                for data_points in dict_data[structure][link]:
+                    df = df.append(
+                        {&#34;structure&#34;: structure, &#34;link&#34;: link, &#34;data&#34;: data_points},
+                        ignore_index=True,
+                    )
+
+        df[&#34;structure&#34;] = df[&#34;structure&#34;].astype(str)
+        df[&#34;link&#34;] = df[&#34;link&#34;].astype(int)
+        df[&#34;data&#34;] = df[&#34;data&#34;].astype(float)
+
         _, ax = plt.subplots()
-        if ax is None:
-            ax = plt.gca()
 
-        for data in data_to_plot:
-            if data not in dict_data.keys():
-                raise KeyError(f&#34;Given key doens&#39;t exist,{dict_data.keys()=}&#34;)
-            ax.plot(dict_data[data], label=data)
-            if &#34;plot_std&#34; in kwargs:
-                std = data.replace(&#34;mean&#34;, &#34;std&#34;)
-                ax.fill_between(
-                    range(0, len(dict_data[data])),
-                    np.array(dict_data[data]) - np.array(dict_data[std]),
-                    np.array(dict_data[data]) + np.array(dict_data[std]),
-                    alpha=0.5,
-                )
+        ax = sns.violinplot(
+            data=df,
+            x=&#34;link&#34;,
+            y=&#34;data&#34;,
+            hue=&#34;structure&#34;,
+            width=0.7,
+            palette=&#34;Set2&#34;,
+            ax=ax,
+            cut=0,
+        )
 
-        if &#34;title&#34; in kwargs:
-            ax.set_title(kwargs[&#34;title&#34;])
         if &#34;xlabel&#34; in kwargs:
-            ax.set_xlabel(kwargs[&#34;xlabel&#34;])
+            ax.set_xlabel(kwargs[&#34;xlabel&#34;].capitalize(), weight=&#34;bold&#34;, fontsize=35)
         if &#34;ylabel&#34; in kwargs:
-            ax.set_ylabel(kwargs[&#34;ylabel&#34;])
+            ax.set_ylabel(kwargs[&#34;ylabel&#34;].capitalize(), weight=&#34;bold&#34;, fontsize=35)
+
+        if &#34;density_conv&#34; in kwargs:
+            ax.set_xticks(
+                np.arange(0, len(kwargs[&#34;density_conv&#34;])), labels=kwargs[&#34;density_conv&#34;]
+            )
 
         # set legend
-        ax.legend()
-        return ax
+        ax.legend(fancybox=True, shadow=True, fontsize=35)
+        ax.tick_params(labelsize=35)
+        plt.tight_layout()
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;violin_plot&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, ax)
+            return ax
+        else:
+            plt.show()
+            return ax
+
+    def plot_lines(
+        self,
+        dict_data: DefaultDict[str, List[int]],
+        y_data_to_plot: List[str],
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot line graph from data  points.
+
+        Args:
+            dict_data (DefaultDict[str, List[Any]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+
+        Returns:
+            plt.Axes: matplotlib axes object
+        &#34;&#34;&#34;
+        keys_diff_structure = list(dict_data.keys())
+        _, axs = plt.subplots(1, len(keys_diff_structure))
+        if axs is None:
+            axs = plt.gca()
+
+        if not isinstance(axs, (np.ndarray, np.generic)):
+            axs = np.array([axs])
+
+        for key_diff_structure, ax in zip(keys_diff_structure, axs):
+            for data in y_data_to_plot:
+                if data not in dict_data[keys_diff_structure[0]].keys():
+                    raise KeyError(
+                        f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+                    )
+                ax.plot(
+                    dict_data[key_diff_structure][x_data_to_plot],
+                    dict_data[key_diff_structure][data],
+                    label=data.replace(&#34;_&#34;, &#34; &#34;).capitalize(),
+                )
+
+                if &#34;plot_deviation&#34; in kwargs:
+                    if kwargs[&#34;plot_deviation&#34;] == &#34;std&#34;:  # standard deviation
+                        dev = data.replace(&#34;mean&#34;, &#34;std&#34;)
+                    elif (
+                        kwargs[&#34;plot_deviation&#34;] == &#34;sem&#34;
+                    ):  # standard error of the mean
+                        dev = data.replace(&#34;mean&#34;, &#34;sem&#34;)
+
+                    upper_dev = np.array(
+                        dict_data[key_diff_structure][data]
+                    ) + np.array(dict_data[key_diff_structure][dev])
+                    lower_dev = np.array(
+                        dict_data[key_diff_structure][data]
+                    ) - np.array(dict_data[key_diff_structure][dev])
+
+                    # if values are above 1 or below 0 is not possible
+                    if &#34;mean_ratio&#34; in data:
+                        upper_dev = np.where(upper_dev &gt; 1, 1, upper_dev)
+                        lower_dev = np.where(lower_dev &lt; 0, 0, lower_dev)
+
+                    ax.fill_between(
+                        dict_data[key_diff_structure][x_data_to_plot],
+                        lower_dev,
+                        upper_dev,
+                        alpha=0.5,
+                    )
+
+            # set label to percentage
+            ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+            if &#34;ylim&#34; in kwargs:
+                ax.set_ylim(kwargs[&#34;ylim&#34;][0], kwargs[&#34;ylim&#34;][1])
+            else:
+                ax.set_ylim(0, 1)
+            ax.ticklabel_format(
+                axis=&#34;x&#34;, style=&#34;sci&#34;, scilimits=(0, 0), useMathText=&#34;True&#34;
+            )
+            if &#34;title&#34; in kwargs:
+                ax.set_title(
+                    key_diff_structure.replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+                )
+            if &#34;xlabel&#34; in kwargs:
+                ax.set_xlabel(
+                    kwargs[&#34;xlabel&#34;].replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+                )
+            if &#34;ylabel&#34; in kwargs:
+                ax.set_ylabel(
+                    kwargs[&#34;ylabel&#34;].replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+                )
+
+            if &#34;tick_size&#34; in kwargs:
+                ax.tick_params(labelsize=kwargs[&#34;tick_size&#34;])
+
+            if &#34;axes_size&#34; in kwargs:
+                ax.xaxis.label.set_size(kwargs[&#34;axes_size&#34;])
+                ax.yaxis.label.set_size(kwargs[&#34;axes_size&#34;])
+
+            if &#34;legend_size&#34; in kwargs:
+                ax.legend(fancybox=True, shadow=True, fontsize=kwargs[&#34;legend_size&#34;])
+            else:
+                # set legend
+                ax.legend(
+                    fancybox=True,
+                    shadow=True,
+                )
+
+            # only do it if multiple plots are made
+            if &#34;square_plot&#34; in kwargs:
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;population_ratio_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs
 
     def plot_hist(
         self,
         dict_data: DefaultDict[str, List[Any]],
-        data_to_plot: List[str],
-        n_bins: int = None,
+        y_data_to_plot: List[str],
         *args: str,
         **kwargs: Any,
-    ) -&gt; plt.Axes:
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
         &#34;&#34;&#34;Plot a histogram from data points.
 
         Args:
@@ -446,25 +1257,432 @@ class Plotter(ConfigParser):
         Returns:
             plt.Axes: matplotlib axes object
         &#34;&#34;&#34;
-        _, ax = plt.subplots()
-        if ax is None:
-            ax = plt.gca()
+        _, axs = plt.subplots(1, len(y_data_to_plot))
+        if axs is None:
+            axs = plt.gca()
 
-        for data in data_to_plot:
-            if data not in dict_data.keys():
-                raise KeyError(f&#34;Given key doens&#39;t exist,{dict_data.keys()=}&#34;)
-            ax.hist(dict_data[data], label=data, bins=n_bins)
+        keys_diff_structure = list(dict_data.keys())
 
-        if &#34;title&#34; in kwargs:
-            ax.set_title(kwargs[&#34;title&#34;])
-        if &#34;xlabel&#34; in kwargs:
-            ax.set_xlabel(kwargs[&#34;xlabel&#34;])
-        if &#34;ylabel&#34; in kwargs:
-            ax.set_ylabel(kwargs[&#34;ylabel&#34;])
+        for data, ax in zip(y_data_to_plot, axs):
+            if data not in dict_data[keys_diff_structure[0]].keys():
+                raise KeyError(
+                    f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+                )
 
-        # set legend
-        ax.legend()
-        return ax</code></pre>
+            color_list = iter(list(sns.color_palette(&#34;Set2&#34;)))
+            for key_diff_structure in keys_diff_structure:
+                color = next(color_list)
+                sns.kdeplot(
+                    dict_data[key_diff_structure][data],
+                    color=color,
+                    common_norm=True,
+                    multiple=&#34;stack&#34;,
+                    alpha=0.8,
+                    linewidth=0,
+                    label=key_diff_structure,
+                    ax=ax,
+                )
+
+                if &#34;xlabel&#34; in kwargs:
+                    ax.set_xlabel(
+                        data.replace(&#34;mean_&#34;, &#34;&#34;).replace(&#34;_&#34;, &#34; &#34;).capitalize(),
+                        weight=&#34;bold&#34;,
+                    )
+                    if &#34;information&#34; in data:
+                        ax.set_xlabel(&#34;Flow of information&#34;, weight=&#34;bold&#34;)
+
+                # set legend
+                ax.legend(fancybox=True, shadow=True)
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+            if &#34;ylabel&#34; in kwargs:
+                axs[0].set_ylabel(&#34;Density&#34;.capitalize(), weight=&#34;bold&#34;)
+                axs[1].set_ylabel(&#34; &#34;.capitalize(), weight=&#34;bold&#34;)
+                axs[2].set_ylabel(&#34; &#34;.capitalize(), weight=&#34;bold&#34;)
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;topo_meas_hist&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs
+
+    def plot_phase_diag(
+        self,
+        dict_data: DefaultDict[str, List[int]],
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; plt.Axes:
+        &#34;&#34;&#34;Generate a phase diagram of param1 and param2.
+
+        The colors correspond to the dominant status at the end of the run
+
+        Returns:
+            plt.Axes: phase diagram figure
+        &#34;&#34;&#34;
+        structures = list(dict_data.keys())
+        cases = list(dict_data[structures[0]].keys())
+
+        mpl.rcParams[&#34;axes.spines.top&#34;] = True
+        mpl.rcParams[&#34;axes.spines.right&#34;] = True
+        plt.rcParams[&#34;axes.labelsize&#34;] = &#34;xx-large&#34;
+        plt.rcParams[&#34;axes.titlesize&#34;] = &#34;xx-large&#34;
+        plt.rcParams[&#34;xtick.labelsize&#34;] = &#34;large&#34;
+        plt.rcParams[&#34;ytick.labelsize&#34;] = &#34;large&#34;
+        fig, axs = plt.subplots(len(cases), len(structures))
+
+        for case, k in zip(cases, range(axs.shape[0])):
+
+            # data 1 normalizer=iter([Normalize(0,0.8),Normalize(0,0.03),Normalize(0,0.035)])
+            # data 2 normalizer=iter([Normalize(0,0.75),Normalize(0,0.025),Normalize(0,0.05)])
+
+            normalizer = iter(
+                [Normalize(0, 0.8), Normalize(0, 0.03), Normalize(0, 0.035)]
+            )
+            for structure, i in zip(structures, range(axs.shape[1])):
+
+                divider = make_axes_locatable(axs[k, i])
+                cax = divider.append_axes(&#34;right&#34;, size=&#34;5%&#34;, pad=0.05)
+                mat = axs[k, i].matshow(
+                    dict_data[structure][case][&#34;ratio_criminal&#34;],
+                    aspect=&#34;auto&#34;,
+                    interpolation=&#34;bilinear&#34;,
+                    norm=next(normalizer),
+                    cmap=&#34;viridis&#34;,
+                    extent=[
+                        min(dict_data[structure][case][&#34;x_range&#34;]),
+                        max(dict_data[structure][case][&#34;x_range&#34;]),
+                        max(dict_data[structure][case][&#34;y_range&#34;]),
+                        min(dict_data[structure][case][&#34;y_range&#34;]),
+                    ],
+                    # norm=normalizer
+                )
+                fig.colorbar(mat, cax=cax, orientation=&#34;vertical&#34;)
+
+                # Add the \ to the param to print it in latex format
+                if dict_data[structure][case][&#34;param_x&#34;] in [
+                    &#34;beata_c&#34;,
+                    &#34;beta_s&#34;,
+                    &#34;beta_h&#34;,
+                    &#34;delta&#34;,
+                    &#34;tau&#34;,
+                    &#34;gamma&#34;,
+                ]:
+                    dict_data[structure][case][&#34;param_x&#34;] = (
+                        &#34;\\&#34; + dict_data[structure][case][&#34;param_x&#34;]
+                    )
+                if dict_data[structure][case][&#34;param_y&#34;] in [
+                    &#34;beata_c&#34;,
+                    &#34;beta_s&#34;,
+                    &#34;beta_h&#34;,
+                    &#34;delta&#34;,
+                    &#34;tau&#34;,
+                    &#34;gamma&#34;,
+                ]:
+                    dict_data[structure][case][&#34;param_y&#34;] = (
+                        &#34;\\&#34; + dict_data[structure][case][&#34;param_y&#34;]
+                    )
+
+                param_y = dict_data[structure][case][&#34;param_y&#34;]
+                param_x = dict_data[structure][case][&#34;param_x&#34;]
+                axs[k, i].set_xlabel(fr&#34;${param_x}$&#34;)
+                axs[k, i].set_ylabel(fr&#34;${param_y}$&#34;, rotation=0)
+                axs[k, i].grid(b=None)
+
+        for ax, structure in zip(axs[0], structures):
+            ax.set_title(structure.capitalize(), weight=&#34;bold&#34;)
+
+        # plt.tight_layout()
+        if self.args.save:
+
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;phase_diag_&#34;
+                + param_x
+                + &#34;_&#34;
+                + param_y
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+        else:
+            plt.show()
+            return ax
+
+    def plot_lines_comparative(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: List[str],
+        x_data_to_plot: str = None,
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot line graph from data points.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        &#34;&#34;&#34;
+        _, axs = plt.subplots(1, len(y_data_to_plot))
+        if axs is None:
+            axs = plt.gca()
+
+        keys_diff_structure = list(dict_data.keys())
+
+        for data, ax in zip(y_data_to_plot, axs):
+            if data not in dict_data[keys_diff_structure[0]].keys():
+                raise KeyError(
+                    f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+                )
+
+            color_list = iter(list(sns.color_palette(&#34;Set2&#34;)))
+            for key_diff_structure in keys_diff_structure:
+                color = next(color_list)
+                deviation = data.replace(&#34;mean&#34;, &#34;sem&#34;)
+                ax.errorbar(
+                    dict_data[key_diff_structure][x_data_to_plot],
+                    dict_data[key_diff_structure][data],
+                    yerr=dict_data[key_diff_structure][deviation],
+                    color=color,
+                    capsize=5,
+                    label=key_diff_structure,
+                )
+
+                ax.set_xlabel(&#34;Rounds&#34;, weight=&#34;bold&#34;)
+                ax.ticklabel_format(
+                    axis=&#34;x&#34;, style=&#34;sci&#34;, scilimits=(0, 0), useMathText=&#34;True&#34;
+                )
+                ax.set_ylabel(
+                    data.replace(&#34;mean_&#34;, &#34;&#34;).replace(&#34;_&#34;, &#34; &#34;).capitalize(),
+                    weight=&#34;bold&#34;,
+                )
+                if &#34;information&#34; in data:
+                    ax.set_ylabel(&#34;Flow of information&#34;, weight=&#34;bold&#34;)
+                # set legend
+                ax.legend(
+                    fancybox=True,
+                    shadow=True,
+                )
+                ax.grid(alpha=0.5, linestyle=&#34;:&#34;)
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;topological_meas&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs
+
+    def plot_lines_correlation(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: str,
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot line graph from correlation points with correlatio factor.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        &#34;&#34;&#34;
+        keys = list(dict_data.keys())
+
+        mpl.rcParams[&#34;axes.spines.top&#34;] = True
+        mpl.rcParams[&#34;axes.spines.right&#34;] = True
+
+        fig, axs = plt.subplots(1, len(y_data_to_plot))
+
+        if axs is None:
+            axs = plt.gca()
+
+        for centrality_measure, ax in zip(y_data_to_plot, axs):
+
+            line_plot_style = iter([&#34;k-&#34;, &#34;k--&#34;, &#34;k:&#34;])
+            for key in keys:
+                corr = get_correlation(
+                    dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                    dict_data[key][&#34;df_total&#34;][centrality_measure],
+                )
+
+                m, b = np.polyfit(
+                    dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                    dict_data[key][&#34;df_total&#34;][centrality_measure],
+                    1,
+                )
+
+                ax.plot(
+                    dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                    m * dict_data[key][&#34;df_total&#34;][x_data_to_plot] + b,
+                    next(line_plot_style),
+                    # label=key + f&#34; --- {corr=}&#34;,
+                    label=corr,
+                )
+
+                ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+                ax.set_xlabel(&#34;Criminal likelihood&#34;, weight=&#34;bold&#34;)
+                ax.set_ylabel(centrality_measure.capitalize(), weight=&#34;bold&#34;)
+                ax.patch.set_edgecolor(&#34;black&#34;)
+                ax.patch.set_linewidth(&#34;2&#34;)
+                ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+                ax.legend(
+                    loc=&#34;upper center&#34;,
+                    bbox_to_anchor=(0.5, 1.05),
+                    ncol=3,
+                    fancybox=True,
+                    shadow=True,
+                )
+
+        line_labels = [&#34;Preferential&#34;, &#34;Random&#34;, &#34;Small-world&#34;]
+        fig.legend(
+            ax.get_lines(),  # The line objects
+            labels=line_labels,  # The labels for each line
+            loc=&#34;upper center&#34;,  # Position of legend
+            bbox_to_anchor=(0.5, 0.8),
+            borderaxespad=0.1,  # Small spacing around legend box
+            ncol=3,
+            fontsize=&#34;large&#34;,
+        )
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;correlation_fig&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs
+
+    def plot_lines_correlation_grid(
+        self,
+        dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+        y_data_to_plot: str,
+        x_data_to_plot: str,
+        *args: str,
+        **kwargs: Any,
+    ) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+        &#34;&#34;&#34;Plot line graph from correlation points with correlatio factor.
+
+        Args:
+            dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+            data_to_plot (List[str]): Defines which data to choose from the dict_data
+        Returns:
+            plt.Axes: matplotlib axes object
+        &#34;&#34;&#34;
+        keys = list(dict_data.keys())
+
+        mpl.rcParams[&#34;axes.spines.top&#34;] = True
+        mpl.rcParams[&#34;axes.spines.right&#34;] = True
+
+        fig, axs = plt.subplots(len(y_data_to_plot), len(keys))
+
+        if axs is None:
+            axs = plt.gca()
+
+        for centrality_measure, i in zip(y_data_to_plot, range(axs.shape[0])):
+            for key, k in zip(keys, range(0, axs.shape[1])):
+
+                # filter the nodes that have not been affected at all by the simulation
+                filtered_data = dict_data[key][&#34;df_total&#34;][
+                    dict_data[key][&#34;df_total&#34;][x_data_to_plot] != 0
+                ]
+                # remove inf and NaN entries
+                filtered_data = filtered_data.replace([np.inf, -np.inf], np.nan).dropna(
+                    axis=1
+                )
+
+                corr = get_correlation(
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
+                )
+
+                m, b = np.polyfit(
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
+                    1,
+                )
+
+                axs[i, k].plot(
+                    filtered_data[x_data_to_plot],
+                    m * filtered_data[x_data_to_plot] + b,
+                    color=&#34;k&#34;,
+                    label=corr,
+                )
+
+                axs[i, k].scatter(
+                    filtered_data[x_data_to_plot],
+                    filtered_data[centrality_measure],
+                    s=0.5,
+                    color=&#34;grey&#34;,
+                )
+
+                axs[i, k].set_xlim(0, 1)
+                axs[i, k].xaxis.set_major_formatter(mtick.PercentFormatter())
+                axs[i, k].patch.set_edgecolor(&#34;black&#34;)
+                axs[i, k].patch.set_linewidth(&#34;2&#34;)
+                axs[i, k].legend(
+                    loc=&#34;upper center&#34;,
+                    bbox_to_anchor=(0.5, 1.05),
+                    ncol=3,
+                    fancybox=True,
+                    shadow=True,
+                )
+
+        for ax, col in zip(axs[0], keys):
+            ax.set_title(col.capitalize(), weight=&#34;bold&#34;)
+
+        for ax, col in zip(axs[-1], keys):
+            ax.set_xlabel(&#34;Criminal likelihood&#34;.capitalize(), weight=&#34;bold&#34;)
+
+        for ax, row in zip(axs[:, 0], y_data_to_plot):
+            ax.set_ylabel(row.capitalize(), weight=&#34;bold&#34;)
+
+        plt.tight_layout()
+
+        if self.args.save:
+            fig_name = (
+                DirectoryFinder().result_dir_fig
+                + &#34;correlation_grid_fig&#34;
+                + &#34;_&#34;
+                + timestamp()
+                + &#34;.png&#34;
+            )
+            self.save_figure(fig_name, axs)
+            return axs
+        else:
+            plt.show()
+            return axs</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -478,7 +1696,15 @@ class Plotter(ConfigParser):
 <dd>
 <div class="desc"><p>Visualizes the Network.</p>
 <p>If vertex_property is given, then the vertex are colored based on their
-property</p></div>
+property.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>network</code></strong> :&ensp;<code>gt.Graph</code></dt>
+<dd>population network containing honest/lone wovles/criminals.</dd>
+<dt><strong><code>color_vertex_property</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>property to show in the plot ("status" for now).
+Defaults to None.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -491,7 +1717,12 @@ property</p></div>
     &#34;&#34;&#34;Visualizes the Network.
 
     If vertex_property is given, then the vertex are colored based on their
-    property
+    property.
+
+    Args:
+        network (gt.Graph): population network containing honest/lone wovles/criminals.
+        color_vertex_property (str, optional): property to show in the plot (&#34;status&#34; for now).
+                                                Defaults to None.
     &#34;&#34;&#34;
     assert isinstance(network, gt.Graph), &#34;network type is not from graph-tool&#34;
 
@@ -501,12 +1732,12 @@ property</p></div>
     # draw circular
     if self.args.draw_network == &#34;c&#34;:
         g = gt.GraphView(network)
-        state = gt.minimize_nested_blockmodel_dl(g)
-        t = gt.get_hierarchy_tree(state)[0]
+        status = gt.minimize_nested_blockmodel_dl(g)
+        t = gt.get_hierarchy_tree(status)[0]
         tpos = pos = gt.radial_tree_layout(t, t.vertex(t.num_vertices() - 1))
         cts = gt.get_hierarchy_control_points(g, t, tpos)
         pos = g.own_property(tpos)
-        b = state.levels[0].b
+        b = status.levels[0].b
         shape = b.copy()
         shape.a %= 14
         gt.graph_draw(
@@ -520,7 +1751,13 @@ property</p></div>
         )
 
     elif self.args.draw_network == &#34;n&#34; and color_vertex_property is None:
-        gt.graph_draw(network, pos=pos)
+        gt.graph_draw(
+            network,
+            pos=pos,
+            output=f&#34;{DirectoryFinder().result_dir_fig}{network.graph_properties.name}.png&#34;
+            if self.args.save
+            else None,
+        )
 
     elif self.args.draw_network == &#34;n&#34; and color_vertex_property is not None:
         # Add a color map corresponding to the chosen vertex_property
@@ -532,6 +1769,9 @@ property</p></div>
             network,
             pos=pos,
             vertex_fill_color=network.vertex_properties[color_vertex_property],
+            output=f&#34;{DirectoryFinder().result_dir_fig}{network.graph_properties.name}.png&#34;
+            if self.args.save
+            else None,
         )</code></pre>
 </details>
 </dd>
@@ -548,13 +1788,13 @@ property</p></div>
     self, network: gt.Graph, color_vertex_property: str = None
 ) -&gt; gt.PropertyMap:
     &#34;&#34;&#34;Define the color of the vertex based on the vertex property.&#34;&#34;&#34;
-    if color_vertex_property == &#34;state_color&#34;:
+    if color_vertex_property == &#34;status_color&#34;:
         # c = red, h = blue, w = green
         color_map = {&#34;c&#34;: (1, 0, 0, 1), &#34;h&#34;: (0, 0, 1, 1), &#34;w&#34;: (0, 1, 0, 1)}
         color_code = network.new_vertex_property(&#34;vector&lt;double&gt;&#34;)
-        network.vertex_properties[&#34;state_color&#34;] = color_code
+        network.vertex_properties[&#34;status_color&#34;] = color_code
         for v in network.vertices():
-            color_code[v] = color_map[network.vertex_properties[&#34;state&#34;][v]]
+            color_code[v] = color_map[network.vertex_properties[&#34;status&#34;][v]]
         return network, color_code
 
     elif color_vertex_property == &#34;group_color&#34;:
@@ -564,8 +1804,24 @@ property</p></div>
         return None</code></pre>
 </details>
 </dd>
+<dt id="utils.plotter.Plotter.load_figure"><code class="name flex">
+<span>def <span class="ident">load_figure</span></span>(<span>self, fig_name: str) ‑> matplotlib.axes._axes.Axes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load a pickle saved figure and returns an axes.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_figure(self, fig_name: str) -&gt; plt.Axes:
+    &#34;&#34;&#34;Load a pickle saved figure and returns an axes.&#34;&#34;&#34;
+    with open(fig_name, &#34;rb&#34;) as fid:
+        ax = pickle.load(fid)
+    return ax</code></pre>
+</details>
+</dd>
 <dt id="utils.plotter.Plotter.plot_hist"><code class="name flex">
-<span>def <span class="ident">plot_hist</span></span>(<span>self, dict_data: DefaultDict[str, List[Any]], data_to_plot: List[str], n_bins: int = None, *args: str, **kwargs: Any) ‑> matplotlib.axes._axes.Axes</span>
+<span>def <span class="ident">plot_hist</span></span>(<span>self, dict_data: DefaultDict[str, List[Any]], y_data_to_plot: List[str], *args: str, **kwargs: Any) ‑> Union[matplotlib.axes._axes.Axes, numpy.ndarray, numpy.generic]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot a histogram from data points.</p>
@@ -588,11 +1844,10 @@ property</p></div>
 <pre><code class="python">def plot_hist(
     self,
     dict_data: DefaultDict[str, List[Any]],
-    data_to_plot: List[str],
-    n_bins: int = None,
+    y_data_to_plot: List[str],
     *args: str,
     **kwargs: Any,
-) -&gt; plt.Axes:
+) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
     &#34;&#34;&#34;Plot a histogram from data points.
 
     Args:
@@ -602,36 +1857,75 @@ property</p></div>
     Returns:
         plt.Axes: matplotlib axes object
     &#34;&#34;&#34;
-    _, ax = plt.subplots()
-    if ax is None:
-        ax = plt.gca()
+    _, axs = plt.subplots(1, len(y_data_to_plot))
+    if axs is None:
+        axs = plt.gca()
 
-    for data in data_to_plot:
-        if data not in dict_data.keys():
-            raise KeyError(f&#34;Given key doens&#39;t exist,{dict_data.keys()=}&#34;)
-        ax.hist(dict_data[data], label=data, bins=n_bins)
+    keys_diff_structure = list(dict_data.keys())
 
-    if &#34;title&#34; in kwargs:
-        ax.set_title(kwargs[&#34;title&#34;])
-    if &#34;xlabel&#34; in kwargs:
-        ax.set_xlabel(kwargs[&#34;xlabel&#34;])
-    if &#34;ylabel&#34; in kwargs:
-        ax.set_ylabel(kwargs[&#34;ylabel&#34;])
+    for data, ax in zip(y_data_to_plot, axs):
+        if data not in dict_data[keys_diff_structure[0]].keys():
+            raise KeyError(
+                f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+            )
 
-    # set legend
-    ax.legend()
-    return ax</code></pre>
+        color_list = iter(list(sns.color_palette(&#34;Set2&#34;)))
+        for key_diff_structure in keys_diff_structure:
+            color = next(color_list)
+            sns.kdeplot(
+                dict_data[key_diff_structure][data],
+                color=color,
+                common_norm=True,
+                multiple=&#34;stack&#34;,
+                alpha=0.8,
+                linewidth=0,
+                label=key_diff_structure,
+                ax=ax,
+            )
+
+            if &#34;xlabel&#34; in kwargs:
+                ax.set_xlabel(
+                    data.replace(&#34;mean_&#34;, &#34;&#34;).replace(&#34;_&#34;, &#34; &#34;).capitalize(),
+                    weight=&#34;bold&#34;,
+                )
+                if &#34;information&#34; in data:
+                    ax.set_xlabel(&#34;Flow of information&#34;, weight=&#34;bold&#34;)
+
+            # set legend
+            ax.legend(fancybox=True, shadow=True)
+            ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+        if &#34;ylabel&#34; in kwargs:
+            axs[0].set_ylabel(&#34;Density&#34;.capitalize(), weight=&#34;bold&#34;)
+            axs[1].set_ylabel(&#34; &#34;.capitalize(), weight=&#34;bold&#34;)
+            axs[2].set_ylabel(&#34; &#34;.capitalize(), weight=&#34;bold&#34;)
+
+    plt.tight_layout()
+
+    if self.args.save:
+        fig_name = (
+            DirectoryFinder().result_dir_fig
+            + &#34;topo_meas_hist&#34;
+            + &#34;_&#34;
+            + timestamp()
+            + &#34;.png&#34;
+        )
+        self.save_figure(fig_name, axs)
+        return axs
+    else:
+        plt.show()
+        return axs</code></pre>
 </details>
 </dd>
 <dt id="utils.plotter.Plotter.plot_lines"><code class="name flex">
-<span>def <span class="ident">plot_lines</span></span>(<span>self, dict_data: DefaultDict[str, List[int]], data_to_plot: List[str], *args: str, **kwargs: Any) ‑> matplotlib.axes._axes.Axes</span>
+<span>def <span class="ident">plot_lines</span></span>(<span>self, dict_data: DefaultDict[str, List[int]], y_data_to_plot: List[str], x_data_to_plot: str, *args: str, **kwargs: Any) ‑> Union[matplotlib.axes._axes.Axes, numpy.ndarray, numpy.generic]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot line graph from data
 points.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>dict_data</code></strong> :&ensp;<code>DefaultDict[str, List[int]]</code></dt>
+<dt><strong><code>dict_data</code></strong> :&ensp;<code>DefaultDict[str, List[Any]]</code></dt>
 <dd>Contains all the data</dd>
 <dt><strong><code>data_to_plot</code></strong> :&ensp;<code>List[str]</code></dt>
 <dd>Defines which data to choose from the dict_data</dd>
@@ -648,46 +1942,454 @@ points.</p>
 <pre><code class="python">def plot_lines(
     self,
     dict_data: DefaultDict[str, List[int]],
-    data_to_plot: List[str],
+    y_data_to_plot: List[str],
+    x_data_to_plot: str,
     *args: str,
     **kwargs: Any,
-) -&gt; plt.Axes:
+) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
     &#34;&#34;&#34;Plot line graph from data  points.
 
     Args:
-        dict_data (DefaultDict[str, List[int]]): Contains all the data
+        dict_data (DefaultDict[str, List[Any]]): Contains all the data
         data_to_plot (List[str]): Defines which data to choose from the dict_data
 
     Returns:
         plt.Axes: matplotlib axes object
     &#34;&#34;&#34;
-    _, ax = plt.subplots()
-    if ax is None:
-        ax = plt.gca()
+    keys_diff_structure = list(dict_data.keys())
+    _, axs = plt.subplots(1, len(keys_diff_structure))
+    if axs is None:
+        axs = plt.gca()
 
-    for data in data_to_plot:
-        if data not in dict_data.keys():
-            raise KeyError(f&#34;Given key doens&#39;t exist,{dict_data.keys()=}&#34;)
-        ax.plot(dict_data[data], label=data)
-        if &#34;plot_std&#34; in kwargs:
-            std = data.replace(&#34;mean&#34;, &#34;std&#34;)
-            ax.fill_between(
-                range(0, len(dict_data[data])),
-                np.array(dict_data[data]) - np.array(dict_data[std]),
-                np.array(dict_data[data]) + np.array(dict_data[std]),
-                alpha=0.5,
+    if not isinstance(axs, (np.ndarray, np.generic)):
+        axs = np.array([axs])
+
+    for key_diff_structure, ax in zip(keys_diff_structure, axs):
+        for data in y_data_to_plot:
+            if data not in dict_data[keys_diff_structure[0]].keys():
+                raise KeyError(
+                    f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+                )
+            ax.plot(
+                dict_data[key_diff_structure][x_data_to_plot],
+                dict_data[key_diff_structure][data],
+                label=data.replace(&#34;_&#34;, &#34; &#34;).capitalize(),
             )
 
-    if &#34;title&#34; in kwargs:
-        ax.set_title(kwargs[&#34;title&#34;])
-    if &#34;xlabel&#34; in kwargs:
-        ax.set_xlabel(kwargs[&#34;xlabel&#34;])
-    if &#34;ylabel&#34; in kwargs:
-        ax.set_ylabel(kwargs[&#34;ylabel&#34;])
+            if &#34;plot_deviation&#34; in kwargs:
+                if kwargs[&#34;plot_deviation&#34;] == &#34;std&#34;:  # standard deviation
+                    dev = data.replace(&#34;mean&#34;, &#34;std&#34;)
+                elif (
+                    kwargs[&#34;plot_deviation&#34;] == &#34;sem&#34;
+                ):  # standard error of the mean
+                    dev = data.replace(&#34;mean&#34;, &#34;sem&#34;)
 
-    # set legend
-    ax.legend()
-    return ax</code></pre>
+                upper_dev = np.array(
+                    dict_data[key_diff_structure][data]
+                ) + np.array(dict_data[key_diff_structure][dev])
+                lower_dev = np.array(
+                    dict_data[key_diff_structure][data]
+                ) - np.array(dict_data[key_diff_structure][dev])
+
+                # if values are above 1 or below 0 is not possible
+                if &#34;mean_ratio&#34; in data:
+                    upper_dev = np.where(upper_dev &gt; 1, 1, upper_dev)
+                    lower_dev = np.where(lower_dev &lt; 0, 0, lower_dev)
+
+                ax.fill_between(
+                    dict_data[key_diff_structure][x_data_to_plot],
+                    lower_dev,
+                    upper_dev,
+                    alpha=0.5,
+                )
+
+        # set label to percentage
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+        if &#34;ylim&#34; in kwargs:
+            ax.set_ylim(kwargs[&#34;ylim&#34;][0], kwargs[&#34;ylim&#34;][1])
+        else:
+            ax.set_ylim(0, 1)
+        ax.ticklabel_format(
+            axis=&#34;x&#34;, style=&#34;sci&#34;, scilimits=(0, 0), useMathText=&#34;True&#34;
+        )
+        if &#34;title&#34; in kwargs:
+            ax.set_title(
+                key_diff_structure.replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+            )
+        if &#34;xlabel&#34; in kwargs:
+            ax.set_xlabel(
+                kwargs[&#34;xlabel&#34;].replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+            )
+        if &#34;ylabel&#34; in kwargs:
+            ax.set_ylabel(
+                kwargs[&#34;ylabel&#34;].replace(&#34;_&#34;, &#34; &#34;).capitalize(), weight=&#34;bold&#34;
+            )
+
+        if &#34;tick_size&#34; in kwargs:
+            ax.tick_params(labelsize=kwargs[&#34;tick_size&#34;])
+
+        if &#34;axes_size&#34; in kwargs:
+            ax.xaxis.label.set_size(kwargs[&#34;axes_size&#34;])
+            ax.yaxis.label.set_size(kwargs[&#34;axes_size&#34;])
+
+        if &#34;legend_size&#34; in kwargs:
+            ax.legend(fancybox=True, shadow=True, fontsize=kwargs[&#34;legend_size&#34;])
+        else:
+            # set legend
+            ax.legend(
+                fancybox=True,
+                shadow=True,
+            )
+
+        # only do it if multiple plots are made
+        if &#34;square_plot&#34; in kwargs:
+            ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+    plt.tight_layout()
+
+    if self.args.save:
+        fig_name = (
+            DirectoryFinder().result_dir_fig
+            + &#34;population_ratio_&#34;
+            + timestamp()
+            + &#34;.png&#34;
+        )
+        self.save_figure(fig_name, axs)
+        return axs
+    else:
+        plt.show()
+        return axs</code></pre>
+</details>
+</dd>
+<dt id="utils.plotter.Plotter.plot_lines_comparative"><code class="name flex">
+<span>def <span class="ident">plot_lines_comparative</span></span>(<span>self, dict_data: DefaultDict[str, DefaultDict[str, List[int]]], y_data_to_plot: List[str], x_data_to_plot: str = None, *args: str, **kwargs: Any) ‑> Union[matplotlib.axes._axes.Axes, numpy.ndarray, numpy.generic]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plot line graph from data points.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict_data</code></strong> :&ensp;<code>DefaultDict[str, DefaultDict[str, List[int]]]</code></dt>
+<dd>Contains all the data</dd>
+<dt><strong><code>data_to_plot</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>Defines which data to choose from the dict_data</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>plt.Axes</code></dt>
+<dd>matplotlib axes object</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_lines_comparative(
+    self,
+    dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+    y_data_to_plot: List[str],
+    x_data_to_plot: str = None,
+    *args: str,
+    **kwargs: Any,
+) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+    &#34;&#34;&#34;Plot line graph from data points.
+
+    Args:
+        dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+        data_to_plot (List[str]): Defines which data to choose from the dict_data
+    Returns:
+        plt.Axes: matplotlib axes object
+    &#34;&#34;&#34;
+    _, axs = plt.subplots(1, len(y_data_to_plot))
+    if axs is None:
+        axs = plt.gca()
+
+    keys_diff_structure = list(dict_data.keys())
+
+    for data, ax in zip(y_data_to_plot, axs):
+        if data not in dict_data[keys_diff_structure[0]].keys():
+            raise KeyError(
+                f&#34;Given key doesn&#39;t exist,{dict_data[keys_diff_structure[0]].keys()=}&#34;
+            )
+
+        color_list = iter(list(sns.color_palette(&#34;Set2&#34;)))
+        for key_diff_structure in keys_diff_structure:
+            color = next(color_list)
+            deviation = data.replace(&#34;mean&#34;, &#34;sem&#34;)
+            ax.errorbar(
+                dict_data[key_diff_structure][x_data_to_plot],
+                dict_data[key_diff_structure][data],
+                yerr=dict_data[key_diff_structure][deviation],
+                color=color,
+                capsize=5,
+                label=key_diff_structure,
+            )
+
+            ax.set_xlabel(&#34;Rounds&#34;, weight=&#34;bold&#34;)
+            ax.ticklabel_format(
+                axis=&#34;x&#34;, style=&#34;sci&#34;, scilimits=(0, 0), useMathText=&#34;True&#34;
+            )
+            ax.set_ylabel(
+                data.replace(&#34;mean_&#34;, &#34;&#34;).replace(&#34;_&#34;, &#34; &#34;).capitalize(),
+                weight=&#34;bold&#34;,
+            )
+            if &#34;information&#34; in data:
+                ax.set_ylabel(&#34;Flow of information&#34;, weight=&#34;bold&#34;)
+            # set legend
+            ax.legend(
+                fancybox=True,
+                shadow=True,
+            )
+            ax.grid(alpha=0.5, linestyle=&#34;:&#34;)
+            ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+
+    plt.tight_layout()
+
+    if self.args.save:
+        fig_name = (
+            DirectoryFinder().result_dir_fig
+            + &#34;topological_meas&#34;
+            + &#34;_&#34;
+            + timestamp()
+            + &#34;.png&#34;
+        )
+        self.save_figure(fig_name, axs)
+        return axs
+    else:
+        plt.show()
+        return axs</code></pre>
+</details>
+</dd>
+<dt id="utils.plotter.Plotter.plot_lines_correlation"><code class="name flex">
+<span>def <span class="ident">plot_lines_correlation</span></span>(<span>self, dict_data: DefaultDict[str, DefaultDict[str, List[int]]], y_data_to_plot: str, x_data_to_plot: str, *args: str, **kwargs: Any) ‑> Union[matplotlib.axes._axes.Axes, numpy.ndarray, numpy.generic]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plot line graph from correlation points with correlatio factor.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict_data</code></strong> :&ensp;<code>DefaultDict[str, DefaultDict[str, List[int]]]</code></dt>
+<dd>Contains all the data</dd>
+<dt><strong><code>data_to_plot</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>Defines which data to choose from the dict_data</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>plt.Axes</code></dt>
+<dd>matplotlib axes object</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_lines_correlation(
+    self,
+    dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+    y_data_to_plot: str,
+    x_data_to_plot: str,
+    *args: str,
+    **kwargs: Any,
+) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+    &#34;&#34;&#34;Plot line graph from correlation points with correlatio factor.
+
+    Args:
+        dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+        data_to_plot (List[str]): Defines which data to choose from the dict_data
+    Returns:
+        plt.Axes: matplotlib axes object
+    &#34;&#34;&#34;
+    keys = list(dict_data.keys())
+
+    mpl.rcParams[&#34;axes.spines.top&#34;] = True
+    mpl.rcParams[&#34;axes.spines.right&#34;] = True
+
+    fig, axs = plt.subplots(1, len(y_data_to_plot))
+
+    if axs is None:
+        axs = plt.gca()
+
+    for centrality_measure, ax in zip(y_data_to_plot, axs):
+
+        line_plot_style = iter([&#34;k-&#34;, &#34;k--&#34;, &#34;k:&#34;])
+        for key in keys:
+            corr = get_correlation(
+                dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                dict_data[key][&#34;df_total&#34;][centrality_measure],
+            )
+
+            m, b = np.polyfit(
+                dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                dict_data[key][&#34;df_total&#34;][centrality_measure],
+                1,
+            )
+
+            ax.plot(
+                dict_data[key][&#34;df_total&#34;][x_data_to_plot],
+                m * dict_data[key][&#34;df_total&#34;][x_data_to_plot] + b,
+                next(line_plot_style),
+                # label=key + f&#34; --- {corr=}&#34;,
+                label=corr,
+            )
+
+            ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+            ax.set_xlabel(&#34;Criminal likelihood&#34;, weight=&#34;bold&#34;)
+            ax.set_ylabel(centrality_measure.capitalize(), weight=&#34;bold&#34;)
+            ax.patch.set_edgecolor(&#34;black&#34;)
+            ax.patch.set_linewidth(&#34;2&#34;)
+            ax.set_aspect(np.diff(ax.get_xlim()) / np.diff(ax.get_ylim()))
+            ax.legend(
+                loc=&#34;upper center&#34;,
+                bbox_to_anchor=(0.5, 1.05),
+                ncol=3,
+                fancybox=True,
+                shadow=True,
+            )
+
+    line_labels = [&#34;Preferential&#34;, &#34;Random&#34;, &#34;Small-world&#34;]
+    fig.legend(
+        ax.get_lines(),  # The line objects
+        labels=line_labels,  # The labels for each line
+        loc=&#34;upper center&#34;,  # Position of legend
+        bbox_to_anchor=(0.5, 0.8),
+        borderaxespad=0.1,  # Small spacing around legend box
+        ncol=3,
+        fontsize=&#34;large&#34;,
+    )
+
+    plt.tight_layout()
+
+    if self.args.save:
+        fig_name = (
+            DirectoryFinder().result_dir_fig
+            + &#34;correlation_fig&#34;
+            + &#34;_&#34;
+            + timestamp()
+            + &#34;.png&#34;
+        )
+        self.save_figure(fig_name, axs)
+        return axs
+    else:
+        plt.show()
+        return axs</code></pre>
+</details>
+</dd>
+<dt id="utils.plotter.Plotter.plot_lines_correlation_grid"><code class="name flex">
+<span>def <span class="ident">plot_lines_correlation_grid</span></span>(<span>self, dict_data: DefaultDict[str, DefaultDict[str, List[int]]], y_data_to_plot: str, x_data_to_plot: str, *args: str, **kwargs: Any) ‑> Union[matplotlib.axes._axes.Axes, numpy.ndarray, numpy.generic]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plot line graph from correlation points with correlatio factor.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict_data</code></strong> :&ensp;<code>DefaultDict[str, DefaultDict[str, List[int]]]</code></dt>
+<dd>Contains all the data</dd>
+<dt><strong><code>data_to_plot</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>Defines which data to choose from the dict_data</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>plt.Axes</code></dt>
+<dd>matplotlib axes object</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_lines_correlation_grid(
+    self,
+    dict_data: DefaultDict[str, DefaultDict[str, List[int]]],
+    y_data_to_plot: str,
+    x_data_to_plot: str,
+    *args: str,
+    **kwargs: Any,
+) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+    &#34;&#34;&#34;Plot line graph from correlation points with correlatio factor.
+
+    Args:
+        dict_data (DefaultDict[str, DefaultDict[str, List[int]]]): Contains all the data
+        data_to_plot (List[str]): Defines which data to choose from the dict_data
+    Returns:
+        plt.Axes: matplotlib axes object
+    &#34;&#34;&#34;
+    keys = list(dict_data.keys())
+
+    mpl.rcParams[&#34;axes.spines.top&#34;] = True
+    mpl.rcParams[&#34;axes.spines.right&#34;] = True
+
+    fig, axs = plt.subplots(len(y_data_to_plot), len(keys))
+
+    if axs is None:
+        axs = plt.gca()
+
+    for centrality_measure, i in zip(y_data_to_plot, range(axs.shape[0])):
+        for key, k in zip(keys, range(0, axs.shape[1])):
+
+            # filter the nodes that have not been affected at all by the simulation
+            filtered_data = dict_data[key][&#34;df_total&#34;][
+                dict_data[key][&#34;df_total&#34;][x_data_to_plot] != 0
+            ]
+            # remove inf and NaN entries
+            filtered_data = filtered_data.replace([np.inf, -np.inf], np.nan).dropna(
+                axis=1
+            )
+
+            corr = get_correlation(
+                filtered_data[x_data_to_plot],
+                filtered_data[centrality_measure],
+            )
+
+            m, b = np.polyfit(
+                filtered_data[x_data_to_plot],
+                filtered_data[centrality_measure],
+                1,
+            )
+
+            axs[i, k].plot(
+                filtered_data[x_data_to_plot],
+                m * filtered_data[x_data_to_plot] + b,
+                color=&#34;k&#34;,
+                label=corr,
+            )
+
+            axs[i, k].scatter(
+                filtered_data[x_data_to_plot],
+                filtered_data[centrality_measure],
+                s=0.5,
+                color=&#34;grey&#34;,
+            )
+
+            axs[i, k].set_xlim(0, 1)
+            axs[i, k].xaxis.set_major_formatter(mtick.PercentFormatter())
+            axs[i, k].patch.set_edgecolor(&#34;black&#34;)
+            axs[i, k].patch.set_linewidth(&#34;2&#34;)
+            axs[i, k].legend(
+                loc=&#34;upper center&#34;,
+                bbox_to_anchor=(0.5, 1.05),
+                ncol=3,
+                fancybox=True,
+                shadow=True,
+            )
+
+    for ax, col in zip(axs[0], keys):
+        ax.set_title(col.capitalize(), weight=&#34;bold&#34;)
+
+    for ax, col in zip(axs[-1], keys):
+        ax.set_xlabel(&#34;Criminal likelihood&#34;.capitalize(), weight=&#34;bold&#34;)
+
+    for ax, row in zip(axs[:, 0], y_data_to_plot):
+        ax.set_ylabel(row.capitalize(), weight=&#34;bold&#34;)
+
+    plt.tight_layout()
+
+    if self.args.save:
+        fig_name = (
+            DirectoryFinder().result_dir_fig
+            + &#34;correlation_grid_fig&#34;
+            + &#34;_&#34;
+            + timestamp()
+            + &#34;.png&#34;
+        )
+        self.save_figure(fig_name, axs)
+        return axs
+    else:
+        plt.show()
+        return axs</code></pre>
 </details>
 </dd>
 <dt id="utils.plotter.Plotter.plot_log_log"><code class="name flex">
@@ -695,16 +2397,37 @@ points.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot the data in a log-log scale to visualize the powerlaw.</p>
-<p>Important: Sort the data in ascending way</p></div>
+<p>Important: Sort the data in ascending way</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>List[float]</code></dt>
+<dd>containing the centrality (avg. degree,&hellip;) of each node</dd>
+<dt><strong><code>x_label</code></strong> :&ensp;<code>str</code></dt>
+<dd>x label</dd>
+<dt><strong><code>y_label</code></strong> :&ensp;<code>str</code></dt>
+<dd>y label</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>plt.Axes</code></dt>
+<dd>returns the figure object</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def plot_log_log(self, data: List[float], x_label: str, y_label: str) -&gt; plt.Axes:
-    &#34;&#34;&#34;
-    Plot the data in a log-log scale to visualize the powerlaw.
+    &#34;&#34;&#34;Plot the data in a log-log scale to visualize the powerlaw.
 
     Important: Sort the data in ascending way
+
+    Args:
+        data (List[float]): containing the centrality (avg. degree,...) of each node
+        x_label (str): x label
+        y_label (str): y label
+
+    Returns:
+        plt.Axes: returns the figure object
     &#34;&#34;&#34;
     data = sorted(data, reverse=True)
     fit = powerlaw.Fit(data)
@@ -727,8 +2450,239 @@ points.</p>
     ax.legend()
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
+    plt.tight_layout()
 
     return ax</code></pre>
+</details>
+</dd>
+<dt id="utils.plotter.Plotter.plot_phase_diag"><code class="name flex">
+<span>def <span class="ident">plot_phase_diag</span></span>(<span>self, dict_data: DefaultDict[str, List[int]], *args: str, **kwargs: Any) ‑> matplotlib.axes._axes.Axes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a phase diagram of param1 and param2.</p>
+<p>The colors correspond to the dominant status at the end of the run</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>plt.Axes</code></dt>
+<dd>phase diagram figure</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_phase_diag(
+    self,
+    dict_data: DefaultDict[str, List[int]],
+    *args: str,
+    **kwargs: Any,
+) -&gt; plt.Axes:
+    &#34;&#34;&#34;Generate a phase diagram of param1 and param2.
+
+    The colors correspond to the dominant status at the end of the run
+
+    Returns:
+        plt.Axes: phase diagram figure
+    &#34;&#34;&#34;
+    structures = list(dict_data.keys())
+    cases = list(dict_data[structures[0]].keys())
+
+    mpl.rcParams[&#34;axes.spines.top&#34;] = True
+    mpl.rcParams[&#34;axes.spines.right&#34;] = True
+    plt.rcParams[&#34;axes.labelsize&#34;] = &#34;xx-large&#34;
+    plt.rcParams[&#34;axes.titlesize&#34;] = &#34;xx-large&#34;
+    plt.rcParams[&#34;xtick.labelsize&#34;] = &#34;large&#34;
+    plt.rcParams[&#34;ytick.labelsize&#34;] = &#34;large&#34;
+    fig, axs = plt.subplots(len(cases), len(structures))
+
+    for case, k in zip(cases, range(axs.shape[0])):
+
+        # data 1 normalizer=iter([Normalize(0,0.8),Normalize(0,0.03),Normalize(0,0.035)])
+        # data 2 normalizer=iter([Normalize(0,0.75),Normalize(0,0.025),Normalize(0,0.05)])
+
+        normalizer = iter(
+            [Normalize(0, 0.8), Normalize(0, 0.03), Normalize(0, 0.035)]
+        )
+        for structure, i in zip(structures, range(axs.shape[1])):
+
+            divider = make_axes_locatable(axs[k, i])
+            cax = divider.append_axes(&#34;right&#34;, size=&#34;5%&#34;, pad=0.05)
+            mat = axs[k, i].matshow(
+                dict_data[structure][case][&#34;ratio_criminal&#34;],
+                aspect=&#34;auto&#34;,
+                interpolation=&#34;bilinear&#34;,
+                norm=next(normalizer),
+                cmap=&#34;viridis&#34;,
+                extent=[
+                    min(dict_data[structure][case][&#34;x_range&#34;]),
+                    max(dict_data[structure][case][&#34;x_range&#34;]),
+                    max(dict_data[structure][case][&#34;y_range&#34;]),
+                    min(dict_data[structure][case][&#34;y_range&#34;]),
+                ],
+                # norm=normalizer
+            )
+            fig.colorbar(mat, cax=cax, orientation=&#34;vertical&#34;)
+
+            # Add the \ to the param to print it in latex format
+            if dict_data[structure][case][&#34;param_x&#34;] in [
+                &#34;beata_c&#34;,
+                &#34;beta_s&#34;,
+                &#34;beta_h&#34;,
+                &#34;delta&#34;,
+                &#34;tau&#34;,
+                &#34;gamma&#34;,
+            ]:
+                dict_data[structure][case][&#34;param_x&#34;] = (
+                    &#34;\\&#34; + dict_data[structure][case][&#34;param_x&#34;]
+                )
+            if dict_data[structure][case][&#34;param_y&#34;] in [
+                &#34;beata_c&#34;,
+                &#34;beta_s&#34;,
+                &#34;beta_h&#34;,
+                &#34;delta&#34;,
+                &#34;tau&#34;,
+                &#34;gamma&#34;,
+            ]:
+                dict_data[structure][case][&#34;param_y&#34;] = (
+                    &#34;\\&#34; + dict_data[structure][case][&#34;param_y&#34;]
+                )
+
+            param_y = dict_data[structure][case][&#34;param_y&#34;]
+            param_x = dict_data[structure][case][&#34;param_x&#34;]
+            axs[k, i].set_xlabel(fr&#34;${param_x}$&#34;)
+            axs[k, i].set_ylabel(fr&#34;${param_y}$&#34;, rotation=0)
+            axs[k, i].grid(b=None)
+
+    for ax, structure in zip(axs[0], structures):
+        ax.set_title(structure.capitalize(), weight=&#34;bold&#34;)
+
+    # plt.tight_layout()
+    if self.args.save:
+
+        fig_name = (
+            DirectoryFinder().result_dir_fig
+            + &#34;phase_diag_&#34;
+            + param_x
+            + &#34;_&#34;
+            + param_y
+            + &#34;_&#34;
+            + timestamp()
+            + &#34;.png&#34;
+        )
+        self.save_figure(fig_name, axs)
+    else:
+        plt.show()
+        return ax</code></pre>
+</details>
+</dd>
+<dt id="utils.plotter.Plotter.plot_violin"><code class="name flex">
+<span>def <span class="ident">plot_violin</span></span>(<span>self, dict_data: DefaultDict[str, List[int]], *args: str, **kwargs: Any) ‑> Union[matplotlib.axes._axes.Axes, numpy.ndarray, numpy.generic]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plot violin graph from data
+points.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict_data</code></strong> :&ensp;<code>DefaultDict[str, List[Any]]</code></dt>
+<dd>Contains all the data</dd>
+<dt><strong><code>data_to_plot</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>Defines which data to choose from the dict_data</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>plt.Axes</code></dt>
+<dd>matplotlib axes object</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_violin(
+    self,
+    dict_data: DefaultDict[str, List[int]],
+    *args: str,
+    **kwargs: Any,
+) -&gt; Union[plt.Axes, np.ndarray, np.generic]:
+    &#34;&#34;&#34;Plot violin graph from data  points.
+
+    Args:
+        dict_data (DefaultDict[str, List[Any]]): Contains all the data
+        data_to_plot (List[str]): Defines which data to choose from the dict_data
+
+    Returns:
+        plt.Axes: matplotlib axes object
+    &#34;&#34;&#34;
+    # data needs to be in df
+
+    df = pd.DataFrame(columns=[&#34;structure&#34;, &#34;link&#34;, &#34;data&#34;])
+
+    for structure in dict_data.keys():
+        for link in dict_data[structure].keys():
+            for data_points in dict_data[structure][link]:
+                df = df.append(
+                    {&#34;structure&#34;: structure, &#34;link&#34;: link, &#34;data&#34;: data_points},
+                    ignore_index=True,
+                )
+
+    df[&#34;structure&#34;] = df[&#34;structure&#34;].astype(str)
+    df[&#34;link&#34;] = df[&#34;link&#34;].astype(int)
+    df[&#34;data&#34;] = df[&#34;data&#34;].astype(float)
+
+    _, ax = plt.subplots()
+
+    ax = sns.violinplot(
+        data=df,
+        x=&#34;link&#34;,
+        y=&#34;data&#34;,
+        hue=&#34;structure&#34;,
+        width=0.7,
+        palette=&#34;Set2&#34;,
+        ax=ax,
+        cut=0,
+    )
+
+    if &#34;xlabel&#34; in kwargs:
+        ax.set_xlabel(kwargs[&#34;xlabel&#34;].capitalize(), weight=&#34;bold&#34;, fontsize=35)
+    if &#34;ylabel&#34; in kwargs:
+        ax.set_ylabel(kwargs[&#34;ylabel&#34;].capitalize(), weight=&#34;bold&#34;, fontsize=35)
+
+    if &#34;density_conv&#34; in kwargs:
+        ax.set_xticks(
+            np.arange(0, len(kwargs[&#34;density_conv&#34;])), labels=kwargs[&#34;density_conv&#34;]
+        )
+
+    # set legend
+    ax.legend(fancybox=True, shadow=True, fontsize=35)
+    ax.tick_params(labelsize=35)
+    plt.tight_layout()
+    if self.args.save:
+        fig_name = (
+            DirectoryFinder().result_dir_fig
+            + &#34;violin_plot&#34;
+            + &#34;_&#34;
+            + timestamp()
+            + &#34;.png&#34;
+        )
+        self.save_figure(fig_name, ax)
+        return ax
+    else:
+        plt.show()
+        return ax</code></pre>
+</details>
+</dd>
+<dt id="utils.plotter.Plotter.save_figure"><code class="name flex">
+<span>def <span class="ident">save_figure</span></span>(<span>sefl, fig_name: str, axs: matplotlib.axes._axes.Axes) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Save figures to png files and pickle data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_figure(sefl, fig_name: str, axs: plt.Axes) -&gt; None:
+    &#34;&#34;&#34;Save figures to png files and pickle data.&#34;&#34;&#34;
+    plt.savefig(fig_name, dpi=300, bbox_inches=&#34;tight&#34;)
+    with open(fig_name.replace(&#34;png&#34;, &#34;pkl&#34;), &#34;wb&#34;) as fig:
+        pickle.dump(axs, fig)</code></pre>
 </details>
 </dd>
 </dl>
@@ -754,9 +2708,16 @@ points.</p>
 <ul class="">
 <li><code><a title="utils.plotter.Plotter.draw_network" href="#utils.plotter.Plotter.draw_network">draw_network</a></code></li>
 <li><code><a title="utils.plotter.Plotter.get_color_map" href="#utils.plotter.Plotter.get_color_map">get_color_map</a></code></li>
+<li><code><a title="utils.plotter.Plotter.load_figure" href="#utils.plotter.Plotter.load_figure">load_figure</a></code></li>
 <li><code><a title="utils.plotter.Plotter.plot_hist" href="#utils.plotter.Plotter.plot_hist">plot_hist</a></code></li>
 <li><code><a title="utils.plotter.Plotter.plot_lines" href="#utils.plotter.Plotter.plot_lines">plot_lines</a></code></li>
+<li><code><a title="utils.plotter.Plotter.plot_lines_comparative" href="#utils.plotter.Plotter.plot_lines_comparative">plot_lines_comparative</a></code></li>
+<li><code><a title="utils.plotter.Plotter.plot_lines_correlation" href="#utils.plotter.Plotter.plot_lines_correlation">plot_lines_correlation</a></code></li>
+<li><code><a title="utils.plotter.Plotter.plot_lines_correlation_grid" href="#utils.plotter.Plotter.plot_lines_correlation_grid">plot_lines_correlation_grid</a></code></li>
 <li><code><a title="utils.plotter.Plotter.plot_log_log" href="#utils.plotter.Plotter.plot_log_log">plot_log_log</a></code></li>
+<li><code><a title="utils.plotter.Plotter.plot_phase_diag" href="#utils.plotter.Plotter.plot_phase_diag">plot_phase_diag</a></code></li>
+<li><code><a title="utils.plotter.Plotter.plot_violin" href="#utils.plotter.Plotter.plot_violin">plot_violin</a></code></li>
+<li><code><a title="utils.plotter.Plotter.save_figure" href="#utils.plotter.Plotter.save_figure">save_figure</a></code></li>
 </ul>
 </li>
 </ul>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>network_utils.network_stats API documentation</title>
-<meta name="description" content="This script&#39;s intention is to get the properties of an given network …" />
+<meta name="description" content="This script&#39;s intention is to get the overall properties of a given network …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,7 +22,7 @@
 <h1 class="title">Module <code>network_utils.network_stats</code></h1>
 </header>
 <section id="section-intro">
-<p>This script's intention is to get the properties of an given network.</p>
+<p>This script's intention is to get the overall properties of a given network.</p>
 <p><strong>author</strong> = Louis Weyland
 <strong>date</strong>
 = 5/02/2022</p>
@@ -30,20 +30,22 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;This script&#39;s intention is to get the properties of an given network.
+<pre><code class="python">&#34;&#34;&#34;This script&#39;s intention is to get the overall properties of a given network.
 
 __author__ = Louis Weyland
 __date__   = 5/02/2022
 &#34;&#34;&#34;
 import logging
+from typing import Dict
 from typing import List
 from typing import Tuple
+from typing import Union
 
 import networkit as nk
 import numpy as np
 import powerlaw
-from utils.suppress_stdout_stderr import suppress_stdout_stderr
 from tqdm import tqdm
+from utils.suppress_stdout_stderr import suppress_stdout_stderr
 
 logger = logging.getLogger(&#34;logger&#34;)
 
@@ -56,20 +58,40 @@ class NetworkStats:
         assert isinstance(network, nk.Graph), &#34;Given network type is not Networkit&#34;
         self.network = network
 
-    def get_overview(self) -&gt; None:
-        &#34;&#34;&#34;Get an overview of the network.&#34;&#34;&#34;
-        print(&#34;----------------------------&#34;)
-        nk.overview(self.network)
-        nk.community.detectCommunities(self.network)
-        self.get_connected_components()
-        self.check_if_powerlaw()
-        self.get_density()
-        self.get_relative_density()
-        self.get_diameter()
-        self.get_radius()
-        self.get_degree_dispersion()
+    def get_overview(self) -&gt; Dict[str, Union[int, float]]:
+        &#34;&#34;&#34;Get an overview of the network.
+
+        Returns:
+            Dict[str, Union[int, float]]: A dictionary of various metrics.
+        &#34;&#34;&#34;
+        if logging.getLevelName(logger.level) == &#34;INFO&#34;:
+            print(&#34;----------------------------&#34;)
+            nk.overview(self.network)
+            nk.community.detectCommunities(self.network)
+
+        overview = {
+            &#34;component&#34;: int(self.get_connected_components()),
+            &#34;is_powerlaw&#34;: self.check_if_powerlaw()[0],
+            &#34;density&#34;: self.get_density(),
+            &#34;secrecy&#34;: self.get_secrecy(),
+            &#34;nodes&#34;: int(self.network.numberOfNodes()),
+            &#34;edges&#34;: int(self.network.numberOfEdges()),
+            &#34;avg_degree&#34;: sum(
+                nk.centrality.DegreeCentrality(self.network).run().scores()
+            )
+            / self.network.numberOfNodes(),
+            &#34;clustering_coeff&#34;: self.get_clustering_coefficient(),
+            &#34;relative_density&#34;: self.get_relative_density(),
+            &#34;diameter&#34;: int(self.get_diameter()),
+            # &#34;radius&#34;: int(self.get_radius()),
+            &#34;dispersion&#34;: self.get_degree_dispersion(),
+            &#34;avg_path_length&#34;: self.get_average_path_length(),
+        }
         # self.get_efficiency()
-        print(&#34;----------------------------&#34;)
+        if logging.getLevelName(logger.level) == &#34;INFO&#34;:
+            print(&#34;----------------------------&#34;)
+
+        return overview
 
     def get_connected_components(self) -&gt; int:
         &#34;&#34;&#34;Return the number of connected components.&#34;&#34;&#34;
@@ -136,6 +158,24 @@ class NetworkStats:
             logger.warning(&#34;Graph must be connected! Otherwise distance == inf&#34;)
             return -1
 
+    def get_average_path_length(self) -&gt; float:
+        &#34;&#34;&#34;Return the average_path_length.&#34;&#34;&#34;
+        # Initialse algorithm
+        cc = nk.components.ConnectedComponents(self.network)
+        cc.run()
+        gcs = cc.extractLargestConnectedComponent(self.network, True)
+        n_nodes = gcs.numberOfNodes()
+        if n_nodes &lt;= 1:
+            return 0
+        apsp = nk.distance.APSP(gcs)
+        apsp.run()
+
+        distances = apsp.getDistances(asarray=True)
+        upper_triang = np.triu(distances, k=1)
+        avg_path_length = upper_triang[np.nonzero(upper_triang)].mean()
+        logger.info(f&#34;Average path length is {avg_path_length=}&#34;)
+        return avg_path_length
+
     def get_radius(self) -&gt; int:
         &#34;&#34;&#34;Get the radius of a graph which is the minimum eccentricity.&#34;&#34;&#34;
         # predefine the len of the list for speed
@@ -168,6 +208,14 @@ class NetworkStats:
         d = (2 * m) / (n * (n - 1))
         logger.info(f&#34;Density = {d}&#34;)
         return d
+
+    def get_secrecy(self) -&gt; float:
+        &#34;&#34;&#34;Get the secrecy of a network.&#34;&#34;&#34;
+        m = self.network.numberOfEdges()
+        n = self.network.numberOfNodes()
+        s = (n * (n - 1)) / (2 * m)
+        logger.info(f&#34;Secrecy = {s}&#34;)
+        return s
 
     def get_relative_density(self) -&gt; float:
         &#34;&#34;&#34;Get the relative density of a graph as defined in Scott J.&#34;&#34;&#34;
@@ -218,7 +266,14 @@ class NetworkStats:
         efficiency = (1 / (n * (n - 1))) * np.sum(arr_inv_dist)
 
         logger.info(f&#34;Efficiency = {efficiency}&#34;)
-        return efficiency</code></pre>
+        return efficiency
+
+    def get_clustering_coefficient(self) -&gt; float:
+        &#34;&#34;&#34;Return the global clustering coefficient.&#34;&#34;&#34;
+        lcc = (
+            nk.centrality.LocalClusteringCoefficient(self.network, True).run().scores()
+        )
+        return sum(lcc) / self.network.numberOfNodes()</code></pre>
 </details>
 </section>
 <section>
@@ -249,20 +304,40 @@ class NetworkStats:
         assert isinstance(network, nk.Graph), &#34;Given network type is not Networkit&#34;
         self.network = network
 
-    def get_overview(self) -&gt; None:
-        &#34;&#34;&#34;Get an overview of the network.&#34;&#34;&#34;
-        print(&#34;----------------------------&#34;)
-        nk.overview(self.network)
-        nk.community.detectCommunities(self.network)
-        self.get_connected_components()
-        self.check_if_powerlaw()
-        self.get_density()
-        self.get_relative_density()
-        self.get_diameter()
-        self.get_radius()
-        self.get_degree_dispersion()
+    def get_overview(self) -&gt; Dict[str, Union[int, float]]:
+        &#34;&#34;&#34;Get an overview of the network.
+
+        Returns:
+            Dict[str, Union[int, float]]: A dictionary of various metrics.
+        &#34;&#34;&#34;
+        if logging.getLevelName(logger.level) == &#34;INFO&#34;:
+            print(&#34;----------------------------&#34;)
+            nk.overview(self.network)
+            nk.community.detectCommunities(self.network)
+
+        overview = {
+            &#34;component&#34;: int(self.get_connected_components()),
+            &#34;is_powerlaw&#34;: self.check_if_powerlaw()[0],
+            &#34;density&#34;: self.get_density(),
+            &#34;secrecy&#34;: self.get_secrecy(),
+            &#34;nodes&#34;: int(self.network.numberOfNodes()),
+            &#34;edges&#34;: int(self.network.numberOfEdges()),
+            &#34;avg_degree&#34;: sum(
+                nk.centrality.DegreeCentrality(self.network).run().scores()
+            )
+            / self.network.numberOfNodes(),
+            &#34;clustering_coeff&#34;: self.get_clustering_coefficient(),
+            &#34;relative_density&#34;: self.get_relative_density(),
+            &#34;diameter&#34;: int(self.get_diameter()),
+            # &#34;radius&#34;: int(self.get_radius()),
+            &#34;dispersion&#34;: self.get_degree_dispersion(),
+            &#34;avg_path_length&#34;: self.get_average_path_length(),
+        }
         # self.get_efficiency()
-        print(&#34;----------------------------&#34;)
+        if logging.getLevelName(logger.level) == &#34;INFO&#34;:
+            print(&#34;----------------------------&#34;)
+
+        return overview
 
     def get_connected_components(self) -&gt; int:
         &#34;&#34;&#34;Return the number of connected components.&#34;&#34;&#34;
@@ -329,6 +404,24 @@ class NetworkStats:
             logger.warning(&#34;Graph must be connected! Otherwise distance == inf&#34;)
             return -1
 
+    def get_average_path_length(self) -&gt; float:
+        &#34;&#34;&#34;Return the average_path_length.&#34;&#34;&#34;
+        # Initialse algorithm
+        cc = nk.components.ConnectedComponents(self.network)
+        cc.run()
+        gcs = cc.extractLargestConnectedComponent(self.network, True)
+        n_nodes = gcs.numberOfNodes()
+        if n_nodes &lt;= 1:
+            return 0
+        apsp = nk.distance.APSP(gcs)
+        apsp.run()
+
+        distances = apsp.getDistances(asarray=True)
+        upper_triang = np.triu(distances, k=1)
+        avg_path_length = upper_triang[np.nonzero(upper_triang)].mean()
+        logger.info(f&#34;Average path length is {avg_path_length=}&#34;)
+        return avg_path_length
+
     def get_radius(self) -&gt; int:
         &#34;&#34;&#34;Get the radius of a graph which is the minimum eccentricity.&#34;&#34;&#34;
         # predefine the len of the list for speed
@@ -361,6 +454,14 @@ class NetworkStats:
         d = (2 * m) / (n * (n - 1))
         logger.info(f&#34;Density = {d}&#34;)
         return d
+
+    def get_secrecy(self) -&gt; float:
+        &#34;&#34;&#34;Get the secrecy of a network.&#34;&#34;&#34;
+        m = self.network.numberOfEdges()
+        n = self.network.numberOfNodes()
+        s = (n * (n - 1)) / (2 * m)
+        logger.info(f&#34;Secrecy = {s}&#34;)
+        return s
 
     def get_relative_density(self) -&gt; float:
         &#34;&#34;&#34;Get the relative density of a graph as defined in Scott J.&#34;&#34;&#34;
@@ -411,7 +512,14 @@ class NetworkStats:
         efficiency = (1 / (n * (n - 1))) * np.sum(arr_inv_dist)
 
         logger.info(f&#34;Efficiency = {efficiency}&#34;)
-        return efficiency</code></pre>
+        return efficiency
+
+    def get_clustering_coefficient(self) -&gt; float:
+        &#34;&#34;&#34;Return the global clustering coefficient.&#34;&#34;&#34;
+        lcc = (
+            nk.centrality.LocalClusteringCoefficient(self.network, True).run().scores()
+        )
+        return sum(lcc) / self.network.numberOfNodes()</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -455,6 +563,51 @@ class NetworkStats:
             f&#34;Network degree distribution follows a powerlaw, p_value = {res[1]:.4f}&#34;
         )
     return is_powerlaw, fit.alpha</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_average_path_length"><code class="name flex">
+<span>def <span class="ident">get_average_path_length</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the average_path_length.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_average_path_length(self) -&gt; float:
+    &#34;&#34;&#34;Return the average_path_length.&#34;&#34;&#34;
+    # Initialse algorithm
+    cc = nk.components.ConnectedComponents(self.network)
+    cc.run()
+    gcs = cc.extractLargestConnectedComponent(self.network, True)
+    n_nodes = gcs.numberOfNodes()
+    if n_nodes &lt;= 1:
+        return 0
+    apsp = nk.distance.APSP(gcs)
+    apsp.run()
+
+    distances = apsp.getDistances(asarray=True)
+    upper_triang = np.triu(distances, k=1)
+    avg_path_length = upper_triang[np.nonzero(upper_triang)].mean()
+    logger.info(f&#34;Average path length is {avg_path_length=}&#34;)
+    return avg_path_length</code></pre>
+</details>
+</dd>
+<dt id="network_utils.network_stats.NetworkStats.get_clustering_coefficient"><code class="name flex">
+<span>def <span class="ident">get_clustering_coefficient</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the global clustering coefficient.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_clustering_coefficient(self) -&gt; float:
+    &#34;&#34;&#34;Return the global clustering coefficient.&#34;&#34;&#34;
+    lcc = (
+        nk.centrality.LocalClusteringCoefficient(self.network, True).run().scores()
+    )
+    return sum(lcc) / self.network.numberOfNodes()</code></pre>
 </details>
 </dd>
 <dt id="network_utils.network_stats.NetworkStats.get_community"><code class="name flex">
@@ -629,28 +782,53 @@ class NetworkStats:
 </details>
 </dd>
 <dt id="network_utils.network_stats.NetworkStats.get_overview"><code class="name flex">
-<span>def <span class="ident">get_overview</span></span>(<span>self) ‑> None</span>
+<span>def <span class="ident">get_overview</span></span>(<span>self) ‑> Dict[str, Union[int, float]]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get an overview of the network.</p></div>
+<div class="desc"><p>Get an overview of the network.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Union[int, float]]</code></dt>
+<dd>A dictionary of various metrics.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_overview(self) -&gt; None:
-    &#34;&#34;&#34;Get an overview of the network.&#34;&#34;&#34;
-    print(&#34;----------------------------&#34;)
-    nk.overview(self.network)
-    nk.community.detectCommunities(self.network)
-    self.get_connected_components()
-    self.check_if_powerlaw()
-    self.get_density()
-    self.get_relative_density()
-    self.get_diameter()
-    self.get_radius()
-    self.get_degree_dispersion()
+<pre><code class="python">def get_overview(self) -&gt; Dict[str, Union[int, float]]:
+    &#34;&#34;&#34;Get an overview of the network.
+
+    Returns:
+        Dict[str, Union[int, float]]: A dictionary of various metrics.
+    &#34;&#34;&#34;
+    if logging.getLevelName(logger.level) == &#34;INFO&#34;:
+        print(&#34;----------------------------&#34;)
+        nk.overview(self.network)
+        nk.community.detectCommunities(self.network)
+
+    overview = {
+        &#34;component&#34;: int(self.get_connected_components()),
+        &#34;is_powerlaw&#34;: self.check_if_powerlaw()[0],
+        &#34;density&#34;: self.get_density(),
+        &#34;secrecy&#34;: self.get_secrecy(),
+        &#34;nodes&#34;: int(self.network.numberOfNodes()),
+        &#34;edges&#34;: int(self.network.numberOfEdges()),
+        &#34;avg_degree&#34;: sum(
+            nk.centrality.DegreeCentrality(self.network).run().scores()
+        )
+        / self.network.numberOfNodes(),
+        &#34;clustering_coeff&#34;: self.get_clustering_coefficient(),
+        &#34;relative_density&#34;: self.get_relative_density(),
+        &#34;diameter&#34;: int(self.get_diameter()),
+        # &#34;radius&#34;: int(self.get_radius()),
+        &#34;dispersion&#34;: self.get_degree_dispersion(),
+        &#34;avg_path_length&#34;: self.get_average_path_length(),
+    }
     # self.get_efficiency()
-    print(&#34;----------------------------&#34;)</code></pre>
+    if logging.getLevelName(logger.level) == &#34;INFO&#34;:
+        print(&#34;----------------------------&#34;)
+
+    return overview</code></pre>
 </details>
 </dd>
 <dt id="network_utils.network_stats.NetworkStats.get_radius"><code class="name flex">
@@ -712,6 +890,24 @@ class NetworkStats:
     raise NotImplementedError</code></pre>
 </details>
 </dd>
+<dt id="network_utils.network_stats.NetworkStats.get_secrecy"><code class="name flex">
+<span>def <span class="ident">get_secrecy</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the secrecy of a network.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_secrecy(self) -&gt; float:
+    &#34;&#34;&#34;Get the secrecy of a network.&#34;&#34;&#34;
+    m = self.network.numberOfEdges()
+    n = self.network.numberOfNodes()
+    s = (n * (n - 1)) / (2 * m)
+    logger.info(f&#34;Secrecy = {s}&#34;)
+    return s</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -734,6 +930,8 @@ class NetworkStats:
 <h4><code><a title="network_utils.network_stats.NetworkStats" href="#network_utils.network_stats.NetworkStats">NetworkStats</a></code></h4>
 <ul class="">
 <li><code><a title="network_utils.network_stats.NetworkStats.check_if_powerlaw" href="#network_utils.network_stats.NetworkStats.check_if_powerlaw">check_if_powerlaw</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_average_path_length" href="#network_utils.network_stats.NetworkStats.get_average_path_length">get_average_path_length</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_clustering_coefficient" href="#network_utils.network_stats.NetworkStats.get_clustering_coefficient">get_clustering_coefficient</a></code></li>
 <li><code><a title="network_utils.network_stats.NetworkStats.get_community" href="#network_utils.network_stats.NetworkStats.get_community">get_community</a></code></li>
 <li><code><a title="network_utils.network_stats.NetworkStats.get_connected_components" href="#network_utils.network_stats.NetworkStats.get_connected_components">get_connected_components</a></code></li>
 <li><code><a title="network_utils.network_stats.NetworkStats.get_degree_dispersion" href="#network_utils.network_stats.NetworkStats.get_degree_dispersion">get_degree_dispersion</a></code></li>
@@ -746,6 +944,7 @@ class NetworkStats:
 <li><code><a title="network_utils.network_stats.NetworkStats.get_radius" href="#network_utils.network_stats.NetworkStats.get_radius">get_radius</a></code></li>
 <li><code><a title="network_utils.network_stats.NetworkStats.get_relative_density" href="#network_utils.network_stats.NetworkStats.get_relative_density">get_relative_density</a></code></li>
 <li><code><a title="network_utils.network_stats.NetworkStats.get_scale_freeness" href="#network_utils.network_stats.NetworkStats.get_scale_freeness">get_scale_freeness</a></code></li>
+<li><code><a title="network_utils.network_stats.NetworkStats.get_secrecy" href="#network_utils.network_stats.NetworkStats.get_secrecy">get_secrecy</a></code></li>
 </ul>
 </li>
 </ul>

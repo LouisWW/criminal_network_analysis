@@ -38,11 +38,11 @@ The SensitivityAnalyser is based on the SALib library.
 __author__ = Louis Weyland
 __date__   = 5/05/2022
 &#34;&#34;&#34;
-import datetime
 import functools
 import logging
 import multiprocessing
 import os
+import sys
 from collections import OrderedDict
 from typing import Any
 from typing import Callable
@@ -50,16 +50,19 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import TypeVar
+from typing import Union
 
+import graph_tool.all as gt
 import numpy as np
 import pandas as pd
-from p_tqdm import p_map
+import tqdm
+from config.config import ConfigParser
 from SALib.analyze import sobol
 from SALib.sample import saltelli
-from config.config import ConfigParser
-from network_utils.network_converter import NetworkConverter
-from network_utils.network_reader import NetworkReader
+from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
+from utils.tools import DirectoryFinder
+from utils.tools import timestamp
 
 logger = logging.getLogger(&#34;logger&#34;)
 
@@ -69,9 +72,39 @@ SA = TypeVar(&#34;SA&#34;, bound=&#34;SensitivityAnalyser&#34;)
 class SensitivityAnalyser(ConfigParser):
     &#34;&#34;&#34;Performs sensitivity analysis on different models.&#34;&#34;&#34;
 
-    def __init__(self) -&gt; None:
+    def __init__(self, problem: dict = None) -&gt; None:
         &#34;&#34;&#34;Inherit from Configparser.&#34;&#34;&#34;
         super().__init__()
+        if problem is None:
+            self.problem = {
+                &#34;num_vars&#34;: 10,
+                &#34;names&#34;: [
+                    &#34;delta&#34;,
+                    &#34;tau&#34;,
+                    &#34;gamma&#34;,
+                    &#34;beta_s&#34;,
+                    &#34;beta_h&#34;,
+                    &#34;beta_c&#34;,
+                    &#34;c_w&#34;,
+                    &#34;c_c&#34;,
+                    &#34;r_w&#34;,
+                    &#34;r_c&#34;,
+                ],
+                &#34;bounds&#34;: [
+                    [0, 1],
+                    [0, 1],
+                    [0, 1],
+                    [0, 20],
+                    [0, 20],
+                    [0, 20],
+                    [0, 100],
+                    [0, 100],
+                    [0, 100],
+                    [0, 100],
+                ],
+            }
+        else:
+            self.problem = problem
 
     def save_results(func: Callable) -&gt; Any:
         &#34;&#34;&#34;Save the sensitivity analysis results.
@@ -84,17 +117,8 @@ class SensitivityAnalyser(ConfigParser):
             value = func(self, *args, **kwargs)
             # Save results
             if self.args.save:
-                # Get timestamp
-                e = datetime.datetime.now()
-                timestamp = e.strftime(&#34;%d-%m-%Y-%H-%M&#34;)
-                # Get the saving directory
-                # Get directory first
-                path = os.getcwd()
-                par_dir = os.path.abspath(os.path.join(path))
-                # par_dir = ../src/
-                savig_dir = par_dir + &#34;/results/data/sensitivity_analysis/&#34;
                 file_name = (
-                    savig_dir
+                    DirectoryFinder().result_dir_data_sa
                     + func.__name__
                     + &#34;_&#34;
                     + str(kwargs[&#34;output_value&#34;])
@@ -103,13 +127,15 @@ class SensitivityAnalyser(ConfigParser):
                     + &#34;_n_s_&#34;
                     + str(kwargs[&#34;n_samples&#34;])
                     + &#34;_&#34;
-                    + timestamp
+                    + self.args.attach_meth
+                    + &#34;_&#34;
+                    + timestamp()
                 )
 
                 df_list = value.to_df()
                 df = pd.concat([df_list[0], df_list[1], df_list[2]], axis=1)
                 with open(file_name, &#34;w&#34;) as fo:
-                    fo.write(df.__repr__())
+                    fo.write(df.to_string())
 
             return value
 
@@ -117,89 +143,178 @@ class SensitivityAnalyser(ConfigParser):
 
     @save_results
     def sim_mart_vaq_sa(
-        self, output_value: str, n_samples: int, rounds: int, problem: dict = None
-    ) -&gt; Dict[str, List[float]]:
-        &#34;&#34;&#34;Perform a sensitivity analysis on the Martinez-Vaquero model.
+        self,
+        output_value: str,
+        n_samples: int,
+        rounds: int,
+    ) -&gt; Union[int, Dict[str, List[float]]]:
+        &#34;&#34;&#34;Runnning the sensitivity analysis.&#34;&#34;&#34;
+        if self.args.running_chunk:
+            # chuck the sensitivity analysis and save the dataframe inbetween
+            self.check_file_and_graph_exist(n_samples, rounds)
+            param_values, gt_network = self.load_file_and_graph(n_samples, rounds)
+            # Getting all param_values that haven&#39;t run yet
+            latest_param_values = param_values[param_values.isnull().any(axis=1)]
 
-        The analysis is limited on &#34;delta&#34;,&#34;tau&#34;,&#34;gamma&#34;,&#34;beta_s&#34;,&#34;beta_h&#34; and &#34;beta_c&#34;.
-        For the sake of time, no sensitivity analysis is conducted on the ration of h/w/c.
-        Actually, h/w/c are correlated and would therefore return falsified Sobol results.
-        Furthermore, the importance of the two parameters, temperature or the probability
-        of random mutation is known. If the temperature is too high, the system will have
-        random chaotic switched between status. If the probability of random mutation is high,
-        the system with converge to a ration of 0.33 for h/w/c. What is interesting is to see the
-        importance of the investigation stage as well as the influence of criminals on lone wolfs.
-        Also it is interesting to see, what influence the penalty on the whole criminal organisation
-        can have.
+            if len(latest_param_values) == 0:
+                sys.exit(0)
+            else:
+                for sub_pd in self.chunker(latest_param_values, 50):
+                    latest_param_values_to_list = sub_pd.values.tolist()
+                    list_of_param_comb = [
+                        (gt_network, self.problem, params, output_value, rounds)
+                        for params in latest_param_values_to_list
+                    ]
 
-        Args:
-            network  (gt.graph): Criminal network
-            output_value  (str): Name of the interested output value such as
-                                    [&#39;ratio_honest&#39;,&#39;ratio_wolf&#39;,&#39;ratio_criminal&#39;
-                                    &#39;fitness_honest&#39;,&#39;fitness_criminal&#39;,&#39;fitness_wolf]
-            problem      (dict): Define which variables to conduct sensitivity analysis
-                                    with defining the bounds
-            n_samples     (int): Define the size of the search space
-            rounds        (int); Define the number of rounds played in the Simulation
-        &#34;&#34;&#34;
-        # Get the network of criminal first
-        nx_network = NetworkReader().get_data(self.args.read_data)
-        gt_network = NetworkConverter.nx_to_gt(nx_network)
+                    y = self.sensitivity_analysis_parallel(list_of_param_comb)
+                    param_values.loc[sub_pd.index, &#34;y&#34;] = y
+                    self.overwrite_file(param_values, n_samples, rounds)
 
-        if problem is None:
-            problem = {
-                &#34;num_vars&#34;: 6,
-                &#34;names&#34;: [
-                    &#34;delta&#34;,
-                    &#34;tau&#34;,
-                    &#34;gamma&#34;,
-                    &#34;beta_s&#34;,
-                    &#34;beta_h&#34;,
-                    &#34;beta_c&#34;,
-                ],
-                &#34;bounds&#34;: [[0, 1], [0, 1], [0, 1], [0, 200], [0, 200], [0, 200]],
-            }
-        # sample
-        param_values = saltelli.sample(problem, n_samples)
+            # analyse
+            sobol_indices = sobol.analyze(self.problem, np.asarray(param_values[&#34;y&#34;]))
+            return sobol_indices
 
+        elif not self.args.running_chunk:
+            # Get the network of criminal first
+            meta_sim = MetaSimulator(
+                network_name=self.args.read_data,
+                attachment_method=self.args.attach_meth,
+                ratio_honest=self.args.ratio_honest,
+                ratio_wolf=self.args.ratio_wolf,
+                k=self.args.k,
+            )
+            gt_network = meta_sim.network
+            param_values = self.create_saltelli_samples(self.problem, n_samples)
+            param_values = [
+                (gt_network, self.problem, params, output_value, rounds)
+                for params in param_values
+            ]
+
+            results = self.sensitivity_analysis_parallel(param_values)
+
+            # analyse
+            sobol_indices = sobol.analyze(self.problem, results)
+            return sobol_indices
+        return -1
+
+    def sensitivity_analysis_parallel(self, list_of_param_comb: list) -&gt; np.ndarray:
+        &#34;&#34;&#34;Run the simulation parallel.&#34;&#34;&#34;
         # ((number of loops*rounds/average_time_per_round)/n_threads)/ convert_to_hours
-        approx_running_time = ((len(param_values) * rounds * (45 / 1000)) / 23) / 3600
-        logger.warning(
-            f&#34;The sensitivity analysis will take approx {approx_running_time:.2f}h on\
-            24 cpus (~ 3.8 GHz))&#34;
-        )
         # Running multiprocessing
         num_cpus = multiprocessing.cpu_count() - 1
-        Y = p_map(
-            self.sim_mart_vaq_sa_helper,
-            (
-                [
-                    (gt_network, problem, params, output_value, rounds)
-                    for params in param_values
-                ]
-            ),
-            **{&#34;num_cpus&#34;: num_cpus, &#34;desc&#34;: &#34;Running sensitivity analysis&#34;},
-        )
+        Y = []
+        with multiprocessing.Pool(num_cpus) as p:
+            for result in tqdm.tqdm(
+                p.imap(self.sim_mart_vaq_sa_helper, list_of_param_comb),
+                total=len(list_of_param_comb),
+            ):
+                Y.append(result)
+            p.close()
+            p.join()
 
         Y_array = np.asarray(Y)
-
-        # analyse
-        sobol_indices = sobol.analyze(problem, Y_array)
-        return sobol_indices
+        return Y_array
 
     def sim_mart_vaq_sa_helper(self, tuple_of_variable: Any) -&gt; float:
         &#34;&#34;&#34;Run the simulation Mart-Vaq given the parameter.&#34;&#34;&#34;
         # Set the seed each time, otherwise the simulation will be exactly the same
-        np.random.seed()
-        gt_network, problem, params, output_value, rounds = tuple_of_variable
+        np.random.seed(0)
+        (gt_network, problem, params, output_value, rounds) = tuple_of_variable
 
         # Unpack input variables
         variable_dict = OrderedDict().fromkeys(problem[&#34;names&#34;], 0)
         variable_dict = dict(zip(variable_dict.keys(), params))
 
         simulator = SimMartVaq(network=gt_network, **variable_dict)
-        _, data_collector = simulator.play(network=simulator.network, rounds=rounds)
-        return data_collector[output_value][-1]</code></pre>
+        _, data_collector = simulator.play(
+            # ith_collect == rounds to collect only at the end
+            network=simulator.network,
+            rounds=rounds,
+            ith_collect=rounds,
+        )
+        return data_collector[output_value][-1]
+
+    def create_saltelli_samples(self, problem: dict, n_samples: int) -&gt; np.ndarray:
+        &#34;&#34;&#34;Return saltelli samples.&#34;&#34;&#34;
+        return saltelli.sample(problem, n_samples)
+
+    def check_file_and_graph_exist(self, n_samples: int, rounds: int) -&gt; None:
+        &#34;&#34;&#34;Check if file and graph doesn&#39;t exist otherwise create.&#34;&#34;&#34;
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + &#34;_&#34;
+            + str(rounds)
+            + &#34;_&#34;
+            + str(n_samples)
+            + &#34;.csv&#34;
+        )
+        graph_file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + f&#34;_h_{self.args.ratio_honest:.2f}_w_{self.args.ratio_wolf}_k_{self.args.k}&#34;
+            + &#34;_graph.xml.gz&#34;
+        )
+        if not os.path.isfile(file):
+            param_values = self.create_saltelli_samples(self.problem, n_samples)
+            param_values = pd.DataFrame.from_records(
+                param_values, columns=self.problem[&#34;names&#34;]
+            )
+            param_values[&#34;y&#34;] = np.nan
+            param_values.to_csv(file, index=False)
+        if not os.path.isfile(graph_file):
+            # create graph
+            meta_sim = MetaSimulator(
+                network_name=self.args.read_data,
+                attachment_method=self.args.attach_meth,
+                ratio_honest=self.args.ratio_honest,
+                ratio_wolf=self.args.ratio_wolf,
+                k=self.args.k,
+            )
+
+            meta_sim.network.save(graph_file)
+
+    def overwrite_file(
+        self, param_values: pd.DataFrame, n_samples: int, rounds: int
+    ) -&gt; None:
+        &#34;&#34;&#34;Overwite the file with new results.&#34;&#34;&#34;
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + &#34;_&#34;
+            + str(rounds)
+            + &#34;_&#34;
+            + str(n_samples)
+            + &#34;.csv&#34;
+        )
+        param_values.to_csv(file, index=False)
+
+    def load_file_and_graph(
+        self, n_samples: int, rounds: int
+    ) -&gt; Tuple[pd.DataFrame, gt.Graph]:
+        &#34;&#34;&#34;Load the data and the graph.&#34;&#34;&#34;
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + &#34;_&#34;
+            + str(rounds)
+            + &#34;_&#34;
+            + str(n_samples)
+            + &#34;.csv&#34;
+        )
+        graph_file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + f&#34;_h_{self.args.ratio_honest:.2f}_w_{self.args.ratio_wolf}_k_{self.args.k}&#34;
+            + &#34;_graph.xml.gz&#34;
+        )
+        param_values = pd.read_csv(file)
+        graph = gt.load_graph(graph_file)
+        return param_values, graph
+
+    def chunker(self, seq: pd.DataFrame, size: int) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Chucks the panda DataFrame.&#34;&#34;&#34;
+        return (seq[pos : pos + size] for pos in range(0, len(seq), size))</code></pre>
 </details>
 </section>
 <section>
@@ -213,6 +328,7 @@ class SensitivityAnalyser(ConfigParser):
 <dl>
 <dt id="utils.sensitivity_analysis.SensitivityAnalyser"><code class="flex name class">
 <span>class <span class="ident">SensitivityAnalyser</span></span>
+<span>(</span><span>problem: dict = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Performs sensitivity analysis on different models.</p>
@@ -224,9 +340,39 @@ class SensitivityAnalyser(ConfigParser):
 <pre><code class="python">class SensitivityAnalyser(ConfigParser):
     &#34;&#34;&#34;Performs sensitivity analysis on different models.&#34;&#34;&#34;
 
-    def __init__(self) -&gt; None:
+    def __init__(self, problem: dict = None) -&gt; None:
         &#34;&#34;&#34;Inherit from Configparser.&#34;&#34;&#34;
         super().__init__()
+        if problem is None:
+            self.problem = {
+                &#34;num_vars&#34;: 10,
+                &#34;names&#34;: [
+                    &#34;delta&#34;,
+                    &#34;tau&#34;,
+                    &#34;gamma&#34;,
+                    &#34;beta_s&#34;,
+                    &#34;beta_h&#34;,
+                    &#34;beta_c&#34;,
+                    &#34;c_w&#34;,
+                    &#34;c_c&#34;,
+                    &#34;r_w&#34;,
+                    &#34;r_c&#34;,
+                ],
+                &#34;bounds&#34;: [
+                    [0, 1],
+                    [0, 1],
+                    [0, 1],
+                    [0, 20],
+                    [0, 20],
+                    [0, 20],
+                    [0, 100],
+                    [0, 100],
+                    [0, 100],
+                    [0, 100],
+                ],
+            }
+        else:
+            self.problem = problem
 
     def save_results(func: Callable) -&gt; Any:
         &#34;&#34;&#34;Save the sensitivity analysis results.
@@ -239,17 +385,8 @@ class SensitivityAnalyser(ConfigParser):
             value = func(self, *args, **kwargs)
             # Save results
             if self.args.save:
-                # Get timestamp
-                e = datetime.datetime.now()
-                timestamp = e.strftime(&#34;%d-%m-%Y-%H-%M&#34;)
-                # Get the saving directory
-                # Get directory first
-                path = os.getcwd()
-                par_dir = os.path.abspath(os.path.join(path))
-                # par_dir = ../src/
-                savig_dir = par_dir + &#34;/results/data/sensitivity_analysis/&#34;
                 file_name = (
-                    savig_dir
+                    DirectoryFinder().result_dir_data_sa
                     + func.__name__
                     + &#34;_&#34;
                     + str(kwargs[&#34;output_value&#34;])
@@ -258,13 +395,15 @@ class SensitivityAnalyser(ConfigParser):
                     + &#34;_n_s_&#34;
                     + str(kwargs[&#34;n_samples&#34;])
                     + &#34;_&#34;
-                    + timestamp
+                    + self.args.attach_meth
+                    + &#34;_&#34;
+                    + timestamp()
                 )
 
                 df_list = value.to_df()
                 df = pd.concat([df_list[0], df_list[1], df_list[2]], axis=1)
                 with open(file_name, &#34;w&#34;) as fo:
-                    fo.write(df.__repr__())
+                    fo.write(df.to_string())
 
             return value
 
@@ -272,89 +411,178 @@ class SensitivityAnalyser(ConfigParser):
 
     @save_results
     def sim_mart_vaq_sa(
-        self, output_value: str, n_samples: int, rounds: int, problem: dict = None
-    ) -&gt; Dict[str, List[float]]:
-        &#34;&#34;&#34;Perform a sensitivity analysis on the Martinez-Vaquero model.
+        self,
+        output_value: str,
+        n_samples: int,
+        rounds: int,
+    ) -&gt; Union[int, Dict[str, List[float]]]:
+        &#34;&#34;&#34;Runnning the sensitivity analysis.&#34;&#34;&#34;
+        if self.args.running_chunk:
+            # chuck the sensitivity analysis and save the dataframe inbetween
+            self.check_file_and_graph_exist(n_samples, rounds)
+            param_values, gt_network = self.load_file_and_graph(n_samples, rounds)
+            # Getting all param_values that haven&#39;t run yet
+            latest_param_values = param_values[param_values.isnull().any(axis=1)]
 
-        The analysis is limited on &#34;delta&#34;,&#34;tau&#34;,&#34;gamma&#34;,&#34;beta_s&#34;,&#34;beta_h&#34; and &#34;beta_c&#34;.
-        For the sake of time, no sensitivity analysis is conducted on the ration of h/w/c.
-        Actually, h/w/c are correlated and would therefore return falsified Sobol results.
-        Furthermore, the importance of the two parameters, temperature or the probability
-        of random mutation is known. If the temperature is too high, the system will have
-        random chaotic switched between status. If the probability of random mutation is high,
-        the system with converge to a ration of 0.33 for h/w/c. What is interesting is to see the
-        importance of the investigation stage as well as the influence of criminals on lone wolfs.
-        Also it is interesting to see, what influence the penalty on the whole criminal organisation
-        can have.
+            if len(latest_param_values) == 0:
+                sys.exit(0)
+            else:
+                for sub_pd in self.chunker(latest_param_values, 50):
+                    latest_param_values_to_list = sub_pd.values.tolist()
+                    list_of_param_comb = [
+                        (gt_network, self.problem, params, output_value, rounds)
+                        for params in latest_param_values_to_list
+                    ]
 
-        Args:
-            network  (gt.graph): Criminal network
-            output_value  (str): Name of the interested output value such as
-                                    [&#39;ratio_honest&#39;,&#39;ratio_wolf&#39;,&#39;ratio_criminal&#39;
-                                    &#39;fitness_honest&#39;,&#39;fitness_criminal&#39;,&#39;fitness_wolf]
-            problem      (dict): Define which variables to conduct sensitivity analysis
-                                    with defining the bounds
-            n_samples     (int): Define the size of the search space
-            rounds        (int); Define the number of rounds played in the Simulation
-        &#34;&#34;&#34;
-        # Get the network of criminal first
-        nx_network = NetworkReader().get_data(self.args.read_data)
-        gt_network = NetworkConverter.nx_to_gt(nx_network)
+                    y = self.sensitivity_analysis_parallel(list_of_param_comb)
+                    param_values.loc[sub_pd.index, &#34;y&#34;] = y
+                    self.overwrite_file(param_values, n_samples, rounds)
 
-        if problem is None:
-            problem = {
-                &#34;num_vars&#34;: 6,
-                &#34;names&#34;: [
-                    &#34;delta&#34;,
-                    &#34;tau&#34;,
-                    &#34;gamma&#34;,
-                    &#34;beta_s&#34;,
-                    &#34;beta_h&#34;,
-                    &#34;beta_c&#34;,
-                ],
-                &#34;bounds&#34;: [[0, 1], [0, 1], [0, 1], [0, 200], [0, 200], [0, 200]],
-            }
-        # sample
-        param_values = saltelli.sample(problem, n_samples)
+            # analyse
+            sobol_indices = sobol.analyze(self.problem, np.asarray(param_values[&#34;y&#34;]))
+            return sobol_indices
 
+        elif not self.args.running_chunk:
+            # Get the network of criminal first
+            meta_sim = MetaSimulator(
+                network_name=self.args.read_data,
+                attachment_method=self.args.attach_meth,
+                ratio_honest=self.args.ratio_honest,
+                ratio_wolf=self.args.ratio_wolf,
+                k=self.args.k,
+            )
+            gt_network = meta_sim.network
+            param_values = self.create_saltelli_samples(self.problem, n_samples)
+            param_values = [
+                (gt_network, self.problem, params, output_value, rounds)
+                for params in param_values
+            ]
+
+            results = self.sensitivity_analysis_parallel(param_values)
+
+            # analyse
+            sobol_indices = sobol.analyze(self.problem, results)
+            return sobol_indices
+        return -1
+
+    def sensitivity_analysis_parallel(self, list_of_param_comb: list) -&gt; np.ndarray:
+        &#34;&#34;&#34;Run the simulation parallel.&#34;&#34;&#34;
         # ((number of loops*rounds/average_time_per_round)/n_threads)/ convert_to_hours
-        approx_running_time = ((len(param_values) * rounds * (45 / 1000)) / 23) / 3600
-        logger.warning(
-            f&#34;The sensitivity analysis will take approx {approx_running_time:.2f}h on\
-            24 cpus (~ 3.8 GHz))&#34;
-        )
         # Running multiprocessing
         num_cpus = multiprocessing.cpu_count() - 1
-        Y = p_map(
-            self.sim_mart_vaq_sa_helper,
-            (
-                [
-                    (gt_network, problem, params, output_value, rounds)
-                    for params in param_values
-                ]
-            ),
-            **{&#34;num_cpus&#34;: num_cpus, &#34;desc&#34;: &#34;Running sensitivity analysis&#34;},
-        )
+        Y = []
+        with multiprocessing.Pool(num_cpus) as p:
+            for result in tqdm.tqdm(
+                p.imap(self.sim_mart_vaq_sa_helper, list_of_param_comb),
+                total=len(list_of_param_comb),
+            ):
+                Y.append(result)
+            p.close()
+            p.join()
 
         Y_array = np.asarray(Y)
-
-        # analyse
-        sobol_indices = sobol.analyze(problem, Y_array)
-        return sobol_indices
+        return Y_array
 
     def sim_mart_vaq_sa_helper(self, tuple_of_variable: Any) -&gt; float:
         &#34;&#34;&#34;Run the simulation Mart-Vaq given the parameter.&#34;&#34;&#34;
         # Set the seed each time, otherwise the simulation will be exactly the same
-        np.random.seed()
-        gt_network, problem, params, output_value, rounds = tuple_of_variable
+        np.random.seed(0)
+        (gt_network, problem, params, output_value, rounds) = tuple_of_variable
 
         # Unpack input variables
         variable_dict = OrderedDict().fromkeys(problem[&#34;names&#34;], 0)
         variable_dict = dict(zip(variable_dict.keys(), params))
 
         simulator = SimMartVaq(network=gt_network, **variable_dict)
-        _, data_collector = simulator.play(network=simulator.network, rounds=rounds)
-        return data_collector[output_value][-1]</code></pre>
+        _, data_collector = simulator.play(
+            # ith_collect == rounds to collect only at the end
+            network=simulator.network,
+            rounds=rounds,
+            ith_collect=rounds,
+        )
+        return data_collector[output_value][-1]
+
+    def create_saltelli_samples(self, problem: dict, n_samples: int) -&gt; np.ndarray:
+        &#34;&#34;&#34;Return saltelli samples.&#34;&#34;&#34;
+        return saltelli.sample(problem, n_samples)
+
+    def check_file_and_graph_exist(self, n_samples: int, rounds: int) -&gt; None:
+        &#34;&#34;&#34;Check if file and graph doesn&#39;t exist otherwise create.&#34;&#34;&#34;
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + &#34;_&#34;
+            + str(rounds)
+            + &#34;_&#34;
+            + str(n_samples)
+            + &#34;.csv&#34;
+        )
+        graph_file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + f&#34;_h_{self.args.ratio_honest:.2f}_w_{self.args.ratio_wolf}_k_{self.args.k}&#34;
+            + &#34;_graph.xml.gz&#34;
+        )
+        if not os.path.isfile(file):
+            param_values = self.create_saltelli_samples(self.problem, n_samples)
+            param_values = pd.DataFrame.from_records(
+                param_values, columns=self.problem[&#34;names&#34;]
+            )
+            param_values[&#34;y&#34;] = np.nan
+            param_values.to_csv(file, index=False)
+        if not os.path.isfile(graph_file):
+            # create graph
+            meta_sim = MetaSimulator(
+                network_name=self.args.read_data,
+                attachment_method=self.args.attach_meth,
+                ratio_honest=self.args.ratio_honest,
+                ratio_wolf=self.args.ratio_wolf,
+                k=self.args.k,
+            )
+
+            meta_sim.network.save(graph_file)
+
+    def overwrite_file(
+        self, param_values: pd.DataFrame, n_samples: int, rounds: int
+    ) -&gt; None:
+        &#34;&#34;&#34;Overwite the file with new results.&#34;&#34;&#34;
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + &#34;_&#34;
+            + str(rounds)
+            + &#34;_&#34;
+            + str(n_samples)
+            + &#34;.csv&#34;
+        )
+        param_values.to_csv(file, index=False)
+
+    def load_file_and_graph(
+        self, n_samples: int, rounds: int
+    ) -&gt; Tuple[pd.DataFrame, gt.Graph]:
+        &#34;&#34;&#34;Load the data and the graph.&#34;&#34;&#34;
+        file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + &#34;_&#34;
+            + str(rounds)
+            + &#34;_&#34;
+            + str(n_samples)
+            + &#34;.csv&#34;
+        )
+        graph_file = (
+            DirectoryFinder().result_dir_data_sa
+            + self.args.attach_meth
+            + f&#34;_h_{self.args.ratio_honest:.2f}_w_{self.args.ratio_wolf}_k_{self.args.k}&#34;
+            + &#34;_graph.xml.gz&#34;
+        )
+        param_values = pd.read_csv(file)
+        graph = gt.load_graph(graph_file)
+        return param_values, graph
+
+    def chunker(self, seq: pd.DataFrame, size: int) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Chucks the panda DataFrame.&#34;&#34;&#34;
+        return (seq[pos : pos + size] for pos in range(0, len(seq), size))</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -362,6 +590,138 @@ class SensitivityAnalyser(ConfigParser):
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="utils.sensitivity_analysis.SensitivityAnalyser.check_file_and_graph_exist"><code class="name flex">
+<span>def <span class="ident">check_file_and_graph_exist</span></span>(<span>self, n_samples: int, rounds: int) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if file and graph doesn't exist otherwise create.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_file_and_graph_exist(self, n_samples: int, rounds: int) -&gt; None:
+    &#34;&#34;&#34;Check if file and graph doesn&#39;t exist otherwise create.&#34;&#34;&#34;
+    file = (
+        DirectoryFinder().result_dir_data_sa
+        + self.args.attach_meth
+        + &#34;_&#34;
+        + str(rounds)
+        + &#34;_&#34;
+        + str(n_samples)
+        + &#34;.csv&#34;
+    )
+    graph_file = (
+        DirectoryFinder().result_dir_data_sa
+        + self.args.attach_meth
+        + f&#34;_h_{self.args.ratio_honest:.2f}_w_{self.args.ratio_wolf}_k_{self.args.k}&#34;
+        + &#34;_graph.xml.gz&#34;
+    )
+    if not os.path.isfile(file):
+        param_values = self.create_saltelli_samples(self.problem, n_samples)
+        param_values = pd.DataFrame.from_records(
+            param_values, columns=self.problem[&#34;names&#34;]
+        )
+        param_values[&#34;y&#34;] = np.nan
+        param_values.to_csv(file, index=False)
+    if not os.path.isfile(graph_file):
+        # create graph
+        meta_sim = MetaSimulator(
+            network_name=self.args.read_data,
+            attachment_method=self.args.attach_meth,
+            ratio_honest=self.args.ratio_honest,
+            ratio_wolf=self.args.ratio_wolf,
+            k=self.args.k,
+        )
+
+        meta_sim.network.save(graph_file)</code></pre>
+</details>
+</dd>
+<dt id="utils.sensitivity_analysis.SensitivityAnalyser.chunker"><code class="name flex">
+<span>def <span class="ident">chunker</span></span>(<span>self, seq: pandas.core.frame.DataFrame, size: int) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Chucks the panda DataFrame.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def chunker(self, seq: pd.DataFrame, size: int) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Chucks the panda DataFrame.&#34;&#34;&#34;
+    return (seq[pos : pos + size] for pos in range(0, len(seq), size))</code></pre>
+</details>
+</dd>
+<dt id="utils.sensitivity_analysis.SensitivityAnalyser.create_saltelli_samples"><code class="name flex">
+<span>def <span class="ident">create_saltelli_samples</span></span>(<span>self, problem: dict, n_samples: int) ‑> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return saltelli samples.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_saltelli_samples(self, problem: dict, n_samples: int) -&gt; np.ndarray:
+    &#34;&#34;&#34;Return saltelli samples.&#34;&#34;&#34;
+    return saltelli.sample(problem, n_samples)</code></pre>
+</details>
+</dd>
+<dt id="utils.sensitivity_analysis.SensitivityAnalyser.load_file_and_graph"><code class="name flex">
+<span>def <span class="ident">load_file_and_graph</span></span>(<span>self, n_samples: int, rounds: int) ‑> Tuple[pandas.core.frame.DataFrame, graph_tool.Graph]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load the data and the graph.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_file_and_graph(
+    self, n_samples: int, rounds: int
+) -&gt; Tuple[pd.DataFrame, gt.Graph]:
+    &#34;&#34;&#34;Load the data and the graph.&#34;&#34;&#34;
+    file = (
+        DirectoryFinder().result_dir_data_sa
+        + self.args.attach_meth
+        + &#34;_&#34;
+        + str(rounds)
+        + &#34;_&#34;
+        + str(n_samples)
+        + &#34;.csv&#34;
+    )
+    graph_file = (
+        DirectoryFinder().result_dir_data_sa
+        + self.args.attach_meth
+        + f&#34;_h_{self.args.ratio_honest:.2f}_w_{self.args.ratio_wolf}_k_{self.args.k}&#34;
+        + &#34;_graph.xml.gz&#34;
+    )
+    param_values = pd.read_csv(file)
+    graph = gt.load_graph(graph_file)
+    return param_values, graph</code></pre>
+</details>
+</dd>
+<dt id="utils.sensitivity_analysis.SensitivityAnalyser.overwrite_file"><code class="name flex">
+<span>def <span class="ident">overwrite_file</span></span>(<span>self, param_values: pandas.core.frame.DataFrame, n_samples: int, rounds: int) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Overwite the file with new results.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def overwrite_file(
+    self, param_values: pd.DataFrame, n_samples: int, rounds: int
+) -&gt; None:
+    &#34;&#34;&#34;Overwite the file with new results.&#34;&#34;&#34;
+    file = (
+        DirectoryFinder().result_dir_data_sa
+        + self.args.attach_meth
+        + &#34;_&#34;
+        + str(rounds)
+        + &#34;_&#34;
+        + str(n_samples)
+        + &#34;.csv&#34;
+    )
+    param_values.to_csv(file, index=False)</code></pre>
+</details>
+</dd>
 <dt id="utils.sensitivity_analysis.SensitivityAnalyser.save_results"><code class="name flex">
 <span>def <span class="ident">save_results</span></span>(<span>func: Callable) ‑> Any</span>
 </code></dt>
@@ -383,17 +743,8 @@ class SensitivityAnalyser(ConfigParser):
         value = func(self, *args, **kwargs)
         # Save results
         if self.args.save:
-            # Get timestamp
-            e = datetime.datetime.now()
-            timestamp = e.strftime(&#34;%d-%m-%Y-%H-%M&#34;)
-            # Get the saving directory
-            # Get directory first
-            path = os.getcwd()
-            par_dir = os.path.abspath(os.path.join(path))
-            # par_dir = ../src/
-            savig_dir = par_dir + &#34;/results/data/sensitivity_analysis/&#34;
             file_name = (
-                savig_dir
+                DirectoryFinder().result_dir_data_sa
                 + func.__name__
                 + &#34;_&#34;
                 + str(kwargs[&#34;output_value&#34;])
@@ -402,123 +753,113 @@ class SensitivityAnalyser(ConfigParser):
                 + &#34;_n_s_&#34;
                 + str(kwargs[&#34;n_samples&#34;])
                 + &#34;_&#34;
-                + timestamp
+                + self.args.attach_meth
+                + &#34;_&#34;
+                + timestamp()
             )
 
             df_list = value.to_df()
             df = pd.concat([df_list[0], df_list[1], df_list[2]], axis=1)
             with open(file_name, &#34;w&#34;) as fo:
-                fo.write(df.__repr__())
+                fo.write(df.to_string())
 
         return value
 
     return wrapper_decorator</code></pre>
 </details>
 </dd>
-<dt id="utils.sensitivity_analysis.SensitivityAnalyser.sim_mart_vaq_sa"><code class="name flex">
-<span>def <span class="ident">sim_mart_vaq_sa</span></span>(<span>self, output_value: str, n_samples: int, rounds: int, problem: dict = None) ‑> Dict[str, List[float]]</span>
+<dt id="utils.sensitivity_analysis.SensitivityAnalyser.sensitivity_analysis_parallel"><code class="name flex">
+<span>def <span class="ident">sensitivity_analysis_parallel</span></span>(<span>self, list_of_param_comb: list) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Perform a sensitivity analysis on the Martinez-Vaquero model.</p>
-<p>The analysis is limited on "delta","tau","gamma","beta_s","beta_h" and "beta_c".
-For the sake of time, no sensitivity analysis is conducted on the ration of h/w/c.
-Actually, h/w/c are correlated and would therefore return falsified Sobol results.
-Furthermore, the importance of the two parameters, temperature or the probability
-of random mutation is known. If the temperature is too high, the system will have
-random chaotic switched between status. If the probability of random mutation is high,
-the system with converge to a ration of 0.33 for h/w/c. What is interesting is to see the
-importance of the investigation stage as well as the influence of criminals on lone wolfs.
-Also it is interesting to see, what influence the penalty on the whole criminal organisation
-can have.</p>
-<h2 id="args">Args</h2>
-<p>network
-(gt.graph): Criminal network
-output_value
-(str): Name of the interested output value such as
-['ratio_honest','ratio_wolf','ratio_criminal'
-'fitness_honest','fitness_criminal','fitness_wolf]
-problem
-(dict): Define which variables to conduct sensitivity analysis
-with defining the bounds
-n_samples
-(int): Define the size of the search space
-rounds
-(int); Define the number of rounds played in the Simulation</p></div>
+<div class="desc"><p>Run the simulation parallel.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sensitivity_analysis_parallel(self, list_of_param_comb: list) -&gt; np.ndarray:
+    &#34;&#34;&#34;Run the simulation parallel.&#34;&#34;&#34;
+    # ((number of loops*rounds/average_time_per_round)/n_threads)/ convert_to_hours
+    # Running multiprocessing
+    num_cpus = multiprocessing.cpu_count() - 1
+    Y = []
+    with multiprocessing.Pool(num_cpus) as p:
+        for result in tqdm.tqdm(
+            p.imap(self.sim_mart_vaq_sa_helper, list_of_param_comb),
+            total=len(list_of_param_comb),
+        ):
+            Y.append(result)
+        p.close()
+        p.join()
+
+    Y_array = np.asarray(Y)
+    return Y_array</code></pre>
+</details>
+</dd>
+<dt id="utils.sensitivity_analysis.SensitivityAnalyser.sim_mart_vaq_sa"><code class="name flex">
+<span>def <span class="ident">sim_mart_vaq_sa</span></span>(<span>self, output_value: str, n_samples: int, rounds: int) ‑> Union[int, Dict[str, List[float]]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Runnning the sensitivity analysis.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@save_results
 def sim_mart_vaq_sa(
-    self, output_value: str, n_samples: int, rounds: int, problem: dict = None
-) -&gt; Dict[str, List[float]]:
-    &#34;&#34;&#34;Perform a sensitivity analysis on the Martinez-Vaquero model.
+    self,
+    output_value: str,
+    n_samples: int,
+    rounds: int,
+) -&gt; Union[int, Dict[str, List[float]]]:
+    &#34;&#34;&#34;Runnning the sensitivity analysis.&#34;&#34;&#34;
+    if self.args.running_chunk:
+        # chuck the sensitivity analysis and save the dataframe inbetween
+        self.check_file_and_graph_exist(n_samples, rounds)
+        param_values, gt_network = self.load_file_and_graph(n_samples, rounds)
+        # Getting all param_values that haven&#39;t run yet
+        latest_param_values = param_values[param_values.isnull().any(axis=1)]
 
-    The analysis is limited on &#34;delta&#34;,&#34;tau&#34;,&#34;gamma&#34;,&#34;beta_s&#34;,&#34;beta_h&#34; and &#34;beta_c&#34;.
-    For the sake of time, no sensitivity analysis is conducted on the ration of h/w/c.
-    Actually, h/w/c are correlated and would therefore return falsified Sobol results.
-    Furthermore, the importance of the two parameters, temperature or the probability
-    of random mutation is known. If the temperature is too high, the system will have
-    random chaotic switched between status. If the probability of random mutation is high,
-    the system with converge to a ration of 0.33 for h/w/c. What is interesting is to see the
-    importance of the investigation stage as well as the influence of criminals on lone wolfs.
-    Also it is interesting to see, what influence the penalty on the whole criminal organisation
-    can have.
+        if len(latest_param_values) == 0:
+            sys.exit(0)
+        else:
+            for sub_pd in self.chunker(latest_param_values, 50):
+                latest_param_values_to_list = sub_pd.values.tolist()
+                list_of_param_comb = [
+                    (gt_network, self.problem, params, output_value, rounds)
+                    for params in latest_param_values_to_list
+                ]
 
-    Args:
-        network  (gt.graph): Criminal network
-        output_value  (str): Name of the interested output value such as
-                                [&#39;ratio_honest&#39;,&#39;ratio_wolf&#39;,&#39;ratio_criminal&#39;
-                                &#39;fitness_honest&#39;,&#39;fitness_criminal&#39;,&#39;fitness_wolf]
-        problem      (dict): Define which variables to conduct sensitivity analysis
-                                with defining the bounds
-        n_samples     (int): Define the size of the search space
-        rounds        (int); Define the number of rounds played in the Simulation
-    &#34;&#34;&#34;
-    # Get the network of criminal first
-    nx_network = NetworkReader().get_data(self.args.read_data)
-    gt_network = NetworkConverter.nx_to_gt(nx_network)
+                y = self.sensitivity_analysis_parallel(list_of_param_comb)
+                param_values.loc[sub_pd.index, &#34;y&#34;] = y
+                self.overwrite_file(param_values, n_samples, rounds)
 
-    if problem is None:
-        problem = {
-            &#34;num_vars&#34;: 6,
-            &#34;names&#34;: [
-                &#34;delta&#34;,
-                &#34;tau&#34;,
-                &#34;gamma&#34;,
-                &#34;beta_s&#34;,
-                &#34;beta_h&#34;,
-                &#34;beta_c&#34;,
-            ],
-            &#34;bounds&#34;: [[0, 1], [0, 1], [0, 1], [0, 200], [0, 200], [0, 200]],
-        }
-    # sample
-    param_values = saltelli.sample(problem, n_samples)
+        # analyse
+        sobol_indices = sobol.analyze(self.problem, np.asarray(param_values[&#34;y&#34;]))
+        return sobol_indices
 
-    # ((number of loops*rounds/average_time_per_round)/n_threads)/ convert_to_hours
-    approx_running_time = ((len(param_values) * rounds * (45 / 1000)) / 23) / 3600
-    logger.warning(
-        f&#34;The sensitivity analysis will take approx {approx_running_time:.2f}h on\
-        24 cpus (~ 3.8 GHz))&#34;
-    )
-    # Running multiprocessing
-    num_cpus = multiprocessing.cpu_count() - 1
-    Y = p_map(
-        self.sim_mart_vaq_sa_helper,
-        (
-            [
-                (gt_network, problem, params, output_value, rounds)
-                for params in param_values
-            ]
-        ),
-        **{&#34;num_cpus&#34;: num_cpus, &#34;desc&#34;: &#34;Running sensitivity analysis&#34;},
-    )
+    elif not self.args.running_chunk:
+        # Get the network of criminal first
+        meta_sim = MetaSimulator(
+            network_name=self.args.read_data,
+            attachment_method=self.args.attach_meth,
+            ratio_honest=self.args.ratio_honest,
+            ratio_wolf=self.args.ratio_wolf,
+            k=self.args.k,
+        )
+        gt_network = meta_sim.network
+        param_values = self.create_saltelli_samples(self.problem, n_samples)
+        param_values = [
+            (gt_network, self.problem, params, output_value, rounds)
+            for params in param_values
+        ]
 
-    Y_array = np.asarray(Y)
+        results = self.sensitivity_analysis_parallel(param_values)
 
-    # analyse
-    sobol_indices = sobol.analyze(problem, Y_array)
-    return sobol_indices</code></pre>
+        # analyse
+        sobol_indices = sobol.analyze(self.problem, results)
+        return sobol_indices
+    return -1</code></pre>
 </details>
 </dd>
 <dt id="utils.sensitivity_analysis.SensitivityAnalyser.sim_mart_vaq_sa_helper"><code class="name flex">
@@ -533,15 +874,20 @@ def sim_mart_vaq_sa(
 <pre><code class="python">def sim_mart_vaq_sa_helper(self, tuple_of_variable: Any) -&gt; float:
     &#34;&#34;&#34;Run the simulation Mart-Vaq given the parameter.&#34;&#34;&#34;
     # Set the seed each time, otherwise the simulation will be exactly the same
-    np.random.seed()
-    gt_network, problem, params, output_value, rounds = tuple_of_variable
+    np.random.seed(0)
+    (gt_network, problem, params, output_value, rounds) = tuple_of_variable
 
     # Unpack input variables
     variable_dict = OrderedDict().fromkeys(problem[&#34;names&#34;], 0)
     variable_dict = dict(zip(variable_dict.keys(), params))
 
     simulator = SimMartVaq(network=gt_network, **variable_dict)
-    _, data_collector = simulator.play(network=simulator.network, rounds=rounds)
+    _, data_collector = simulator.play(
+        # ith_collect == rounds to collect only at the end
+        network=simulator.network,
+        rounds=rounds,
+        ith_collect=rounds,
+    )
     return data_collector[output_value][-1]</code></pre>
 </details>
 </dd>
@@ -566,7 +912,13 @@ def sim_mart_vaq_sa(
 <li>
 <h4><code><a title="utils.sensitivity_analysis.SensitivityAnalyser" href="#utils.sensitivity_analysis.SensitivityAnalyser">SensitivityAnalyser</a></code></h4>
 <ul class="">
+<li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.check_file_and_graph_exist" href="#utils.sensitivity_analysis.SensitivityAnalyser.check_file_and_graph_exist">check_file_and_graph_exist</a></code></li>
+<li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.chunker" href="#utils.sensitivity_analysis.SensitivityAnalyser.chunker">chunker</a></code></li>
+<li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.create_saltelli_samples" href="#utils.sensitivity_analysis.SensitivityAnalyser.create_saltelli_samples">create_saltelli_samples</a></code></li>
+<li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.load_file_and_graph" href="#utils.sensitivity_analysis.SensitivityAnalyser.load_file_and_graph">load_file_and_graph</a></code></li>
+<li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.overwrite_file" href="#utils.sensitivity_analysis.SensitivityAnalyser.overwrite_file">overwrite_file</a></code></li>
 <li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.save_results" href="#utils.sensitivity_analysis.SensitivityAnalyser.save_results">save_results</a></code></li>
+<li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.sensitivity_analysis_parallel" href="#utils.sensitivity_analysis.SensitivityAnalyser.sensitivity_analysis_parallel">sensitivity_analysis_parallel</a></code></li>
 <li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.sim_mart_vaq_sa" href="#utils.sensitivity_analysis.SensitivityAnalyser.sim_mart_vaq_sa">sim_mart_vaq_sa</a></code></li>
 <li><code><a title="utils.sensitivity_analysis.SensitivityAnalyser.sim_mart_vaq_sa_helper" href="#utils.sensitivity_analysis.SensitivityAnalyser.sim_mart_vaq_sa_helper">sim_mart_vaq_sa_helper</a></code></li>
 </ul>

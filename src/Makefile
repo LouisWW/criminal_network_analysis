@@ -24,9 +24,9 @@ docs_view:
 	@echo Creating API documentation
 	pdoc3 --html config -o ./docs --force
 	pdoc3 --html network_utils -o ./docs --force
-	pdoc3 --html simulators -o ./docs -force
-	pdoc3 --html test -o ./docs --force
+	pdoc3 --html simulators -o ./docs --force
 	pdoc3 --html utils -o ./docs --force
+	pdoc3 --html test -o ./docs --force
 
 
 .PHONY: profiling_sim_mart

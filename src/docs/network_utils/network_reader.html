@@ -36,20 +36,22 @@ This script&#39;s intention is to properly load the various data from the data/ 
 __author__ = Louis Weyland
 __date__   = 5/02/2022
 &#34;&#34;&#34;
-import os
-
 import networkx as nx
 import pandas as pd
+from utils.tools import DirectoryFinder
 
 
 class NetworkReader:
-    &#34;&#34;&#34;The NetworkReader reads the data from various files and return a graph.&#34;&#34;&#34;
+    &#34;&#34;&#34;The NetworkReader reads the data from various files and return a graph.
+
+    For newly added data in data/ folder, a function needs to be created which is
+    called in get_data.
+    &#34;&#34;&#34;
 
     def __init__(self) -&gt; None:
         &#34;&#34;&#34;Set the directory right.&#34;&#34;&#34;
         # Get current directory
-        par_dir = os.path.abspath(os.path.join(__file__, &#34;../../&#34;))
-        self.directory = par_dir + &#34;/data/&#34;
+        self.directory = DirectoryFinder().criminal_data_dir
 
     def read_cunha(self) -&gt; nx.Graph:
         &#34;&#34;&#34;Get data from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/ .&#34;&#34;&#34;
@@ -60,10 +62,9 @@ class NetworkReader:
         )
 
         graph_obj = nx.Graph(list(zip(data[&#34;vertex1&#34;], data[&#34;vertex2&#34;])))
-
-        # Set state of the nodes to be criminals
-        state = &#34;c&#34;
-        nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+        # Set status of the nodes to be criminals
+        status = &#34;c&#34;
+        nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
         # Set the name of the graph
         graph_obj.name = &#34;cunha&#34;
@@ -79,9 +80,9 @@ class NetworkReader:
             data, source=&#34;Source&#34;, target=&#34;Target&#34;, edge_attr=[&#34;Weight&#34;]
         )
 
-        # Set state of the nodes to be criminals
-        state = &#34;c&#34;
-        nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+        # Set status of the nodes to be criminals
+        status = &#34;c&#34;
+        nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
         # Set the name of the graph
         graph_obj.name = &#34;montagna_meetings&#34;
@@ -97,16 +98,26 @@ class NetworkReader:
             data, source=&#34;Source&#34;, target=&#34;Target&#34;, edge_attr=[&#34;Weight&#34;]
         )
 
-        # Set state of the nodes to be criminals
-        state = &#34;c&#34;
-        nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+        # Set status of the nodes to be criminals
+        status = &#34;c&#34;
+        nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
         # Set the name of the graph
-        graph_obj.name = &#34;montagna_phone_calls&#34;
+        graph_obj.name = &#34;montagna_calls&#34;
         return graph_obj
 
     def get_data(self, data_type: str) -&gt; nx.Graph:
-        &#34;&#34;&#34;Return a data.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the data as network.
+
+        Args:
+            data_type (str): Data name.
+
+        Raises:
+            RuntimeError: If function for the data name doesn&#39;t exist.
+
+        Returns:
+            nx.Graph: a networkx graph of the data.
+        &#34;&#34;&#34;
         if data_type == &#34;cunha&#34;:
             return self.read_cunha()
         elif data_type == &#34;montagna_calls&#34;:
@@ -114,7 +125,9 @@ class NetworkReader:
         elif data_type == &#34;montagna_meetings&#34;:
             return self.read_montagna_meetings()
         else:
-            raise RuntimeError(&#34;No criminal network data has been defined!&#34;)</code></pre>
+            raise RuntimeError(
+                &#34;Define a network please :&#39;cunha&#39;,&#39;montagna_calls&#39;,&#39;montagna_meetings&#39;&#34;
+            )</code></pre>
 </details>
 </section>
 <section>
@@ -131,19 +144,24 @@ class NetworkReader:
 </code></dt>
 <dd>
 <div class="desc"><p>The NetworkReader reads the data from various files and return a graph.</p>
+<p>For newly added data in data/ folder, a function needs to be created which is
+called in get_data.</p>
 <p>Set the directory right.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class NetworkReader:
-    &#34;&#34;&#34;The NetworkReader reads the data from various files and return a graph.&#34;&#34;&#34;
+    &#34;&#34;&#34;The NetworkReader reads the data from various files and return a graph.
+
+    For newly added data in data/ folder, a function needs to be created which is
+    called in get_data.
+    &#34;&#34;&#34;
 
     def __init__(self) -&gt; None:
         &#34;&#34;&#34;Set the directory right.&#34;&#34;&#34;
         # Get current directory
-        par_dir = os.path.abspath(os.path.join(__file__, &#34;../../&#34;))
-        self.directory = par_dir + &#34;/data/&#34;
+        self.directory = DirectoryFinder().criminal_data_dir
 
     def read_cunha(self) -&gt; nx.Graph:
         &#34;&#34;&#34;Get data from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/ .&#34;&#34;&#34;
@@ -154,10 +172,9 @@ class NetworkReader:
         )
 
         graph_obj = nx.Graph(list(zip(data[&#34;vertex1&#34;], data[&#34;vertex2&#34;])))
-
-        # Set state of the nodes to be criminals
-        state = &#34;c&#34;
-        nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+        # Set status of the nodes to be criminals
+        status = &#34;c&#34;
+        nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
         # Set the name of the graph
         graph_obj.name = &#34;cunha&#34;
@@ -173,9 +190,9 @@ class NetworkReader:
             data, source=&#34;Source&#34;, target=&#34;Target&#34;, edge_attr=[&#34;Weight&#34;]
         )
 
-        # Set state of the nodes to be criminals
-        state = &#34;c&#34;
-        nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+        # Set status of the nodes to be criminals
+        status = &#34;c&#34;
+        nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
         # Set the name of the graph
         graph_obj.name = &#34;montagna_meetings&#34;
@@ -191,16 +208,26 @@ class NetworkReader:
             data, source=&#34;Source&#34;, target=&#34;Target&#34;, edge_attr=[&#34;Weight&#34;]
         )
 
-        # Set state of the nodes to be criminals
-        state = &#34;c&#34;
-        nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+        # Set status of the nodes to be criminals
+        status = &#34;c&#34;
+        nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
         # Set the name of the graph
-        graph_obj.name = &#34;montagna_phone_calls&#34;
+        graph_obj.name = &#34;montagna_calls&#34;
         return graph_obj
 
     def get_data(self, data_type: str) -&gt; nx.Graph:
-        &#34;&#34;&#34;Return a data.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the data as network.
+
+        Args:
+            data_type (str): Data name.
+
+        Raises:
+            RuntimeError: If function for the data name doesn&#39;t exist.
+
+        Returns:
+            nx.Graph: a networkx graph of the data.
+        &#34;&#34;&#34;
         if data_type == &#34;cunha&#34;:
             return self.read_cunha()
         elif data_type == &#34;montagna_calls&#34;:
@@ -208,7 +235,9 @@ class NetworkReader:
         elif data_type == &#34;montagna_meetings&#34;:
             return self.read_montagna_meetings()
         else:
-            raise RuntimeError(&#34;No criminal network data has been defined!&#34;)</code></pre>
+            raise RuntimeError(
+                &#34;Define a network please :&#39;cunha&#39;,&#39;montagna_calls&#39;,&#39;montagna_meetings&#39;&#34;
+            )</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -216,13 +245,38 @@ class NetworkReader:
 <span>def <span class="ident">get_data</span></span>(<span>self, data_type: str) ‑> networkx.classes.graph.Graph</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a data.</p></div>
+<div class="desc"><p>Return the data as network.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>Data name.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>If function for the data name doesn't exist.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>nx.Graph</code></dt>
+<dd>a networkx graph of the data.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_data(self, data_type: str) -&gt; nx.Graph:
-    &#34;&#34;&#34;Return a data.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the data as network.
+
+    Args:
+        data_type (str): Data name.
+
+    Raises:
+        RuntimeError: If function for the data name doesn&#39;t exist.
+
+    Returns:
+        nx.Graph: a networkx graph of the data.
+    &#34;&#34;&#34;
     if data_type == &#34;cunha&#34;:
         return self.read_cunha()
     elif data_type == &#34;montagna_calls&#34;:
@@ -230,7 +284,9 @@ class NetworkReader:
     elif data_type == &#34;montagna_meetings&#34;:
         return self.read_montagna_meetings()
     else:
-        raise RuntimeError(&#34;No criminal network data has been defined!&#34;)</code></pre>
+        raise RuntimeError(
+            &#34;Define a network please :&#39;cunha&#39;,&#39;montagna_calls&#39;,&#39;montagna_meetings&#39;&#34;
+        )</code></pre>
 </details>
 </dd>
 <dt id="network_utils.network_reader.NetworkReader.read_cunha"><code class="name flex">
@@ -251,10 +307,9 @@ class NetworkReader:
     )
 
     graph_obj = nx.Graph(list(zip(data[&#34;vertex1&#34;], data[&#34;vertex2&#34;])))
-
-    # Set state of the nodes to be criminals
-    state = &#34;c&#34;
-    nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+    # Set status of the nodes to be criminals
+    status = &#34;c&#34;
+    nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
     # Set the name of the graph
     graph_obj.name = &#34;cunha&#34;
@@ -280,9 +335,9 @@ class NetworkReader:
         data, source=&#34;Source&#34;, target=&#34;Target&#34;, edge_attr=[&#34;Weight&#34;]
     )
 
-    # Set state of the nodes to be criminals
-    state = &#34;c&#34;
-    nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+    # Set status of the nodes to be criminals
+    status = &#34;c&#34;
+    nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
     # Set the name of the graph
     graph_obj.name = &#34;montagna_meetings&#34;
@@ -308,12 +363,12 @@ class NetworkReader:
         data, source=&#34;Source&#34;, target=&#34;Target&#34;, edge_attr=[&#34;Weight&#34;]
     )
 
-    # Set state of the nodes to be criminals
-    state = &#34;c&#34;
-    nx.set_node_attributes(graph_obj, state, &#34;state&#34;)
+    # Set status of the nodes to be criminals
+    status = &#34;c&#34;
+    nx.set_node_attributes(graph_obj, status, &#34;status&#34;)
 
     # Set the name of the graph
-    graph_obj.name = &#34;montagna_phone_calls&#34;
+    graph_obj.name = &#34;montagna_calls&#34;
     return graph_obj</code></pre>
 </details>
 </dd>

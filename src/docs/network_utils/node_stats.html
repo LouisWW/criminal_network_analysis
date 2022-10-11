@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>network_utils.node_stats API documentation</title>
-<meta name="description" content="This script&#39;s intention is to get the properties of all the individual nodes …" />
+<meta name="description" content="This script&#39;s intention is to get the centrality of individual nodes …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,7 +22,7 @@
 <h1 class="title">Module <code>network_utils.node_stats</code></h1>
 </header>
 <section id="section-intro">
-<p>This script's intention is to get the properties of all the individual nodes.</p>
+<p>This script's intention is to get the centrality of individual nodes.</p>
 <p><strong>author</strong> = Louis Weyland
 <strong>date</strong>
 = 13/02/2022</p>
@@ -30,74 +30,150 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;This script&#39;s intention is to get the properties of all the individual nodes.
+<pre><code class="python">&#34;&#34;&#34;This script&#39;s intention is to get the centrality of individual nodes.
 
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 &#34;&#34;&#34;
-from typing import Sequence
+import itertools
+import logging
 from typing import Tuple
 
+import graph_tool.all as gt
 import networkit as nk
 import numpy as np
+from graph_tool import VertexPropertyMap
 from network_utils.network_converter import NetworkConverter
+
+logger = logging.getLogger(&#34;logger&#34;)
 
 
 class NodeStats:
     &#34;&#34;&#34;Define the properties of a node.
 
-    The properties are katz,betweeness,eccentricity
+    The properties are katz,betweeness,eccentricity.
+    Additionally, compute some topology measures.
     &#34;&#34;&#34;
 
-    def __init__(self, network: nk.Graph) -&gt; None:
+    def __init__(self) -&gt; None:
         &#34;&#34;&#34;Initialize the network as an attribute.&#34;&#34;&#34;
-        self.network = NetworkConverter.nx_to_nk(network)
+        pass
 
-    def get_katz(self) -&gt; Sequence[Tuple[int, float]]:
+    @staticmethod
+    def get_katz(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
         &#34;&#34;&#34;Get the katz score for each node.&#34;&#34;&#34;
         # Initialize algorithm
-        katz = nk.centrality.KatzCentrality(self.network, 1e-3)
-        katz.run()
-        return katz.ranking()
+        katz = gt.katz(network)
+        network.katz = katz.a
+        return network, katz
 
-    def get_eccentricity(self) -&gt; Sequence[Tuple[int, int]]:
-        &#34;&#34;&#34;Return the eccentricity of the nodes.&#34;&#34;&#34;
-        eccentricity = np.zeros(self.network.numberOfNodes())
-        # to append to the right idx in the list
-        iterator = iter(range(0, self.network.numberOfNodes()))
-
-        for node in self.network.iterNodes():
-            eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
-                self.network, node
-            )
-
-        return eccentricity
-
-    def get_betweenness(self) -&gt; Sequence[Tuple[int, int]]:
+    @staticmethod
+    def get_betweenness(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
         &#34;&#34;&#34;Return betweeness centrality.&#34;&#34;&#34;
-        btwn = nk.centrality.Betweenness(self.network)
-        btwn.run()
-        return btwn.ranking()
+        btwn, _ = gt.betweenness(network)
+        network.btwn = btwn.a
+        return network, btwn
 
-    def get_closeness(self) -&gt; Sequence[Tuple[int, float]]:
+    @staticmethod
+    def get_closeness(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
         &#34;&#34;&#34;Return the closeness of a node.&#34;&#34;&#34;
-        raise NotImplementedError
+        closeness = gt.closeness(network)
+        network.closeness = closeness.a
+        return network, closeness
 
-    def get_degree(self) -&gt; Sequence[Tuple[int, int]]:
-        &#34;&#34;&#34;Count the number of neighbor a node has.&#34;&#34;&#34;
-        raise NotImplementedError
-
-    def get_local_clustering(self) -&gt; Sequence[Tuple[int, float]]:
-        &#34;&#34;&#34;Get the local clustering of a node.&#34;&#34;&#34;
-        raise NotImplementedError
-
-    def get_eigenvector_centrality(self) -&gt; Sequence[Tuple[int, float]]:
+    @staticmethod
+    def get_eigenvector_centrality(
+        network: gt.Graph,
+    ) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
         &#34;&#34;&#34;Get the eigenvector centrality of a node.&#34;&#34;&#34;
-        raise NotImplementedError
+        (
+            _,
+            eigen_v,
+        ) = gt.eigenvector(network)
+        network.eigen_v = eigen_v.a
+        return network, eigen_v
 
-    def get_average_path(self) -&gt; None:
-        &#34;&#34;&#34;Get average path over a node.&#34;&#34;&#34;
-        raise NotImplementedError</code></pre>
+    @staticmethod
+    def get_central_dominance(
+        network: gt.GraphPropertyMap, betweenness: VertexPropertyMap
+    ) -&gt; float:
+        &#34;&#34;&#34;Get the central point dominace.&#34;&#34;&#34;
+        vertex = betweenness
+        central_dominance = gt.central_point_dominance(network, vertex)
+        return central_dominance
+
+    @staticmethod
+    def get_density(network: gt.Graph) -&gt; float:
+        &#34;&#34;&#34;Return the density.
+
+        Metric has been defined in https://www.nature.com/articles/srep04238
+        &#34;&#34;&#34;
+        n_edges = network.num_edges()
+        n_nodes = network.num_vertices()
+        if (n_nodes * (n_nodes - 1)) == 0:
+            return 0
+        return (2 * n_edges) / (n_nodes * (n_nodes - 1))
+
+    @staticmethod
+    def get_secrecy(network: gt.Graph) -&gt; float:
+        &#34;&#34;&#34;Return the secrecy.
+
+        Metric has been defined in https://www.nature.com/articles/srep04238
+        &#34;&#34;&#34;
+        n_edges = network.num_edges()
+        n_nodes = network.num_vertices()
+        if (2 * n_edges) == 0:
+            return -1
+        return (n_nodes * (n_nodes - 1)) / (2 * n_edges)
+
+    @staticmethod
+    def get_flow_of_information(network: gt.Graph) -&gt; float:
+        &#34;&#34;&#34;Return the flow of information.
+
+        Metric has been defined in
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/
+        &#34;&#34;&#34;
+        n_nodes = network.num_vertices()
+        if n_nodes &lt;= 1:
+            return 0
+        shortest_dist_list = []
+        source_target = list(itertools.combinations(network.get_vertices(), 2))
+        for s, t in source_target:
+            shortest_dist_list.append(
+                gt.shortest_distance(network, source=s, target=t, directed=False)
+            )
+        sum_inv_shortest_dist = sum(1 / dist for dist in shortest_dist_list)
+        return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_shortest_dist
+
+    @staticmethod
+    def get_flow_of_information_faster(gt_network: gt.Graph) -&gt; float:
+        &#34;&#34;&#34;Return the flow of information.
+
+        Metric has been defined in
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/
+        &#34;&#34;&#34;
+        network = NetworkConverter.gt_to_nk(gt_network)
+        n_nodes = network.numberOfNodes()
+        if n_nodes &lt;= 1:
+            return 0
+        apsp = nk.distance.APSP(network)
+        apsp.run()
+
+        distances = apsp.getDistances(asarray=True)
+        inv_distances = np.reciprocal(distances)
+        sum_inv_distances = np.triu(inv_distances, k=1).sum()
+        return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_distances
+
+    @staticmethod
+    def get_size_of_largest_component(network: gt.Graph) -&gt; Tuple[int, int]:
+        &#34;&#34;&#34;Return the size of the largest component.&#34;&#34;&#34;
+        try:
+            largest_component = gt.extract_largest_component(network)
+        except Exception:
+            logger.info(&#34;Something didn&#39;t work with extracting of GCS&#34;)
+            return 0, 0
+
+        return largest_component.num_vertices(), largest_component.num_edges()</code></pre>
 </details>
 </section>
 <section>
@@ -111,11 +187,11 @@ class NodeStats:
 <dl>
 <dt id="network_utils.node_stats.NodeStats"><code class="flex name class">
 <span>class <span class="ident">NodeStats</span></span>
-<span>(</span><span>network: networkit.graph.Graph)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Define the properties of a node.</p>
-<p>The properties are katz,betweeness,eccentricity</p>
+<p>The properties are katz,betweeness,eccentricity.
+Additionally, compute some topology measures.</p>
 <p>Initialize the network as an attribute.</p></div>
 <details class="source">
 <summary>
@@ -124,77 +200,134 @@ class NodeStats:
 <pre><code class="python">class NodeStats:
     &#34;&#34;&#34;Define the properties of a node.
 
-    The properties are katz,betweeness,eccentricity
+    The properties are katz,betweeness,eccentricity.
+    Additionally, compute some topology measures.
     &#34;&#34;&#34;
 
-    def __init__(self, network: nk.Graph) -&gt; None:
+    def __init__(self) -&gt; None:
         &#34;&#34;&#34;Initialize the network as an attribute.&#34;&#34;&#34;
-        self.network = NetworkConverter.nx_to_nk(network)
+        pass
 
-    def get_katz(self) -&gt; Sequence[Tuple[int, float]]:
+    @staticmethod
+    def get_katz(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
         &#34;&#34;&#34;Get the katz score for each node.&#34;&#34;&#34;
         # Initialize algorithm
-        katz = nk.centrality.KatzCentrality(self.network, 1e-3)
-        katz.run()
-        return katz.ranking()
+        katz = gt.katz(network)
+        network.katz = katz.a
+        return network, katz
 
-    def get_eccentricity(self) -&gt; Sequence[Tuple[int, int]]:
-        &#34;&#34;&#34;Return the eccentricity of the nodes.&#34;&#34;&#34;
-        eccentricity = np.zeros(self.network.numberOfNodes())
-        # to append to the right idx in the list
-        iterator = iter(range(0, self.network.numberOfNodes()))
-
-        for node in self.network.iterNodes():
-            eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
-                self.network, node
-            )
-
-        return eccentricity
-
-    def get_betweenness(self) -&gt; Sequence[Tuple[int, int]]:
+    @staticmethod
+    def get_betweenness(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
         &#34;&#34;&#34;Return betweeness centrality.&#34;&#34;&#34;
-        btwn = nk.centrality.Betweenness(self.network)
-        btwn.run()
-        return btwn.ranking()
+        btwn, _ = gt.betweenness(network)
+        network.btwn = btwn.a
+        return network, btwn
 
-    def get_closeness(self) -&gt; Sequence[Tuple[int, float]]:
+    @staticmethod
+    def get_closeness(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
         &#34;&#34;&#34;Return the closeness of a node.&#34;&#34;&#34;
-        raise NotImplementedError
+        closeness = gt.closeness(network)
+        network.closeness = closeness.a
+        return network, closeness
 
-    def get_degree(self) -&gt; Sequence[Tuple[int, int]]:
-        &#34;&#34;&#34;Count the number of neighbor a node has.&#34;&#34;&#34;
-        raise NotImplementedError
-
-    def get_local_clustering(self) -&gt; Sequence[Tuple[int, float]]:
-        &#34;&#34;&#34;Get the local clustering of a node.&#34;&#34;&#34;
-        raise NotImplementedError
-
-    def get_eigenvector_centrality(self) -&gt; Sequence[Tuple[int, float]]:
+    @staticmethod
+    def get_eigenvector_centrality(
+        network: gt.Graph,
+    ) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
         &#34;&#34;&#34;Get the eigenvector centrality of a node.&#34;&#34;&#34;
-        raise NotImplementedError
+        (
+            _,
+            eigen_v,
+        ) = gt.eigenvector(network)
+        network.eigen_v = eigen_v.a
+        return network, eigen_v
 
-    def get_average_path(self) -&gt; None:
-        &#34;&#34;&#34;Get average path over a node.&#34;&#34;&#34;
-        raise NotImplementedError</code></pre>
+    @staticmethod
+    def get_central_dominance(
+        network: gt.GraphPropertyMap, betweenness: VertexPropertyMap
+    ) -&gt; float:
+        &#34;&#34;&#34;Get the central point dominace.&#34;&#34;&#34;
+        vertex = betweenness
+        central_dominance = gt.central_point_dominance(network, vertex)
+        return central_dominance
+
+    @staticmethod
+    def get_density(network: gt.Graph) -&gt; float:
+        &#34;&#34;&#34;Return the density.
+
+        Metric has been defined in https://www.nature.com/articles/srep04238
+        &#34;&#34;&#34;
+        n_edges = network.num_edges()
+        n_nodes = network.num_vertices()
+        if (n_nodes * (n_nodes - 1)) == 0:
+            return 0
+        return (2 * n_edges) / (n_nodes * (n_nodes - 1))
+
+    @staticmethod
+    def get_secrecy(network: gt.Graph) -&gt; float:
+        &#34;&#34;&#34;Return the secrecy.
+
+        Metric has been defined in https://www.nature.com/articles/srep04238
+        &#34;&#34;&#34;
+        n_edges = network.num_edges()
+        n_nodes = network.num_vertices()
+        if (2 * n_edges) == 0:
+            return -1
+        return (n_nodes * (n_nodes - 1)) / (2 * n_edges)
+
+    @staticmethod
+    def get_flow_of_information(network: gt.Graph) -&gt; float:
+        &#34;&#34;&#34;Return the flow of information.
+
+        Metric has been defined in
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/
+        &#34;&#34;&#34;
+        n_nodes = network.num_vertices()
+        if n_nodes &lt;= 1:
+            return 0
+        shortest_dist_list = []
+        source_target = list(itertools.combinations(network.get_vertices(), 2))
+        for s, t in source_target:
+            shortest_dist_list.append(
+                gt.shortest_distance(network, source=s, target=t, directed=False)
+            )
+        sum_inv_shortest_dist = sum(1 / dist for dist in shortest_dist_list)
+        return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_shortest_dist
+
+    @staticmethod
+    def get_flow_of_information_faster(gt_network: gt.Graph) -&gt; float:
+        &#34;&#34;&#34;Return the flow of information.
+
+        Metric has been defined in
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/
+        &#34;&#34;&#34;
+        network = NetworkConverter.gt_to_nk(gt_network)
+        n_nodes = network.numberOfNodes()
+        if n_nodes &lt;= 1:
+            return 0
+        apsp = nk.distance.APSP(network)
+        apsp.run()
+
+        distances = apsp.getDistances(asarray=True)
+        inv_distances = np.reciprocal(distances)
+        sum_inv_distances = np.triu(inv_distances, k=1).sum()
+        return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_distances
+
+    @staticmethod
+    def get_size_of_largest_component(network: gt.Graph) -&gt; Tuple[int, int]:
+        &#34;&#34;&#34;Return the size of the largest component.&#34;&#34;&#34;
+        try:
+            largest_component = gt.extract_largest_component(network)
+        except Exception:
+            logger.info(&#34;Something didn&#39;t work with extracting of GCS&#34;)
+            return 0, 0
+
+        return largest_component.num_vertices(), largest_component.num_edges()</code></pre>
 </details>
-<h3>Methods</h3>
+<h3>Static methods</h3>
 <dl>
-<dt id="network_utils.node_stats.NodeStats.get_average_path"><code class="name flex">
-<span>def <span class="ident">get_average_path</span></span>(<span>self) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get average path over a node.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_average_path(self) -&gt; None:
-    &#34;&#34;&#34;Get average path over a node.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
-</dd>
 <dt id="network_utils.node_stats.NodeStats.get_betweenness"><code class="name flex">
-<span>def <span class="ident">get_betweenness</span></span>(<span>self) ‑> Sequence[Tuple[int, int]]</span>
+<span>def <span class="ident">get_betweenness</span></span>(<span>network: graph_tool.Graph) ‑> Tuple[graph_tool.Graph, graph_tool.VertexPropertyMap]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return betweeness centrality.</p></div>
@@ -202,15 +335,35 @@ class NodeStats:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_betweenness(self) -&gt; Sequence[Tuple[int, int]]:
+<pre><code class="python">@staticmethod
+def get_betweenness(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
     &#34;&#34;&#34;Return betweeness centrality.&#34;&#34;&#34;
-    btwn = nk.centrality.Betweenness(self.network)
-    btwn.run()
-    return btwn.ranking()</code></pre>
+    btwn, _ = gt.betweenness(network)
+    network.btwn = btwn.a
+    return network, btwn</code></pre>
+</details>
+</dd>
+<dt id="network_utils.node_stats.NodeStats.get_central_dominance"><code class="name flex">
+<span>def <span class="ident">get_central_dominance</span></span>(<span>network: graph_tool.GraphPropertyMap, betweenness: graph_tool.VertexPropertyMap) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the central point dominace.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_central_dominance(
+    network: gt.GraphPropertyMap, betweenness: VertexPropertyMap
+) -&gt; float:
+    &#34;&#34;&#34;Get the central point dominace.&#34;&#34;&#34;
+    vertex = betweenness
+    central_dominance = gt.central_point_dominance(network, vertex)
+    return central_dominance</code></pre>
 </details>
 </dd>
 <dt id="network_utils.node_stats.NodeStats.get_closeness"><code class="name flex">
-<span>def <span class="ident">get_closeness</span></span>(<span>self) ‑> Sequence[Tuple[int, float]]</span>
+<span>def <span class="ident">get_closeness</span></span>(<span>network: graph_tool.Graph) ‑> Tuple[graph_tool.Graph, graph_tool.VertexPropertyMap]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return the closeness of a node.</p></div>
@@ -218,50 +371,39 @@ class NodeStats:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_closeness(self) -&gt; Sequence[Tuple[int, float]]:
+<pre><code class="python">@staticmethod
+def get_closeness(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
     &#34;&#34;&#34;Return the closeness of a node.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    closeness = gt.closeness(network)
+    network.closeness = closeness.a
+    return network, closeness</code></pre>
 </details>
 </dd>
-<dt id="network_utils.node_stats.NodeStats.get_degree"><code class="name flex">
-<span>def <span class="ident">get_degree</span></span>(<span>self) ‑> Sequence[Tuple[int, int]]</span>
+<dt id="network_utils.node_stats.NodeStats.get_density"><code class="name flex">
+<span>def <span class="ident">get_density</span></span>(<span>network: graph_tool.Graph) ‑> float</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Count the number of neighbor a node has.</p></div>
+<div class="desc"><p>Return the density.</p>
+<p>Metric has been defined in <a href="https://www.nature.com/articles/srep04238">https://www.nature.com/articles/srep04238</a></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_degree(self) -&gt; Sequence[Tuple[int, int]]:
-    &#34;&#34;&#34;Count the number of neighbor a node has.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
-</dd>
-<dt id="network_utils.node_stats.NodeStats.get_eccentricity"><code class="name flex">
-<span>def <span class="ident">get_eccentricity</span></span>(<span>self) ‑> Sequence[Tuple[int, int]]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Return the eccentricity of the nodes.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_eccentricity(self) -&gt; Sequence[Tuple[int, int]]:
-    &#34;&#34;&#34;Return the eccentricity of the nodes.&#34;&#34;&#34;
-    eccentricity = np.zeros(self.network.numberOfNodes())
-    # to append to the right idx in the list
-    iterator = iter(range(0, self.network.numberOfNodes()))
+<pre><code class="python">@staticmethod
+def get_density(network: gt.Graph) -&gt; float:
+    &#34;&#34;&#34;Return the density.
 
-    for node in self.network.iterNodes():
-        eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
-            self.network, node
-        )
-
-    return eccentricity</code></pre>
+    Metric has been defined in https://www.nature.com/articles/srep04238
+    &#34;&#34;&#34;
+    n_edges = network.num_edges()
+    n_nodes = network.num_vertices()
+    if (n_nodes * (n_nodes - 1)) == 0:
+        return 0
+    return (2 * n_edges) / (n_nodes * (n_nodes - 1))</code></pre>
 </details>
 </dd>
 <dt id="network_utils.node_stats.NodeStats.get_eigenvector_centrality"><code class="name flex">
-<span>def <span class="ident">get_eigenvector_centrality</span></span>(<span>self) ‑> Sequence[Tuple[int, float]]</span>
+<span>def <span class="ident">get_eigenvector_centrality</span></span>(<span>network: graph_tool.Graph) ‑> Tuple[graph_tool.Graph, graph_tool.VertexPropertyMap]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the eigenvector centrality of a node.</p></div>
@@ -269,13 +411,83 @@ class NodeStats:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_eigenvector_centrality(self) -&gt; Sequence[Tuple[int, float]]:
+<pre><code class="python">@staticmethod
+def get_eigenvector_centrality(
+    network: gt.Graph,
+) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
     &#34;&#34;&#34;Get the eigenvector centrality of a node.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    (
+        _,
+        eigen_v,
+    ) = gt.eigenvector(network)
+    network.eigen_v = eigen_v.a
+    return network, eigen_v</code></pre>
+</details>
+</dd>
+<dt id="network_utils.node_stats.NodeStats.get_flow_of_information"><code class="name flex">
+<span>def <span class="ident">get_flow_of_information</span></span>(<span>network: graph_tool.Graph) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the flow of information.</p>
+<p>Metric has been defined in
+<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/</a></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_flow_of_information(network: gt.Graph) -&gt; float:
+    &#34;&#34;&#34;Return the flow of information.
+
+    Metric has been defined in
+    https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/
+    &#34;&#34;&#34;
+    n_nodes = network.num_vertices()
+    if n_nodes &lt;= 1:
+        return 0
+    shortest_dist_list = []
+    source_target = list(itertools.combinations(network.get_vertices(), 2))
+    for s, t in source_target:
+        shortest_dist_list.append(
+            gt.shortest_distance(network, source=s, target=t, directed=False)
+        )
+    sum_inv_shortest_dist = sum(1 / dist for dist in shortest_dist_list)
+    return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_shortest_dist</code></pre>
+</details>
+</dd>
+<dt id="network_utils.node_stats.NodeStats.get_flow_of_information_faster"><code class="name flex">
+<span>def <span class="ident">get_flow_of_information_faster</span></span>(<span>gt_network: graph_tool.Graph) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the flow of information.</p>
+<p>Metric has been defined in
+<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/</a></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_flow_of_information_faster(gt_network: gt.Graph) -&gt; float:
+    &#34;&#34;&#34;Return the flow of information.
+
+    Metric has been defined in
+    https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214327/
+    &#34;&#34;&#34;
+    network = NetworkConverter.gt_to_nk(gt_network)
+    n_nodes = network.numberOfNodes()
+    if n_nodes &lt;= 1:
+        return 0
+    apsp = nk.distance.APSP(network)
+    apsp.run()
+
+    distances = apsp.getDistances(asarray=True)
+    inv_distances = np.reciprocal(distances)
+    sum_inv_distances = np.triu(inv_distances, k=1).sum()
+    return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_distances</code></pre>
 </details>
 </dd>
 <dt id="network_utils.node_stats.NodeStats.get_katz"><code class="name flex">
-<span>def <span class="ident">get_katz</span></span>(<span>self) ‑> Sequence[Tuple[int, float]]</span>
+<span>def <span class="ident">get_katz</span></span>(<span>network: graph_tool.Graph) ‑> Tuple[graph_tool.Graph, graph_tool.VertexPropertyMap]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the katz score for each node.</p></div>
@@ -283,26 +495,57 @@ class NodeStats:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_katz(self) -&gt; Sequence[Tuple[int, float]]:
+<pre><code class="python">@staticmethod
+def get_katz(network: gt.Graph) -&gt; Tuple[gt.Graph, VertexPropertyMap]:
     &#34;&#34;&#34;Get the katz score for each node.&#34;&#34;&#34;
     # Initialize algorithm
-    katz = nk.centrality.KatzCentrality(self.network, 1e-3)
-    katz.run()
-    return katz.ranking()</code></pre>
+    katz = gt.katz(network)
+    network.katz = katz.a
+    return network, katz</code></pre>
 </details>
 </dd>
-<dt id="network_utils.node_stats.NodeStats.get_local_clustering"><code class="name flex">
-<span>def <span class="ident">get_local_clustering</span></span>(<span>self) ‑> Sequence[Tuple[int, float]]</span>
+<dt id="network_utils.node_stats.NodeStats.get_secrecy"><code class="name flex">
+<span>def <span class="ident">get_secrecy</span></span>(<span>network: graph_tool.Graph) ‑> float</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the local clustering of a node.</p></div>
+<div class="desc"><p>Return the secrecy.</p>
+<p>Metric has been defined in <a href="https://www.nature.com/articles/srep04238">https://www.nature.com/articles/srep04238</a></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_local_clustering(self) -&gt; Sequence[Tuple[int, float]]:
-    &#34;&#34;&#34;Get the local clustering of a node.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+<pre><code class="python">@staticmethod
+def get_secrecy(network: gt.Graph) -&gt; float:
+    &#34;&#34;&#34;Return the secrecy.
+
+    Metric has been defined in https://www.nature.com/articles/srep04238
+    &#34;&#34;&#34;
+    n_edges = network.num_edges()
+    n_nodes = network.num_vertices()
+    if (2 * n_edges) == 0:
+        return -1
+    return (n_nodes * (n_nodes - 1)) / (2 * n_edges)</code></pre>
+</details>
+</dd>
+<dt id="network_utils.node_stats.NodeStats.get_size_of_largest_component"><code class="name flex">
+<span>def <span class="ident">get_size_of_largest_component</span></span>(<span>network: graph_tool.Graph) ‑> Tuple[int, int]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the size of the largest component.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_size_of_largest_component(network: gt.Graph) -&gt; Tuple[int, int]:
+    &#34;&#34;&#34;Return the size of the largest component.&#34;&#34;&#34;
+    try:
+        largest_component = gt.extract_largest_component(network)
+    except Exception:
+        logger.info(&#34;Something didn&#39;t work with extracting of GCS&#34;)
+        return 0, 0
+
+    return largest_component.num_vertices(), largest_component.num_edges()</code></pre>
 </details>
 </dd>
 </dl>
@@ -326,14 +569,16 @@ class NodeStats:
 <li>
 <h4><code><a title="network_utils.node_stats.NodeStats" href="#network_utils.node_stats.NodeStats">NodeStats</a></code></h4>
 <ul class="">
-<li><code><a title="network_utils.node_stats.NodeStats.get_average_path" href="#network_utils.node_stats.NodeStats.get_average_path">get_average_path</a></code></li>
 <li><code><a title="network_utils.node_stats.NodeStats.get_betweenness" href="#network_utils.node_stats.NodeStats.get_betweenness">get_betweenness</a></code></li>
+<li><code><a title="network_utils.node_stats.NodeStats.get_central_dominance" href="#network_utils.node_stats.NodeStats.get_central_dominance">get_central_dominance</a></code></li>
 <li><code><a title="network_utils.node_stats.NodeStats.get_closeness" href="#network_utils.node_stats.NodeStats.get_closeness">get_closeness</a></code></li>
-<li><code><a title="network_utils.node_stats.NodeStats.get_degree" href="#network_utils.node_stats.NodeStats.get_degree">get_degree</a></code></li>
-<li><code><a title="network_utils.node_stats.NodeStats.get_eccentricity" href="#network_utils.node_stats.NodeStats.get_eccentricity">get_eccentricity</a></code></li>
+<li><code><a title="network_utils.node_stats.NodeStats.get_density" href="#network_utils.node_stats.NodeStats.get_density">get_density</a></code></li>
 <li><code><a title="network_utils.node_stats.NodeStats.get_eigenvector_centrality" href="#network_utils.node_stats.NodeStats.get_eigenvector_centrality">get_eigenvector_centrality</a></code></li>
+<li><code><a title="network_utils.node_stats.NodeStats.get_flow_of_information" href="#network_utils.node_stats.NodeStats.get_flow_of_information">get_flow_of_information</a></code></li>
+<li><code><a title="network_utils.node_stats.NodeStats.get_flow_of_information_faster" href="#network_utils.node_stats.NodeStats.get_flow_of_information_faster">get_flow_of_information_faster</a></code></li>
 <li><code><a title="network_utils.node_stats.NodeStats.get_katz" href="#network_utils.node_stats.NodeStats.get_katz">get_katz</a></code></li>
-<li><code><a title="network_utils.node_stats.NodeStats.get_local_clustering" href="#network_utils.node_stats.NodeStats.get_local_clustering">get_local_clustering</a></code></li>
+<li><code><a title="network_utils.node_stats.NodeStats.get_secrecy" href="#network_utils.node_stats.NodeStats.get_secrecy">get_secrecy</a></code></li>
+<li><code><a title="network_utils.node_stats.NodeStats.get_size_of_largest_component" href="#network_utils.node_stats.NodeStats.get_size_of_largest_component">get_size_of_largest_component</a></code></li>
 </ul>
 </li>
 </ul>

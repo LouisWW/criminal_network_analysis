@@ -63,9 +63,35 @@ class ConfigParser:
             nargs=&#34;?&#34;,
             const=&#34;c&#34;,
             choices=[&#34;c&#34;, &#34;n&#34;],
-            help=&#34;&#34;&#34;Defines if the network should be visualized.
+            help=&#34;&#34;&#34;Define if the network should be visualized.
                             c = circular network,
                             n = normal/random&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-execute&#34;,
+            type=str,
+            choices=[&#34;parallel&#34;, &#34;sequential&#34;],
+            help=&#34;&#34;&#34;Run the simulation in parallel or sequential.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-create-population&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Create and save the population (-save flag not needed)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-get-network-stats&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Returns the mean characteristics of a population
+                    (preferential/random/small-world)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-compare-w-rnd-init&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Compare the outcome of the simulations if a random init was used or not.&#34;&#34;&#34;,
         )
 
         parser.add_argument(
@@ -73,15 +99,75 @@ class ConfigParser:
             type=str,
             default=None,
             nargs=&#34;?&#34;,
-            const=&#34;cunha&#34;,
+            const=&#34;montagna_calls&#34;,
             choices=[&#34;cunha&#34;, &#34;montagna_calls&#34;, &#34;montagna_meetings&#34;],
-            help=&#34;&#34;&#34;Defines which network to read; cunha, montagna_meetings, montagna_calls.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define which network to read; cunha, montagna_meetings, montagna_calls.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-attach-meth&#34;,
+            type=str,
+            default=None,
+            nargs=&#34;?&#34;,
+            const=&#34;preferential&#34;,
+            choices=[&#34;preferential&#34;, &#34;random&#34;, &#34;small-world&#34;],
+            help=&#34;&#34;&#34;Define the attachment methods around the criminal network&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-k&#34;,
+            type=int,
+            default=10,
+            help=&#34;&#34;&#34;Define how many new connection a
+                    new node is making while generating a population.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-animate-attachment-process&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Create an animation of the attachment process.&#34;&#34;&#34;,
         )
 
         parser.add_argument(
             &#34;-sim-mart-vaq&#34;,
             action=&#34;store_true&#34;,
-            help=&#34;&#34;&#34;Defines if the simulation based on Martiez-Vaquero is run.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define if the simulation based on Martinez-Vaquero is run.
+                    Thereby, for each repetition the another network is used.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-case&#34;,
+            type=str,
+            choices=[&#34;const&#34;, &#34;growth&#34;, &#34;decline&#34;],
+            help=&#34;&#34;&#34;Define which case is simulated&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-whole-pipeline&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Run the whole simulation for the different structures in one go.
+                    Caution: Might be unstable!!!&#34;&#34;&#34;,
+        )
+        parser.add_argument(
+            &#34;-criminal-likelihood-corr&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define if a correlation between criminal and node centrality exists.&#34;&#34;&#34;,
+        )
+        parser.add_argument(
+            &#34;-sim-mart-vaq-w-net&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define if the simulation based on Martinez-Vaquero is run.
+                    Thereby, for each repetition an new network is created.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-animate-simulation&#34;,
+            type=str,
+            default=None,
+            nargs=&#34;?&#34;,
+            const=&#34;unfiltered&#34;,
+            choices=[&#34;unfiltered&#34;, &#34;filtered&#34;],
+            help=&#34;&#34;&#34;Create an animation of the simulation.&#34;&#34;&#34;,
         )
 
         parser.add_argument(
@@ -92,27 +178,59 @@ class ConfigParser:
             nargs=&#34;?&#34;,
             const=&#34;sim-mart-vaq&#34;,
             choices=[&#34;sim-mart-vaq&#34;],
-            help=&#34;&#34;&#34;Defines to run a sensitivity analysis on one of the choices.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define to run a sensitivity analysis on one of the choices.&#34;&#34;&#34;,
         )
 
+        parser.add_argument(
+            &#34;--sensitivity-analysis-links&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define to run a sensitivity analysis on one of the choices.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-phase-diag&#34;,
+            &#34;--phase-diagram&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Create a phase diagram with the defined parameters.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-topo-meas&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define to run a comparative analysis of the different simulations.
+                    Thereby, for each repetition the same network is used.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-topo-meas-w-net&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define to run a comparative analysis of the different simulations.
+                    Thereby, for each repetition an new network is created.&#34;&#34;&#34;,
+        )
         parser.add_argument(
             &#34;-n-samples&#34;,
             type=int,
             default=15,
-            help=&#34;&#34;&#34;Defines the sampling number for the saltelli method.(default: %(default)s) &#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define the sampling number for the saltelli method.(default: %(default)s) &#34;&#34;&#34;,
         )
 
         parser.add_argument(
             &#34;-output-value&#34;,
             type=str,
             default=None,
-            help=&#34;&#34;&#34;Defines on which output value to focus for the sensitivity analysis.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define on which output value to focus for the sensitivity analysis.&#34;&#34;&#34;,
         )
 
         parser.add_argument(
             &#34;-save&#34;,
             action=&#34;store_true&#34;,
-            help=&#34;&#34;&#34;Defines if the results should be saved.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define if the results should be saved.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-plot&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define if the results should be plotted.ss&#34;&#34;&#34;,
         )
 
         parser.add_argument(
@@ -120,12 +238,102 @@ class ConfigParser:
             &#34;--rounds&#34;,
             type=int,
             default=10,
-            help=&#34;&#34;&#34;Defines the numbers of rounds played. Can be applied to  SimMartVaq.play and
+            help=&#34;&#34;&#34;Define the numbers of rounds played. Can be applied to SimMartVaq.play and
             SensitivityAnalyser.sim_mart_vaq_sa
             &#34;&#34;&#34;,
         )
 
+        parser.add_argument(
+            &#34;-n-groups&#34;,
+            type=int,
+            default=1,
+            help=&#34;&#34;&#34;Define the number of groups for each round.
+            &#34;&#34;&#34;,
+        )
+        parser.add_argument(
+            &#34;-ratio-honest&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Define the initial ratio of honest in a population.
+            &#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-ratio-wolf&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Define the initial ratio of wolves in a population.
+            &#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-delta&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Define the influence of criminals on the acting of the wolf (SimMartVaq)
+            &#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-tau&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Influence of wolf&#39;s action on criminals (SimMartVaq)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-gamma&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Punishment ratio for the members of a criminal organization  (SimMartVaq)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-beta-s&#34;, type=int, help=&#34;&#34;&#34;State punishment value (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-beta-h&#34;, type=int, help=&#34;&#34;&#34;Civil punishment value (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-beta-c&#34;, type=int, help=&#34;&#34;&#34;Criminal punishment value (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-c-w&#34;, type=int, help=&#34;&#34;&#34;Damage caused by wolf (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-c-c&#34;, type=int, help=&#34;&#34;&#34;Damage caused by criminal (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-r-w&#34;, type=int, help=&#34;&#34;&#34;Reward ratio for wolf (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-r-c&#34;, type=int, help=&#34;&#34;&#34;Reward ratio for criminal (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-r-h&#34;, type=int, help=&#34;&#34;&#34;Reward ratio for honest (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-temp&#34;,
+            &#34;--temperature&#34;,
+            type=int,
+            help=&#34;&#34;&#34;Temperature for the fermi function (SimMartVaq)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-mutation-prob&#34;, type=float, help=&#34;&#34;&#34;Mutation probability (SimMartVaq)&#34;&#34;&#34;
+        )
+
         parser.add_argument(&#34;-verbose&#34;, action=&#34;store_true&#34;, help=&#34;Print extra info&#34;)
+
+        parser.add_argument(
+            &#34;-running-chunk&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Running the analysis in chunk
+                                                                    by saving in between&#34;&#34;&#34;,
+        )
 
         # compile the flags
         self.args = parser.parse_known_args()[0]</code></pre>
@@ -169,9 +377,35 @@ class ConfigParser:
             nargs=&#34;?&#34;,
             const=&#34;c&#34;,
             choices=[&#34;c&#34;, &#34;n&#34;],
-            help=&#34;&#34;&#34;Defines if the network should be visualized.
+            help=&#34;&#34;&#34;Define if the network should be visualized.
                             c = circular network,
                             n = normal/random&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-execute&#34;,
+            type=str,
+            choices=[&#34;parallel&#34;, &#34;sequential&#34;],
+            help=&#34;&#34;&#34;Run the simulation in parallel or sequential.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-create-population&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Create and save the population (-save flag not needed)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-get-network-stats&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Returns the mean characteristics of a population
+                    (preferential/random/small-world)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-compare-w-rnd-init&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Compare the outcome of the simulations if a random init was used or not.&#34;&#34;&#34;,
         )
 
         parser.add_argument(
@@ -179,15 +413,75 @@ class ConfigParser:
             type=str,
             default=None,
             nargs=&#34;?&#34;,
-            const=&#34;cunha&#34;,
+            const=&#34;montagna_calls&#34;,
             choices=[&#34;cunha&#34;, &#34;montagna_calls&#34;, &#34;montagna_meetings&#34;],
-            help=&#34;&#34;&#34;Defines which network to read; cunha, montagna_meetings, montagna_calls.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define which network to read; cunha, montagna_meetings, montagna_calls.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-attach-meth&#34;,
+            type=str,
+            default=None,
+            nargs=&#34;?&#34;,
+            const=&#34;preferential&#34;,
+            choices=[&#34;preferential&#34;, &#34;random&#34;, &#34;small-world&#34;],
+            help=&#34;&#34;&#34;Define the attachment methods around the criminal network&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-k&#34;,
+            type=int,
+            default=10,
+            help=&#34;&#34;&#34;Define how many new connection a
+                    new node is making while generating a population.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-animate-attachment-process&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Create an animation of the attachment process.&#34;&#34;&#34;,
         )
 
         parser.add_argument(
             &#34;-sim-mart-vaq&#34;,
             action=&#34;store_true&#34;,
-            help=&#34;&#34;&#34;Defines if the simulation based on Martiez-Vaquero is run.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define if the simulation based on Martinez-Vaquero is run.
+                    Thereby, for each repetition the another network is used.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-case&#34;,
+            type=str,
+            choices=[&#34;const&#34;, &#34;growth&#34;, &#34;decline&#34;],
+            help=&#34;&#34;&#34;Define which case is simulated&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-whole-pipeline&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Run the whole simulation for the different structures in one go.
+                    Caution: Might be unstable!!!&#34;&#34;&#34;,
+        )
+        parser.add_argument(
+            &#34;-criminal-likelihood-corr&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define if a correlation between criminal and node centrality exists.&#34;&#34;&#34;,
+        )
+        parser.add_argument(
+            &#34;-sim-mart-vaq-w-net&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define if the simulation based on Martinez-Vaquero is run.
+                    Thereby, for each repetition an new network is created.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-animate-simulation&#34;,
+            type=str,
+            default=None,
+            nargs=&#34;?&#34;,
+            const=&#34;unfiltered&#34;,
+            choices=[&#34;unfiltered&#34;, &#34;filtered&#34;],
+            help=&#34;&#34;&#34;Create an animation of the simulation.&#34;&#34;&#34;,
         )
 
         parser.add_argument(
@@ -198,27 +492,59 @@ class ConfigParser:
             nargs=&#34;?&#34;,
             const=&#34;sim-mart-vaq&#34;,
             choices=[&#34;sim-mart-vaq&#34;],
-            help=&#34;&#34;&#34;Defines to run a sensitivity analysis on one of the choices.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define to run a sensitivity analysis on one of the choices.&#34;&#34;&#34;,
         )
 
+        parser.add_argument(
+            &#34;--sensitivity-analysis-links&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define to run a sensitivity analysis on one of the choices.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-phase-diag&#34;,
+            &#34;--phase-diagram&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Create a phase diagram with the defined parameters.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-topo-meas&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define to run a comparative analysis of the different simulations.
+                    Thereby, for each repetition the same network is used.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-topo-meas-w-net&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define to run a comparative analysis of the different simulations.
+                    Thereby, for each repetition an new network is created.&#34;&#34;&#34;,
+        )
         parser.add_argument(
             &#34;-n-samples&#34;,
             type=int,
             default=15,
-            help=&#34;&#34;&#34;Defines the sampling number for the saltelli method.(default: %(default)s) &#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define the sampling number for the saltelli method.(default: %(default)s) &#34;&#34;&#34;,
         )
 
         parser.add_argument(
             &#34;-output-value&#34;,
             type=str,
             default=None,
-            help=&#34;&#34;&#34;Defines on which output value to focus for the sensitivity analysis.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define on which output value to focus for the sensitivity analysis.&#34;&#34;&#34;,
         )
 
         parser.add_argument(
             &#34;-save&#34;,
             action=&#34;store_true&#34;,
-            help=&#34;&#34;&#34;Defines if the results should be saved.&#34;&#34;&#34;,
+            help=&#34;&#34;&#34;Define if the results should be saved.&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-plot&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Define if the results should be plotted.ss&#34;&#34;&#34;,
         )
 
         parser.add_argument(
@@ -226,12 +552,102 @@ class ConfigParser:
             &#34;--rounds&#34;,
             type=int,
             default=10,
-            help=&#34;&#34;&#34;Defines the numbers of rounds played. Can be applied to  SimMartVaq.play and
+            help=&#34;&#34;&#34;Define the numbers of rounds played. Can be applied to SimMartVaq.play and
             SensitivityAnalyser.sim_mart_vaq_sa
             &#34;&#34;&#34;,
         )
 
+        parser.add_argument(
+            &#34;-n-groups&#34;,
+            type=int,
+            default=1,
+            help=&#34;&#34;&#34;Define the number of groups for each round.
+            &#34;&#34;&#34;,
+        )
+        parser.add_argument(
+            &#34;-ratio-honest&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Define the initial ratio of honest in a population.
+            &#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-ratio-wolf&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Define the initial ratio of wolves in a population.
+            &#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-delta&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Define the influence of criminals on the acting of the wolf (SimMartVaq)
+            &#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-tau&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Influence of wolf&#39;s action on criminals (SimMartVaq)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-gamma&#34;,
+            type=float,
+            help=&#34;&#34;&#34;Punishment ratio for the members of a criminal organization  (SimMartVaq)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-beta-s&#34;, type=int, help=&#34;&#34;&#34;State punishment value (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-beta-h&#34;, type=int, help=&#34;&#34;&#34;Civil punishment value (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-beta-c&#34;, type=int, help=&#34;&#34;&#34;Criminal punishment value (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-c-w&#34;, type=int, help=&#34;&#34;&#34;Damage caused by wolf (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-c-c&#34;, type=int, help=&#34;&#34;&#34;Damage caused by criminal (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-r-w&#34;, type=int, help=&#34;&#34;&#34;Reward ratio for wolf (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-r-c&#34;, type=int, help=&#34;&#34;&#34;Reward ratio for criminal (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-r-h&#34;, type=int, help=&#34;&#34;&#34;Reward ratio for honest (SimMartVaq)&#34;&#34;&#34;
+        )
+
+        parser.add_argument(
+            &#34;-temp&#34;,
+            &#34;--temperature&#34;,
+            type=int,
+            help=&#34;&#34;&#34;Temperature for the fermi function (SimMartVaq)&#34;&#34;&#34;,
+        )
+
+        parser.add_argument(
+            &#34;-mutation-prob&#34;, type=float, help=&#34;&#34;&#34;Mutation probability (SimMartVaq)&#34;&#34;&#34;
+        )
+
         parser.add_argument(&#34;-verbose&#34;, action=&#34;store_true&#34;, help=&#34;Print extra info&#34;)
+
+        parser.add_argument(
+            &#34;-running-chunk&#34;,
+            action=&#34;store_true&#34;,
+            help=&#34;&#34;&#34;Running the analysis in chunk
+                                                                    by saving in between&#34;&#34;&#34;,
+        )
 
         # compile the flags
         self.args = parser.parse_known_args()[0]</code></pre>
