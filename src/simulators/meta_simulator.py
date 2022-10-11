@@ -59,7 +59,7 @@ class MetaSimulator:
                                         Defaults to 0.1.
             k (int, optional): number of links a new nodes comes with.
                             Defaults to 2.
-            prob (float, optional): rewiring probability for small-world attachment. 
+            prob (float, optional): rewiring probability for small-world attachment.
                                     Defaults to 0.4.
             random_fit_init (bool, optional): define if nodes get a random fitness initialisation.
                                         Defaults to False.
