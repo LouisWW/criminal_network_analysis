@@ -34,6 +34,9 @@ statsmodel = "*"
 similaritymeasures = "*"
 statsmodels = "*"
 seaborn = "*"
+numexpr = {version = "*", index = "p-lock"}
+scipy = "*"
+tsmoothie = "*"
 
 [dev-packages]
 ipykernel = "*"
