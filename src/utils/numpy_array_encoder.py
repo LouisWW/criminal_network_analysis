@@ -7,13 +7,16 @@ __author__ = Louis Weyland
 __date__   = 14/09/2022
 """
 import json
+from typing import Any
+from typing import Union
 
 import numpy as np
 
 
 class NumpyArrayEncoder(json.JSONEncoder):
     """Convert numpy to list for json encoding."""
-    def default(self, obj):
+
+    def default(self, obj: Any) -> Union[np.integer, np.floating, np.ndarray, Any]:
         """Encode the numpy array to the respective type."""
         if isinstance(obj, np.integer):
             return int(obj)

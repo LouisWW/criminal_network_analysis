@@ -19,7 +19,7 @@ from network_utils.network_stats import NetworkStats
 from simulators.meta_simulator import MetaSimulator
 from simulators.sim_mart_vaq import SimMartVaq
 from utils.animation import Animateur
-from utils.numpy_arrayy_encoder import NumpyArrayEncoder
+from utils.numpy_array_encoder import NumpyArrayEncoder
 from utils.plotter import Plotter
 from utils.sensitivity_analysis import SensitivityAnalyser
 from utils.stats import compare_time_series
