@@ -58,7 +58,7 @@ This function will run the whole pipeline, create the different populations and 
 ### Run the simulation in chunks
 To overcome the aforementioned constraints, the simulation can be run in chunks. Thereby, one needs to specify which population structure needs to be simulated. The results are appended in the folder [sim_mart_vaq](results/data/sim_mart_vaq/).
 
-    python3 main.py -sim-mart-vaq -read-data montagna_calls  -case const -attach-meth preferential -k 17 -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec parallel &
+    python3 main.py -sim-mart-vaq -read-data montagna_calls  -case const -attach-meth preferential -k 17 -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec parallel 
 
 ### Run sensitivity analysis
 To run the sensitivity analysis, the following command can be used.
@@ -74,7 +74,7 @@ Since the sensitivity analysis takes up some time, it is possible to run it chun
 ### Run sensitivity analysis on the number of links
 To analyse the impact of paramters *k* on the simulation, an analysis is conducted computing on various *k*. The results are saved in [sensitivity_links](results/data/sensitivity_links)
 
-    python3 main.py --sensitivity-analysis-links -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000  -exec parallel -output-value ratio_criminal
+    python3 main.py --sensitivity-analysis-links -read-data montagna_calls -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1  -r 250000  -exec parallel -output-value ratio_criminal -case growth
 
 ### Run the phase-diagramms
 The following command runs the phase diagram of different parameters defined in main.py. The results are saved in [phase_diag](results/data/phase_diag).

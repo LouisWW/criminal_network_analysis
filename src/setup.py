@@ -4,6 +4,10 @@ To compile the file, the following command is used:
 
 python3 setup.py build_ext --inplace
 
+Or by calling
+
+make compile_cython
+
 __author__ = Louis Weyland
 __date__   = 18/03/2022
 """

@@ -385,10 +385,6 @@ elif args.whole_pipeline:
 
     if args.topo_meas:
         compare_time_series(whole_data)
-        print(f"{whole_data['preferential']['mean_secrecy']=}")
-        print(f"{whole_data['preferential']['sem_secrecy']=}")
-        print(f"{whole_data['random']['mean_secrecy']=}")
-        print(f"{whole_data['small-world']['mean_secrecy']=}")
 
         ax_2 = plotter.plot_lines_comparative(
             dict_data=whole_data,
@@ -414,23 +410,11 @@ elif args.whole_pipeline:
         )
 
     if args.criminal_likelihood_corr:
-        ax_4 = plotter.plot_lines_correlation(
-            dict_data=whole_data,
-            y_data_to_plot=[
-                "degree",
-                "betweenness",
-                "katz",
-                "closeness",
-                "eigen vector",
-            ],
-            x_data_to_plot="criminal_likelihood",
-        )
         ax_5 = plotter.plot_lines_correlation_grid(
             dict_data=whole_data,
             y_data_to_plot=[
                 "degree",
                 "betweenness",
-                "katz",
                 "closeness",
                 "eigen vector",
             ],

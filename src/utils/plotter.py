@@ -81,12 +81,12 @@ class Plotter(ConfigParser):
 
         If vertex_property is given, then the vertex are colored based on their
         property.
-        
+
         Args:
             network (gt.Graph): population network containing honest/lone wovles/criminals.
-            color_vertex_property (str, optional): property to show in the plot ("status" for now). 
+            color_vertex_property (str, optional): property to show in the plot ("status" for now).
                                                     Defaults to None.
-        """        
+        """
         assert isinstance(network, gt.Graph), "network type is not from graph-tool"
 
         # Define pos to circumvent error produced by graph_tool
@@ -141,7 +141,7 @@ class Plotter(ConfigParser):
         """Plot the data in a log-log scale to visualize the powerlaw.
 
         Important: Sort the data in ascending way
-    
+
         Args:
             data (List[float]): containing the centrality (avg. degree,...) of each node
             x_label (str): x label
@@ -149,8 +149,7 @@ class Plotter(ConfigParser):
 
         Returns:
             plt.Axes: returns the figure object
-        """       
-
+        """
         data = sorted(data, reverse=True)
         fit = powerlaw.Fit(data)
 
@@ -298,11 +297,6 @@ class Plotter(ConfigParser):
                     raise KeyError(
                         f"Given key doesn't exist,{dict_data[keys_diff_structure[0]].keys()=}"
                     )
-                print(key_diff_structure, data)
-                print(
-                    dict_data[key_diff_structure][x_data_to_plot],
-                    dict_data[key_diff_structure][data],
-                )
                 ax.plot(
                     dict_data[key_diff_structure][x_data_to_plot],
                     dict_data[key_diff_structure][data],
