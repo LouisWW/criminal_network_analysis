@@ -15,9 +15,6 @@ from distutils.extension import Extension
 
 ext_modules = [
     Extension(
-        "simulators.sim_mart_vaq_helper_c", ["simulators/sim_mart_vaq_helper_c.pyx"]
-    ),
-    Extension(
         "network_utils.network_combiner_helper_c",
         ["network_utils/network_combiner_helper_c.pyx"],
         include_dirs=[np.get_include()],
