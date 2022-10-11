@@ -338,7 +338,7 @@ class SimMartVaq:
             if repetition < multiprocessing.cpu_count() - 1:
                 num_cpus = repetition
             else:
-                num_cpus = multiprocessing.cpu_count() - 5
+                num_cpus = multiprocessing.cpu_count() - 3
 
             if isinstance(network, gt.Graph):
                 results = p_umap(
