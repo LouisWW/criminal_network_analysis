@@ -35,7 +35,6 @@ cpdef list random_attachment_c(int network_size,int n_new_nodes,int k):
 
 
 cdef extern from "stdlib.h":
-    """Faster random generator."""
     double drand48()
 
 
