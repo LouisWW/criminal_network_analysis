@@ -58,7 +58,7 @@ This function will run the whole pipeline, create the different populations and 
 ### Run the simulation in chunks
 To overcome the aforementioned constraints, the simulation can be run in chunks. Thereby, one needs to specify which population structure needs to be simulated. The results are appended in the folder [sim_mart_vaq](results/data/sim_mart_vaq/).
 
-    python3 main.py -sim-mart-vaq -read-data montagna_calls  -case const -attach-meth preferential -k 17 -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec parallel 
+    python3 main.py -sim-mart-vaq -read-data montagna_calls  -case const -attach-meth preferential -k 17 -ratio-honest 0.96 -ratio-wolf 0.01 -n-groups 1 -r 250000 -n-samples 30 -topo-meas -criminal-likelihood-corr -save -exec parallel
 
 ### Run sensitivity analysis
 To run the sensitivity analysis, the following command can be used.
