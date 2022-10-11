@@ -1,4 +1,5 @@
 ## Code
+
 ---
 ### First steps
 
@@ -87,3 +88,66 @@ To profile the code, the cprofile package was used together with the gprof packa
     $ python3 -m cProfile -o output.pstats main.py -read-data montagna_calls -sim-mart-vaq
     $ gprof2dot.py -f pstats output.pstats | dot -Tpng -o output.png
     $ python3 -c"import pstats;p = pstats.Stats('output.pstats');p.sort_stats('cumulative').print_stats('simulators')"
+
+---
+# Tips and Tricks
+
+The above commands are specifically tailored to the analysis reported in the Master Thesis. However, if one wishes to use the simulation only for one's own purposes, the following commands can be used:
+
+When dealing with a huge criminal network, building a population may take some time. As a tip, it is possible to build n populations and store them. These networks can be quickly loaded later for simulation. The following command can be run in a bash script and create 10 different populations of each seizure method:
+
+```bash
+    #!/bin/bash
+    declare -a arr_structure=("preferential" "random" "small-world")
+    declare -a arr_k=(74 74 74)
+    for i in "${!arr_structure[@]}"
+    do
+       echo "Doing ${arr_n_links[i]}"
+       for k in {0..5}
+       do
+          python3 new_main.py -read-data montagna_calls --create-population -ratio-honest 0.99 -ratio-wolf 0.001 -n-sample 10 -attach-meth ${arr_structure[i]} -k ${arr_n_links[i]} -exec parallel
+      done
+    done
+```
+
+If one wished to read own network, create a population and simulate it, the following python script will do so:
+
+```python
+    # Init meta_simulator with preferential attachment
+    meta_sim = MetaSimulator(
+    network_name=network_name,
+    ratio_honest=0.3,
+    ratio_wolf=0.3,
+    k=6,
+    attachment_method="preferential")
+
+    # Get overview/characterisitics of the population
+    # Get overview of the new network
+    complete_network_stats = NetworkStats(
+    NetworkConverter.gt_to_nk(simulators_pref.network))
+    complete_network_stats_pref.get_overview()
+
+
+    # The simulator is called within the meta_simulator
+    data_collector = meta_sim.avg_play(
+    network=meta_sim.network,
+    rounds=20000,
+    n_groups=1,
+    repetition=5,
+    ith_collect=20,
+    collect_fitness=True,
+)
+
+    # Plot the evolution ratio
+    plotter.plot_lines(
+    dict_data={"preferential": data_collector},
+    y_data_to_plot=["mean_ratio_honest", "mean_ratio_wolf", "mean_ratio_criminal"],
+    x_data_to_plot="mean_iteration",
+    title="Testing the simulation",
+    xlabel="rounds",
+    ylabel="ratio",
+    plot_std="True",
+)
+```
+
+To study the actual code of the different functions and classes, please consult the documentation in [docs](docs/) by opening the html files in your browser. In google chrome this can be done by giving the abolute path of the .html file as a search link.
