@@ -7,9 +7,7 @@ __author__ = Louis Weyland
 __date__   = 11/04/2022
 """
 import gc
-import itertools
 import logging
-import math
 import multiprocessing
 import random
 import warnings
@@ -17,7 +15,6 @@ from collections import defaultdict
 from typing import Any
 from typing import DefaultDict
 from typing import Dict
-from typing import FrozenSet
 from typing import List
 from typing import Tuple
 from typing import Union
@@ -39,7 +36,7 @@ logger = logging.getLogger("logger")
 
 
 class SimMartVaq:
-    """Contain the framework to simulate the process."""
+    """Contain the framework to simulate the evolutionary dynamic of a criminal network."""
 
     def __init__(
         self,
@@ -64,18 +61,18 @@ class SimMartVaq:
         Args:
             network (gt.Graph): Initial criminal network
             delta (int, optional): Influence of criminals on the acting of the wolf.
-                                   Defaults to 0.7.
-            tau (int, optional):Influence of the wolf's action on criminals. Defaults to 0.8.
+                                   Defaults to 0.1.
+            tau (int, optional):Influence of the wolf's action on criminals. Defaults to 0.1.
             gamma (float, optional): Punishment ratio for the other members of the criminal
                                                                     organization. Defaults to 0.1.
-            beta_s (int, optional): state punishment value. Defaults to 5.
-            beta_h (int, optional): Civil punishment value. Defaults to 5.
-            beta_c (int, optional): Criminal punishment value. Defaults to 5.
+            beta_s (int, optional): state punishment value. Defaults to 1.
+            beta_h (int, optional): Civil punishment value. Defaults to 1.
+            beta_c (int, optional): Criminal punishment value. Defaults to 1.
             c_w (int, optional): Damage caused by wolf. Defaults to 1.
             c_c (int, optional): Damage caused by criminal. Defaults to 1.
             r_w (int, optional): Reward ratio for wolf. Defaults to 1.
             r_c (int, optional): Reward ratio for criminal. Defaults to 1.
-            r_h (int, optional): Bonus ratio for honest. Defaults to 1.
+            r_h (int, optional): Bonus ratio for honest. Defaults to 0.
             temperature (int, optional): Temperature used in the fermi function. Defaults to 10.
             mutation_prob (float, optional): Mutation probability to either randomly pick a
                                 new status or switch status with an other agent. Defaults to 0.0001.
@@ -144,12 +141,26 @@ class SimMartVaq:
         show_no_bar: bool = True,
         rnd_fit_init: bool = False,
     ) -> Tuple[gt.Graph, DefaultDict[str, List[Any]]]:
-        """Run the simulation.
+        """Play the agent-based model.
 
-        Network is subdivided in to n groups.
-        In each group, a person is selected.
-        If selected person is a wolf or criminal,
-        damage is inflicted on others.
+        Args:
+            network (gt.Graph): population including honests,lone actors and criminals.
+            rounds (int, optional): number of rounds to play. Defaults to 1.
+            n_groups (int, optional): each round select how many people are selected from the pool.
+                                    Defaults to 1.
+            ith_collect (int, optional): collect ratio every nth round (for speed improvement).
+                                        Defaults to 20.
+            collect_fitness (bool, optional): collect fitness. Defaults to True.
+            measure_topology (bool, optional): collect secrecy,flow of information and giant comp.
+                                        Defaults to False.
+            measure_likelihood_corr (bool, optional): collect the likelihood of a node to be
+                                                        criminal. Defaults to False.
+            show_no_bar (bool, optional): show progress bar or not. Defaults to True.
+            rnd_fit_init (bool, optional): assign random fitness to nodes. Defaults to False.
+
+        Returns:
+            Tuple[gt.Graph, DefaultDict[str, List[Any]]]: returns population and dictionary
+                                                                containing all the measurements.
         """
         network.status = np.asarray(list(network.vp.status))
         if rnd_fit_init:
@@ -228,7 +239,8 @@ class SimMartVaq:
             # Collect the data
             if i % ith_collect == 0 or i == 1:
                 _, _, _, p_c, p_h, p_w = self.counting_status_proportions(
-                    network=network, group_members=np.arange(0, network.num_vertices())
+                    network=network,
+                    group_members=list(range(0, network.num_vertices())),
                 )
 
                 data_collector["iteration"].append(i)
@@ -406,7 +418,14 @@ class SimMartVaq:
         return averaged_dict
 
     def avg_play_help(self, tuple_of_variable: Any) -> DefaultDict[str, List[Any]]:
-        """Help for the avg_play to return only the default dict."""
+        """Help for the avg_play to return only the default dict.
+
+        Args:
+            tuple_of_variable (Any): tuple of variable as required by the play() function.
+
+        Returns:
+            DefaultDict[str, List[Any]]: return a dict containing all the measurements.
+        """
         # Set the seed each time, otherwise the simulation will be exactly the same
         random.seed()
         (
@@ -444,6 +463,18 @@ class SimMartVaq:
         """Correspond to the investigation stage.
 
         Given an group, if the victimizer is found, a punishment is conducted
+        Args:
+            network (gt.Graph): population network with honests,lone wolves and criminals
+            group_members (List[int]): list of neighbours of selected person.
+            slct_pers (int): person selected in that specific round.
+            slct_status (str): selected person's status.
+
+        Raises:
+            warnings.warn: raise warning if neighbours have not the status of either
+                                                        honests/lone wolves or criminals.
+
+        Returns:
+            Tuple[gt.Graph]: return the population
         """
         if slct_status == "h":
             # No victimizer ->  No punishment
@@ -502,6 +533,14 @@ class SimMartVaq:
         """Perform an state investigation.
 
         Pick a random person, if victimizer is found, penalty is returned
+
+        Args:
+            group_members (List[int]): list of neighbours of selcted person.
+            slct_pers (int): person selected in that round.
+            penalty_score (int): penalty score from either criminals, peer pressure or state.
+
+        Returns:
+            int: return penalty_score.
         """
         random_picked_person = random.choice(list(group_members))
         if random_picked_person == slct_pers:
@@ -522,6 +561,18 @@ class SimMartVaq:
         """Correspond to the acting stage in the paper.
 
         Given an group, select on person and proceed to the acting.
+
+        Args:
+            network (gt.Graph): population network including honests,lone wolves and criminals
+            slct_pers (int): person selected in that round
+            slct_pers_status (str): slected person' status.
+            group_members (List[int]): list of slected person's neighbours.
+
+        Raises:
+            warnings.warn: raises a warning if neighbours are not honests/lone wolves/criminals.
+
+        Returns:
+            Tuple[gt.Graph, int, str]: returns population, selected person and its status.
         """
         if slct_pers_status == "h":
             new_network = self.inflict_damage(
@@ -554,6 +605,18 @@ class SimMartVaq:
 
         Rest of the group gets a damage inflicted.
         If slct_pers is honest, the person gets bonus points for acting good!
+
+        Args:
+            network (gt.Graph): population network with honests, lone wolves and criminals.
+            group_members (List[int]): list of selected person's neighbours.
+            slct_pers (int): person selected in that round.
+            slct_pers_status (str): selected person' status.
+
+        Raises:
+            warnings.warn: raises a warning if status is not equal to honest/lone wolf/criminal.
+
+        Returns:
+            Tuple[gt.Graph]: returns population.
         """
         if slct_pers_status != "h":
             n_c, n_h, n_w, p_c, p_h, p_w = self.counting_status_proportions(
@@ -563,11 +626,11 @@ class SimMartVaq:
             # Bonus points if law-abiding
             network.fitness[slct_pers] = network.fitness[slct_pers] + self.r_h
         elif slct_pers_status == "c":
-            # Inflict damage to all the wolfs and honest
+            # Inflict damage to all the wolves and honest
             # If only criminals are present in the group
             # then there is no acting
             self.criminal_acting = False
-            # Honest and wolfs are present
+            # Honest and wolves are present
             if p_h + p_w > 0:
                 self.criminal_acting = True
             # Inflicting damage to everyone but himself
@@ -615,6 +678,14 @@ class SimMartVaq:
 
         Randomly picks a two players and performs either mutation
         or a role switch with a certain probability.
+
+        Args:
+            network (gt.Graph): population network with honests,lone wolves and criminals.
+            slct_person (int): person selected in that round.
+            group_members (List[int]): list of person's neighbours.
+
+        Returns:
+            Tuple[gt.Graph]: returns population.
         """
         person_a = slct_person
         bucket_list = list(group_members)
@@ -629,9 +700,20 @@ class SimMartVaq:
         return network
 
     def counting_status_proportions(
-        self, network: gt.Graph, group_members: np.ndarray
+        self, network: gt.Graph, group_members: List
     ) -> Tuple[int, int, int, float, float, float]:
-        """Return the proportions of criminals,honest and wolfs."""
+        """Return the proportions of criminals,honests and wolves.
+
+        Args:
+            network (gt.Graph): population including honests, lone wolves and criminals.
+            group_members (List): list of defined persons to take the ratio off.
+                                        Normally, the list includes the whole population.
+
+        Returns:
+            Tuple[int, int, int, float, float, float]: returns number of criminals/honests/wolves,
+                                                        and ratio of criminals/honests/lone wolves,
+                                                        in that specific order.
+        """
         # First get proportions of h/c/w within the group
         size_group = len(group_members)
         unique, counts = np.unique(network.status[group_members], return_counts=True)
@@ -660,7 +742,15 @@ class SimMartVaq:
     def get_overall_fitness_distribution(
         self, network: gt.Graph
     ) -> Tuple[float, float, float]:
-        """Get the mean fitness for the different status in a group."""
+        """Get the mean fitness for the different status in a group.
+
+        Args:
+            network (gt.Graph): population including the honest,criminals and lone wolves.
+
+        Returns:
+            Tuple[float, float, float]: returns mean honest/criminal and lone wolves fitness.
+                                        In that order!
+        """
         h_idx = np.where(network.status == "h")
         c_idx = np.where(network.status == "c")
         w_idx = np.where(network.status == "w")
@@ -669,64 +759,6 @@ class SimMartVaq:
         mean_c_fit = np.mean(network.fitness[c_idx])
         mean_w_fit = np.mean(network.fitness[w_idx])
         return mean_h_fit, mean_c_fit, mean_w_fit
-
-    def divide_in_groups(
-        self, network: gt.Graph, min_group: int
-    ) -> Tuple[List[int], FrozenSet[int]]:
-        """Divide the network in groups.
-
-        Making use of the  minimize_blockmodel_dl func.
-        For now, the number of groups can't be imposed.
-        Returns a list with the group number/label.
-        """
-        logger.warning("This function is deprecated!")
-        partitions = gt.minimize_blockmodel_dl(
-            network, multilevel_mcmc_args={"B_min": min_group}
-        )
-        mbr_list = partitions.get_blocks()
-        group_numbers = frozenset(mbr_list)
-        return list(mbr_list), group_numbers
-
-    def select_multiple_communities(
-        self, network: gt.Graph, radius: int, min_grp: int, max_grp: int
-    ) -> Dict[int, FrozenSet[int]]:
-        """Define the groups by randomly selecting one node and it's neighbours within radius r.
-
-        This is done in an iterative fashion.Thus some groups can overlapp.
-        """
-        assert (
-            2 <= min_grp <= max_grp
-        ), f"Min number of groups must be between 2 and {max_grp}"
-        assert (
-            min_grp <= max_grp <= network.num_vertices()
-        ), "Maximum group number can exceed network size"
-        n_groups = random.randint(min_grp, max_grp + 1)
-        logger.debug(f"Number of groups is {n_groups}")
-
-        dict_of_groups = {}
-        for n in range(1, n_groups + 1):
-            seed = random.randint(0, network.num_vertices())
-            dict_of_groups[n] = self.select_communities(network, radius, seed)
-
-        return dict_of_groups
-
-    def select_communities(
-        self, network: gt.Graph, radius: int, seed: int
-    ) -> FrozenSet[int]:
-        """Select the neighbours and neighbours neighbours of a given node/seed.
-
-        Args:
-            network (gt.Graph): graph-tool network
-            radius (int): how many neighbours to select(neighbours of neighbours of...)
-            seed (int):  starting node
-        """
-        nbrs = {seed}
-        all_neighbours = []
-        for _ in range(radius):
-            nbrs = {nbr for n in nbrs for nbr in network.get_all_neighbors(n)}
-            all_neighbours.append(list(nbrs))
-        all_neighbours_list = list(itertools.chain.from_iterable(all_neighbours))
-        return frozenset(all_neighbours_list)
 
     def slct_pers_n_neighbours(
         self, network: gt.Graph, n_groups: int, network_size: int
@@ -750,7 +782,15 @@ class SimMartVaq:
         return communities
 
     def mutation(self, network: gt.Graph, person: int) -> gt.Graph:
-        """Perform mutation on a given individual."""
+        """Perform mutation on a given individual.
+
+        Args:
+            network (gt.Graph): population with honests,lone wolves and criminals
+            person (int): person selected in that round.
+
+        Returns:
+            gt.Graph: returns population.
+        """
         network.status[person] = random.choice(["c", "h", "w"])
         return network
 
@@ -760,7 +800,16 @@ class SimMartVaq:
         person_a: int,
         person_b: int,
     ) -> Tuple[gt.Graph]:
-        """Interchange roles based on fermin function."""
+        """Interchange roles based on Fermi function.
+
+        Args:
+            network (gt.Graph): population with honest,lone wolves and criminals.
+            person_a (int): person a to copy person b
+            person_b (int): person b
+
+        Returns:
+            Tuple[gt.Graph]: returns population.
+        """
         fitness_a = network.fitness[person_a]
         fitness_b = network.fitness[person_b]
 
@@ -771,7 +820,15 @@ class SimMartVaq:
         return network
 
     def fermi_function(self, w_j: float, w_i: float) -> bool:
-        """Return the probability of changing their role."""
+        """Return the probability of changing their role.
+
+        Args:
+            w_j (float): fitness of person a
+            w_i (float): fitness of person b
+
+        Returns:
+            bool: returns true if roles are interchanged else flase.
+        """
         prob = 1 / (np.exp(-(w_j - w_i) / self.temperature) + 1)
         if random_c() > prob:
             return False
@@ -820,126 +877,3 @@ class SimMartVaq:
         )
         df = df.astype(float)
         return df
-
-    def mean_group_size(self, radius: int, min_grp: int, max_grp: int) -> int:
-        """Compute the mean average groupe size."""
-        group_size_data_collector = defaultdict(
-            list
-        )  # type: DefaultDict[str, List[Any]]
-        group_size_data_collector["group_size"]
-        for _ in range(0, 100):
-            group_dict = self.select_multiple_communities(
-                self.network, radius=radius, min_grp=min_grp, max_grp=max_grp
-            )
-            for _, v in group_dict.items():
-                group_size_data_collector["group_size"].append(len(v))
-        return int(np.mean(group_size_data_collector["group_size"]))
-
-    def get_analytical_solution(
-        self, radius: int = 3, min_grp: int = 5, max_grp: int = 10
-    ) -> Dict[str, float]:
-        """Compute the analytical solution.
-
-        It has to be noted that the analytical solution offers limited insight.
-        First of all, it doesn't take into account the mutation factor. Second
-        it assumes that it is possible to have a sub-population that is filled
-        with criminals and wolfs. However, in case there is only one criminal in
-        the whole population. The in a sub-population of N players, there can never
-        be more than 1 criminal.
-        """
-        mean_fitness_dict = {"h": 0.0, "c": 0.0, "w": 0.0}
-
-        # Mean group size
-        N = self.mean_group_size(radius, min_grp, max_grp)
-        Z = self.network.num_vertices()
-        Z_c = int(self.ratio_criminal * Z)
-        Z_h = int(self.ratio_honest * Z)
-        Z_w = int(self.ratio_wolf * Z)
-
-        for k in mean_fitness_dict.keys():
-            for N_c_prime in range(0, N):
-                for N_w_prime in range(0, N - N_c_prime - 1):
-                    # Number of honest is N-n_c-n_w
-                    N_h_prime = N - N_c_prime - N_w_prime
-
-                    mean_field_approx = self.mean_field_approx(
-                        p_h=N_h_prime / N, p_c=N_c_prime / N, N=N, N_w=N_w_prime
-                    )
-
-                    mean_fitness_dict[k] += self.hypergeometric_dist(
-                        N_h_prime, N_c_prime, N_w_prime, Z_h, Z_c, Z_w, Z, N, k
-                    ) * (mean_field_approx[k]["a"] + mean_field_approx[k]["i"])
-
-        return mean_fitness_dict
-
-    def hypergeometric_dist(
-        self,
-        N_h: int,
-        N_c: int,
-        N_w: int,
-        Z_h: int,
-        Z_c: int,
-        Z_w: int,
-        Z: int,
-        N: int,
-        indv: str,
-    ) -> float:
-        """Compute the hypergeometric distance."""
-        if indv == "h":
-            if N_h != 0:
-                N_h = N_h - 1
-                Z_h = Z_h - 1
-        elif indv == "c":
-            if N_c != 0:
-                N_c = N_c - 1
-                Z_c = Z_c - 1
-        elif indv == "w":
-            if N_w != 0:
-                N_w = N_w - 1
-                Z_w = Z_w - 1
-
-        h = (math.comb(Z_h, N_h) * math.comb(Z_c, N_c) * math.comb(Z_w, N_w)) / (
-            math.comb(Z - 1, N - 1)
-        )
-        return h
-
-    def mean_field_approx(
-        self, p_h: float, p_c: float, N: int, N_w: int
-    ) -> Dict[str, Dict[str, float]]:
-        """Compute the mean field approximation based on the formula of the paper."""
-        # compute damage and benefits made by a criminal
-        d_c = self.c_c * p_c
-        b_c = self.r_c * self.c_c * (1 - p_c)
-
-        # compute the damage and benefits made by a wolf
-        p_w_prime = 1 - self.delta * (1 - p_c)
-        d_w = self.c_w * p_w_prime * (N_w) / N
-        d_w_prime = self.c_w * p_w_prime * (N_w - 1) / N
-        b_w = self.r_w * self.c_w * (N - 1) * (1 / N) * p_w_prime
-
-        # Fitness for honest,wolfs and criminals
-        # after acting stage
-        w_h_a = -d_c - d_w
-        w_c_a = b_c + self.tau * b_w - d_w
-        w_w_a = (1 - self.tau) * b_w - d_c - d_w_prime
-
-        # Fitness after investigation stage
-        w_h_i = 0
-        w_c_i = (
-            -(self.beta_s + self.beta_h * p_h)
-            * p_c
-            * (self.gamma * p_c + (1 - self.gamma) * (1 / N))
-        )
-        w_w_i = (
-            -(self.beta_s + self.beta_h * p_h + self.beta_c * p_c)
-            * (1 / N)
-            * (1 / N)
-            * p_w_prime
-        )
-
-        mean_field_approx = {
-            "h": {"a": w_h_a, "i": w_h_i},
-            "c": {"a": w_c_a, "i": w_c_i},
-            "w": {"a": w_w_a, "i": w_w_i},
-        }
-        return mean_field_approx
