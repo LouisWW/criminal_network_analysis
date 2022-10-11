@@ -1,11 +1,10 @@
-"""This script's intention is to get the topology and properties of all the individual nodes.
+"""This script's intention is to get the centrality of individual nodes.
 
 __author__ = Louis Weyland
 __date__   = 13/02/2022
 """
 import itertools
 import logging
-from typing import Sequence
 from typing import Tuple
 
 import graph_tool.all as gt
@@ -71,18 +70,6 @@ class NodeStats:
         central_dominance = gt.central_point_dominance(network, vertex)
         return central_dominance
 
-    # @staticmethod
-    # def get_eccentricity(network: nk.Graph) -> Sequence[Tuple[int, int]]:
-    #    """Return the eccentricity of the nodes."""
-    #    eccentricity = np.empty(network.numberOfNodes())
-    #    # to append to the right idx in the list
-    #    iterator = iter(range(0, network.numberOfNodes()))
-    #    for node in network.iterNodes():
-    #         eccentricity[next(iterator)] = nk.distance.Eccentricity.getValue(
-    #          network, node
-    #                   )
-    #     return eccentricity
-
     @staticmethod
     def get_density(network: gt.Graph) -> float:
         """Return the density.
@@ -126,6 +113,7 @@ class NodeStats:
         sum_inv_shortest_dist = sum(1 / dist for dist in shortest_dist_list)
         return (1 / (n_nodes * (n_nodes - 1))) * sum_inv_shortest_dist
 
+    @staticmethod
     def get_flow_of_information_faster(gt_network: gt.Graph) -> float:
         """Return the flow of information.
 
@@ -154,15 +142,3 @@ class NodeStats:
             return 0, 0
 
         return largest_component.num_vertices(), largest_component.num_edges()
-
-    def get_degree(self) -> Sequence[Tuple[int, int]]:
-        """Count the number of neighbor a node has."""
-        raise NotImplementedError
-
-    def get_local_clustering(self) -> Sequence[Tuple[int, float]]:
-        """Get the local clustering of a node."""
-        raise NotImplementedError
-
-    def get_average_path(self) -> None:
-        """Get average path over a node."""
-        raise NotImplementedError

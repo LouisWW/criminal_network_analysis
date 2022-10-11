@@ -1,8 +1,9 @@
 """This script contains the MetaSimulator.
 
-The MetaSimulator encapsules all the simulators.
-It prepapres the network for the simulators. From this script,
-the different models can be run.
+The MetaSimulator encapsules the simulation.
+It prepares the network for the simulators, creates the population,
+saves/load populations and calls the simulation to be played.
+From this script, the different models can be run.
 
 __author__ = Louis Weyland
 __date__ = 17/05/2022
@@ -35,7 +36,7 @@ logger = logging.getLogger("logger")
 
 
 class MetaSimulator:
-    """Encapsule all the simulators and prepares the network."""
+    """Encapsule all the simulations and prepares the network for it."""
 
     def __init__(
         self,
@@ -47,15 +48,21 @@ class MetaSimulator:
         prob: float = 0.4,
         random_fit_init: bool = False,
     ) -> None:
-        """Define the ratio of honest and criminals.
+        """Take all the necessary arguments to create a population.
 
         Args:
-            network_name (str): _description_
-            ratio_honest (float, optional): Honest ratio. Defaults to 0.7.
-            ratio_wolf (float, optional): Wolf ratio. Defaults to 0.1.
-            k (int, optional): Number of edges to add for preferential attachment/rnd/sw..
-                                                            Defaults to 2.
-            random_fit_init (bool, optional): Init random fintess. Defaults to False.
+            network_name (str): name of the data to be loaded.
+            attachment_method (str): define the attachment method to build the population.
+            ratio_honest (float, optional): ratio of honest civilians in the population.
+                                            Defaults to 0.7.
+            ratio_wolf (float, optional): ratio of lone wolves in the population.
+                                        Defaults to 0.1.
+            k (int, optional): number of links a new nodes comes with.
+                            Defaults to 2.
+            prob (float, optional): rewiring probability for small-world attachment. 
+                                    Defaults to 0.4.
+            random_fit_init (bool, optional): define if nodes get a random fitness initialisation.
+                                        Defaults to False.
         """
         # Define name of simulator
         self._name = "meta_simulator"
@@ -111,7 +118,14 @@ class MetaSimulator:
         return gt_network
 
     def create_population(self, network: gt.Graph) -> gt.Graph:
-        """Create the population."""
+        """Create the population.
+
+        Args:
+            network (gt.Graph): criminal network w/o honests and lone wolves nodes.
+
+        Returns:
+            gt.Graph: returns populations incl. honests and lone wolves.
+        """
         # Add the new nodes
         np.random.seed()
         network = self.initialise_network(network, self.prob, self.k)
@@ -142,6 +156,17 @@ class MetaSimulator:
 
         Thereby, the nodes are added based on the preferential attachment principle.
         Returns a network with new added nodes respecting the ratio of criminals/honest/wolfs.
+
+        Args:
+            network (gt.Graph): criminal network without honests and lone wolves.
+            prob (float, optional): rewiring probability (for small-world). Defaults to 0.3.
+            k (int, optional): number of link new added nodes come with. Defaults to 2.
+
+        Raises:
+            RuntimeError: raises error if attachment method is not preferential/random/small-world.
+
+        Returns:
+            gt.Graph: returns a population with honests and lone wolves.
         """
         new_network = deepcopy(network)
         if self.attachment_method == "preferential":
@@ -178,7 +203,14 @@ class MetaSimulator:
         return new_network
 
     def create_list_of_populations(self, repetition: int) -> List[gt.Graph]:
-        """Create a list of n different populations."""
+        """Create a list of n different populations.
+
+        Args:
+            repetition (int): number of populations to create.
+
+        Returns:
+            List[gt.Graph]: list of populations.
+        """
         list_of_population = []
         num_cpus = multiprocessing.cpu_count() - 1
         with multiprocessing.Pool(num_cpus) as p:
@@ -194,13 +226,14 @@ class MetaSimulator:
 
                 p.close()
                 p.join()
-
-                # for i in  tqdm.tqdm(range(0,repetition),desc="Creating populations...."):
-                #    list_of_population.append(self.create_population(self.criminal_network))
         return list_of_population
 
     def create_network_and_save(self, repetition: int) -> None:
-        """Create a list of populations and saves it in the folder."""
+        """Create a list of populations and saves it in the folder.
+
+        Args:
+            repetition (int): number of populations to create.
+        """
         population_name = (
             DirectoryFinder().population_data_dir
             + f"{self.attachment_method}_h_{self.ratio_honest:.2f}_w_{self.ratio_wolf:.2f}_k_{self.k}"
@@ -212,7 +245,17 @@ class MetaSimulator:
     def load_list_of_populations(
         self, repetition: int, matching_files: List[str]
     ) -> List[gt.Graph]:
-        """Load the created populations and return repetition amount of populations."""
+        """Load the created populations and return repetition amount of populations.
+
+        The populations are randomly loaded from the files matching the description
+        Args:
+            repetition (int): number of populations to load.
+            matching_files (List[str]): load the files matching the proportions of
+                                                honest/lone wolves and number of links.
+
+        Returns:
+            List[gt.Graph]: _description_
+        """
         list_of_populations = random.choices(matching_files, k=repetition)
 
         list_of_loaded_population = []
@@ -237,17 +280,29 @@ class MetaSimulator:
     ) -> DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]:
         """Get the average results of the simulation given the parameters.
 
+        This function calls the SimMartVaq play function.
         Same as the avg_play function from sim_mart_vaq.py
         The difference is that instead of running the simulation n (number of repetition) times
         on the same network, the simulation is run once on n (number of repetition) networks
+
         Args:
-            rounds (int, optional): Rounds to play in the simulation. Defaults to 1.
-            n_groups (int,optional): Number of groups to form each round
-            repetition (int, optional): number of repetition of the simulation. Defaults to 20.
+            rounds (int, optional): number of rounds to play. Defaults to 1.
+            n_groups (int, optional): number of nodes to choose each round. Defaults to 20.
+            ith_collect (int, optional): collect the ratio every ith round. Defaults to 20.
+            repetition (int, optional): number of repeating the simulation. Defaults to 20.
+            measure_topology (bool, optional): to measure the secrecy,flow of info and giant comp.
+                                                Defaults to False.
+            measure_likelihood_corr (bool, optional): to measure the criminal likelihood.
+                                                        Defaults to False.
+            collect_fitness (bool, optional): to collect the fitness. Defaults to False.
+            execute (str, optional): define to run the execution parallel or sequential.
+                                                        Defaults to "parallel".
+            show_no_bar (bool, optional): to show the progress bar. Defaults to False.
+            rnd_fit_init (bool, optional): assign random fitness to the agents. Defaults to False.
 
         Returns:
-            DefaultDict[Union[int, str], Union[DefaultDict,List[Any]]]:
-                                                            Returns network and collected data.
+            DefaultDict[str, Union[DefaultDict[Any, Any], List[Any]]]: return a dict of the
+                                            measurements of each repetition and the mean values.
         """
         # create n different populations
         if len(
