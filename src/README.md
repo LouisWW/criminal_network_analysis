@@ -135,8 +135,7 @@ If one wished to read own network, create a population and simulate it, the foll
     n_groups=1,
     repetition=5,
     ith_collect=20,
-    collect_fitness=True,
-)
+    collect_fitness=True)
 
     # Plot the evolution ratio
     plotter.plot_lines(
@@ -146,8 +145,7 @@ If one wished to read own network, create a population and simulate it, the foll
     title="Testing the simulation",
     xlabel="rounds",
     ylabel="ratio",
-    plot_std="True",
-)
+    plot_std="True")
 ```
 
-To study the actual code of the different functions and classes, please consult the documentation in [docs](docs/) by opening the html files in your browser. In google chrome this can be done by giving the abolute path of the .html file as a search link.
+### ***To study the actual code of the different functions and classes, please consult the documentation in [docs](docs/) by opening the html files in your browser. In google chrome this can be done by giving the abolute path of the .html file as a search link.***
