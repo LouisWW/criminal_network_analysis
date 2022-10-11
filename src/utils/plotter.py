@@ -80,8 +80,13 @@ class Plotter(ConfigParser):
         """Visualizes the Network.
 
         If vertex_property is given, then the vertex are colored based on their
-        property
-        """
+        property.
+        
+        Args:
+            network (gt.Graph): population network containing honest/lone wovles/criminals.
+            color_vertex_property (str, optional): property to show in the plot ("status" for now). 
+                                                    Defaults to None.
+        """        
         assert isinstance(network, gt.Graph), "network type is not from graph-tool"
 
         # Define pos to circumvent error produced by graph_tool
@@ -133,11 +138,19 @@ class Plotter(ConfigParser):
             )
 
     def plot_log_log(self, data: List[float], x_label: str, y_label: str) -> plt.Axes:
-        """
-        Plot the data in a log-log scale to visualize the powerlaw.
+        """Plot the data in a log-log scale to visualize the powerlaw.
 
         Important: Sort the data in ascending way
-        """
+    
+        Args:
+            data (List[float]): containing the centrality (avg. degree,...) of each node
+            x_label (str): x label
+            y_label (str): y label
+
+        Returns:
+            plt.Axes: returns the figure object
+        """       
+
         data = sorted(data, reverse=True)
         fit = powerlaw.Fit(data)
 
