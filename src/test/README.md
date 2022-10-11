@@ -49,7 +49,7 @@ In src/pytest.ini we have:
 
         -k                              run specific modules(python files)/tests:
 
-        ---cov="."                      coverage of all the files in .
+        --cov="."                      coverage of all the files in .
         --cov-report html               generate html file
         --cov-config=test/.coveragerc   specify folder where files are generated
 

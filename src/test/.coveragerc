@@ -1,4 +1,4 @@
-This files make sure pytest doesn't include the coverage
+# This files make sure pytest doesn't include the coverage
 # of the test folder and __init__ files
 [run]
 omit = test/*
